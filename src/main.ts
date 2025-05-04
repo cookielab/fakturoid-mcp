@@ -1,34 +1,26 @@
-import {
-  McpServer,
-  ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { FakturoidClient } from "./fakturoid/client.js";
+import { registerFakturoidTools } from "./fakturoid/mcp.js";
+import { env } from "./utils/env.js";
 
 // Create an MCP server
 const server = new McpServer({
-  name: "Demo",
+  name: "Fakturoid MCP",
   version: "1.0.0",
 });
 
-// Add an addition tool
-server.tool("add", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
-  content: [{ type: "text", text: String(a + b) }],
-}));
+// Initialize Fakturoid client
+const fakturoidClient = new FakturoidClient({
+  accountSlug: env.FAKTUROID_ACCOUNT_SLUG,
+  email: env.FAKTUROID_EMAIL,
+  apiKey: env.FAKTUROID_API_KEY,
+  appName: env.FAKTUROID_APP_NAME,
+  contactEmail: env.FAKTUROID_CONTACT_EMAIL,
+});
 
-// Add a dynamic greeting resource
-server.resource(
-  "greeting",
-  new ResourceTemplate("greeting://{name}", { list: undefined }),
-  async (uri, { name }) => ({
-    contents: [
-      {
-        uri: uri.href,
-        text: `Hello, ${name}!`,
-      },
-    ],
-  })
-);
+// Register Fakturoid tools
+registerFakturoidTools(server, fakturoidClient);
 
 // Start receiving messages on stdin and sending messages on stdout
 const transport = new StdioServerTransport();
