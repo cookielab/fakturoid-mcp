@@ -112,6 +112,32 @@ To connect this MCP server to Cursor, follow these steps:
 
 6. Your Fakturoid MCP tools should now be available in Cursor's AI assistant.
 
+## 🤖 Connecting to Claude
+
+To connect this MCP server to your local Claude desktop app, follow these steps:
+
+1. Start the MCP server:
+   ```bash
+   pnpm dev
+   ```
+
+2. Open the Claude desktop app on your computer.
+
+3. Start a new conversation or continue an existing one.
+
+4. Click on your profile or settings icon in the Claude app.
+
+5. Navigate to "Settings" and look for "Developer" or "Extensions" options.
+
+6. Add a new MCP connection with the local URL:
+   ```
+   http://localhost:3456/sse
+   ```
+
+7. Save the settings.
+
+8. Your Fakturoid tools should now be available to Claude in your local conversations.
+
 ## 🧪 Developing Locally
 
 - Run in development mode with automatic restart: `pnpm dev`
