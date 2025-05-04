@@ -5,6 +5,10 @@ import {
   registerFakturoidAccountsTools,
   registerFakturoidInvoicesTools,
   registerFakturoidExpensesTools,
+  registerFakturoidSubjectsTools,
+  registerFakturoidInvoicePaymentsTools,
+  registerFakturoidExpensePaymentsTools,
+  registerFakturoidInboxFilesTools,
 } from './mcp/index.js';
 
 export function registerFakturoidTools(server: McpServer, client: FakturoidClient) {
@@ -12,4 +16,8 @@ export function registerFakturoidTools(server: McpServer, client: FakturoidClien
   registerFakturoidAccountsTools(server, client);
   registerFakturoidInvoicesTools(server, client);
   registerFakturoidExpensesTools(server, client);
+  registerFakturoidSubjectsTools(server, client);
+  registerFakturoidInvoicePaymentsTools(server, client);
+  registerFakturoidExpensePaymentsTools(server, client);
+  registerFakturoidInboxFilesTools(server, client);
 } 

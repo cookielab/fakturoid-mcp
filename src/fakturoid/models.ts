@@ -51,6 +51,57 @@ export interface Account {
   created_at?: string;
 }
 
+// Subjects
+export interface Subject {
+  id: number;
+  custom_id?: string;
+  type: 'company' | 'person' | 'government';
+  name: string;
+  street?: string;
+  street2?: string;
+  city?: string;
+  zip?: string;
+  country?: string;
+  registration_no?: string;
+  vat_no?: string;
+  bank_account?: string;
+  iban?: string;
+  variable_symbol?: string;
+  full_name?: string;
+  email?: string;
+  email_copy?: string;
+  phone?: string;
+  web?: string;
+  private_note?: string;
+  avatar_url?: string;
+  html_url?: string;
+  url?: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface SubjectParams {
+  name: string;
+  type?: 'company' | 'person' | 'government';
+  custom_id?: string;
+  street?: string;
+  street2?: string;
+  city?: string;
+  zip?: string;
+  country?: string;
+  registration_no?: string;
+  vat_no?: string;
+  bank_account?: string;
+  iban?: string;
+  variable_symbol?: string;
+  full_name?: string;
+  email?: string;
+  email_copy?: string;
+  phone?: string;
+  web?: string;
+  private_note?: string;
+}
+
 // Invoices
 export interface Invoice {
   id: number;
@@ -106,6 +157,28 @@ export interface InvoiceParams {
   tags?: string[];
   bank_account_id?: number;
   language?: string;
+}
+
+// Invoice Payments
+export interface InvoicePayment {
+  id: number;
+  invoice_id: number;
+  paid_on: string;
+  amount: number;
+  currency: string;
+  payment_method: 'bank' | 'cash' | 'cod' | 'paypal' | 'card' | 'other';
+  note?: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface InvoicePaymentParams {
+  invoice_id: number;
+  paid_on: string;
+  amount: number;
+  currency?: string;
+  payment_method?: 'bank' | 'cash' | 'cod' | 'paypal' | 'card' | 'other';
+  note?: string;
 }
 
 // Expenses
@@ -164,4 +237,45 @@ export interface ExpenseParams {
   tags?: string[];
   payment_method?: 'bank' | 'cash' | 'other';
   private_note?: string;
+}
+
+// Expense Payments
+export interface ExpensePayment {
+  id: number;
+  expense_id: number;
+  paid_on: string;
+  amount: number;
+  currency: string;
+  payment_method: 'bank' | 'cash' | 'other';
+  note?: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface ExpensePaymentParams {
+  expense_id: number;
+  paid_on: string;
+  amount: number;
+  currency?: string;
+  payment_method?: 'bank' | 'cash' | 'other';
+  note?: string;
+}
+
+// Inbox Files
+export interface InboxFile {
+  id: number;
+  name: string;
+  file_type: string;
+  file_size: number;
+  file_name: string;
+  content_type: string;
+  download_url: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface InboxFileParams {
+  name?: string;
+  content: string; // Base64 encoded content
+  file_name: string;
 } 
