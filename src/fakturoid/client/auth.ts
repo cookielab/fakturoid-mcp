@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
 
+// Base URL for Fakturoid API
+const BASE_URL = 'https://app.fakturoid.cz/api/v3';
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
@@ -40,7 +43,7 @@ export class TokenManager {
    */
   async refreshToken(): Promise<string> {
     try {
-      const response = await fetch('https://app.fakturoid.cz/api/v3/oauth/token', {
+      const response = await fetch(`${BASE_URL}/oauth/token`, {
         method: 'POST',
         headers: {
           'User-Agent': `${this.config.appName} (${this.config.contactEmail})`,

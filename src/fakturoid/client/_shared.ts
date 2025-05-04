@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TokenManager } from './auth.js';
 import type { OAuthConfig } from './auth.js';
 
+// Fakturoid API base URL
 export const BASE_URL = 'https://app.fakturoid.cz/api/v3';
 
 export interface FakturoidClientConfig {

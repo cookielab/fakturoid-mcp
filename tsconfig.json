@@ -15,11 +15,16 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
 
-    /* If transpiling with TypeScript: */
+    /* Module Resolution */
     "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    },
 
     /* AND if you're building for a library: */
     "declaration": true,
