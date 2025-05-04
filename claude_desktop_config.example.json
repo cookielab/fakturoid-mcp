@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "fakturoid": {
+      "command": "node",
+      "args": [
+        "/Users/radekmika/Dev/fakturoid-mcp/dist/main.js",
+        "--ai-runtime"
+      ],
+      "env": {
+        "FAKTUROID_ACCOUNT_SLUG": "radekmika",
+        "FAKTUROID_CLIENT_ID": "your-client-id-from-fakturoid-settings",
+        "FAKTUROID_CLIENT_SECRET": "your-client-secret-from-fakturoid-settings",
+        "FAKTUROID_APP_NAME": "FakturoidMCP",
+        "FAKTUROID_CONTACT_EMAIL": "radek@radekmika.cz",
+        "NODE_ENV": "development",
+        "DEBUG": "true"
+      }
+    }
+  }
+} 

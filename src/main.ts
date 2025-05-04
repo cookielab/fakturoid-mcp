@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import express from "express";
 import { FakturoidClient } from "./fakturoid/client.js";
 import { registerFakturoidTools } from "./fakturoid/mcp.js";
@@ -11,11 +12,21 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
+// Log environment variables in development mode (without sensitive values)
+if (process.env.NODE_ENV === 'development') {
+  console.error('Environment variables detected:');
+  console.error(`- FAKTUROID_ACCOUNT_SLUG: ${process.env.FAKTUROID_ACCOUNT_SLUG ? '[set]' : '[not set]'}`);
+  console.error(`- FAKTUROID_CLIENT_ID: ${process.env.FAKTUROID_CLIENT_ID ? '[set]' : '[not set]'}`);
+  console.error(`- FAKTUROID_CLIENT_SECRET: ${process.env.FAKTUROID_CLIENT_SECRET ? '[set]' : '[not set]'}`);
+  console.error(`- FAKTUROID_APP_NAME: ${process.env.FAKTUROID_APP_NAME ? '[set]' : '[not set]'}`);
+  console.error(`- FAKTUROID_CONTACT_EMAIL: ${process.env.FAKTUROID_CONTACT_EMAIL ? '[set]' : '[not set]'}`);
+}
+
 // Initialize Fakturoid client
 const fakturoidClient = new FakturoidClient({
   accountSlug: env.FAKTUROID_ACCOUNT_SLUG,
-  email: env.FAKTUROID_EMAIL,
-  apiKey: env.FAKTUROID_API_KEY,
+  clientId: env.FAKTUROID_CLIENT_ID,
+  clientSecret: env.FAKTUROID_CLIENT_SECRET,
   appName: env.FAKTUROID_APP_NAME,
   contactEmail: env.FAKTUROID_CONTACT_EMAIL,
 });
@@ -23,30 +34,57 @@ const fakturoidClient = new FakturoidClient({
 // Register Fakturoid tools
 registerFakturoidTools(server, fakturoidClient);
 
-// Create Express app
-const app = express();
-const PORT = env.PORT;
+// For Claude and similar AI tools, always prefer stdio mode 
+// This ensures better compatibility when run as a child process
+const forcedMode = process.env.MCP_FORCE_MODE;
+const isRunningFromAI = process.env.AI_RUNTIME === 'true' || process.argv.includes('--ai-runtime');
+const isStdioMode = forcedMode === 'stdio' || isRunningFromAI || !process.stdin.isTTY || !process.stdout.isTTY;
 
-// Set up SSE transport
-let transport: SSEServerTransport | undefined = undefined;
-
-app.get("/sse", async (req, res) => {
-  transport = new SSEServerTransport("/messages", res);
-  await server.connect(transport);
-});
-
-app.post("/messages", async (req, res) => {
-  if (!transport) {
-    res.status(400);
-    res.json({ error: "No transport" });
-    return;
+if (isStdioMode) {
+  // Running in stdio mode
+  console.error("Running in stdio mode. Processing MCP messages from stdin.");
+  try {
+    const stdioTransport = new StdioServerTransport();
+    server.connect(stdioTransport).catch(error => {
+      console.error("Error connecting stdio transport:", error);
+      process.exit(1);
+    });
+  } catch (error) {
+    console.error("Failed to initialize stdio transport:", error);
+    process.exit(1);
   }
-  await transport.handlePostMessage(req, res);
-});
+} else {
+  // Running in interactive terminal mode - use SSE/HTTP
+  // Create Express app
+  const app = express();
+  const PORT = env.PORT;
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Connect to SSE endpoint at http://localhost:${PORT}/sse`);
-  console.log(`Send messages to http://localhost:${PORT}/messages`);
-}); 
+  // Set up SSE transport
+  let transport: SSEServerTransport | undefined = undefined;
+
+  app.get("/sse", async (req, res) => {
+    console.log("SSE connection established.");
+    transport = new SSEServerTransport("/messages", res);
+    await server.connect(transport);
+    req.on("close", () => {
+      console.log("SSE connection closed.");
+    });
+  });
+
+  app.post("/messages", async (req, res) => {
+    if (!transport) {
+      console.error("SSE transport not ready for POST /messages");
+      res.status(400);
+      res.json({ error: "No transport" });
+      return;
+    }
+    await transport.handlePostMessage(req, res);
+  });
+
+  // Start the Express server
+  app.listen(PORT, () => {
+    console.log(`SSE Server is running on port ${PORT}`);
+    console.log(`Connect to SSE endpoint at http://localhost:${PORT}/sse`);
+    console.log(`Send messages to http://localhost:${PORT}/messages`);
+  });
+}

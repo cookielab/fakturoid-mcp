@@ -1,12 +1,14 @@
 import fetch from 'node-fetch';
 import { z } from 'zod';
+import { TokenManager } from './auth.js';
+import type { OAuthConfig } from './auth.js';
 
 export const BASE_URL = 'https://app.fakturoid.cz/api/v3';
 
 export interface FakturoidClientConfig {
   accountSlug: string;
-  email: string;
-  apiKey: string;
+  clientId: string;
+  clientSecret: string;
   appName: string;
   contactEmail: string;
 }
@@ -17,14 +19,39 @@ export const ErrorResponseSchema = z.object({
   errors: z.record(z.array(z.string())).optional(),
 });
 
-export function getHeaders(config: FakturoidClientConfig, contentType = true): Record<string, string> {
+// Create and store a token manager instance per client config
+const tokenManagers = new Map<string, TokenManager>();
+
+function getTokenManager(config: FakturoidClientConfig): TokenManager {
+  // Create a unique key for this client configuration
+  const key = `${config.clientId}:${config.accountSlug}`;
+  
+  if (!tokenManagers.has(key)) {
+    const oauthConfig: OAuthConfig = {
+      clientId: config.clientId,
+      clientSecret: config.clientSecret,
+      appName: config.appName,
+      contactEmail: config.contactEmail
+    };
+    tokenManagers.set(key, new TokenManager(oauthConfig));
+  }
+  
+  return tokenManagers.get(key)!;
+}
+
+export async function getHeaders(config: FakturoidClientConfig, contentType = true): Promise<Record<string, string>> {
+  const tokenManager = getTokenManager(config);
+  const accessToken = await tokenManager.getToken();
+  
   const headers: Record<string, string> = {
     'User-Agent': `${config.appName} (${config.contactEmail})`,
-    'Authorization': `Basic ${Buffer.from(`${config.email}:${config.apiKey}`).toString('base64')}`,
+    'Authorization': `Bearer ${accessToken}`,
   };
+  
   if (contentType) {
     headers['Content-Type'] = 'application/json';
   }
+  
   return headers;
 }
 
@@ -52,17 +79,22 @@ export async function request<T>(
       url += `?${queryString}`;
     }
   }
+  
+  const headers = await getHeaders(config, !!data);
   const options: any = {
     method,
-    headers: getHeaders(config, !!data),
+    headers,
   };
+  
   if (data) {
     options.body = JSON.stringify(data);
   }
+  
   const response = await fetch(url, options);
   const contentType = response.headers.get('content-type');
   const isJson = contentType && contentType.includes('application/json');
   const body = isJson ? await response.json() : await response.text();
+  
   if (!response.ok) {
     if (isJson) {
       const errorData = ErrorResponseSchema.parse(body);
@@ -77,6 +109,7 @@ export async function request<T>(
     }
     throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
   }
+  
   return body as T;
 }
 
