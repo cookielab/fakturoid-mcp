@@ -14,6 +14,7 @@ The MCP server provides tools and resources for AI models to interact with the F
   - Account API: Get and update account details
   - Invoices API: CRUD operations for invoices
   - Expenses API: CRUD operations for expenses
+- **SSE Transport**: Server-Sent Events transport for communication with MCP clients
 
 ## Requirements
 
@@ -26,11 +27,15 @@ The MCP server provides tools and resources for AI models to interact with the F
 Create a `.env` file in the project root with the following variables:
 
 ```
+# Fakturoid API Credentials
 FAKTUROID_ACCOUNT_SLUG=your-account-slug
 FAKTUROID_EMAIL=your-email@example.com
 FAKTUROID_API_KEY=your-api-key
 FAKTUROID_APP_NAME=Your App Name
 FAKTUROID_CONTACT_EMAIL=contact-email@example.com
+
+# Server Configuration
+PORT=3456
 ```
 
 ## Development
@@ -47,3 +52,16 @@ pnpm dev
 # Build for production
 pnpm build
 ```
+
+## Endpoints
+
+The server provides the following HTTP endpoints:
+
+- `GET /sse`: Connect to the server via Server-Sent Events
+- `POST /messages`: Send messages to the MCP server
+
+## Example Usage
+
+1. Start the server with `pnpm dev`
+2. Connect to `http://localhost:3456/sse` to establish an SSE connection
+3. Send messages to `http://localhost:3456/messages` to interact with the MCP tools

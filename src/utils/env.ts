@@ -11,6 +11,7 @@ const envSchema = z.object({
   FAKTUROID_API_KEY: z.string().min(1),
   FAKTUROID_APP_NAME: z.string().min(1),
   FAKTUROID_CONTACT_EMAIL: z.string().email(),
+  PORT: z.string().optional().transform(val => val ? parseInt(val, 10) : 3456),
 });
 
 // Parse environment variables
