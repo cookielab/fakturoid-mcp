@@ -1,3 +1,5 @@
+export * from './models/index.js';
+
 // Common types
 export interface Pagination {
   page?: number;
