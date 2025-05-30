@@ -3,10 +3,12 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import express from "express";
 import { FakturoidClient } from "./fakturoid/client.js";
-import { registerFakturoidTools } from "./fakturoid/mcp.js";
+import { registerFakturoidTools } from "./fakturoid/tools.js";
+import { registerFakturoidResources } from "./fakturoid/resources.js";
+import { registerFakturoidPrompts } from "./fakturoid/prompts.js";
 import { env } from "./utils/env.js";
 
-// Create an MCP server
+// Create an MCP server with full capabilities
 const server = new McpServer({
   name: "Fakturoid MCP",
   version: "1.0.0",
@@ -31,8 +33,14 @@ const fakturoidClient = new FakturoidClient({
   contactEmail: env.FAKTUROID_CONTACT_EMAIL,
 });
 
-// Register Fakturoid tools
+// Register all MCP features
 registerFakturoidTools(server, fakturoidClient);
+
+// Register resources and prompts using the underlying server instance
+// Access the underlying Server instance from McpServer to use low-level handlers
+const underlyingServer = (server as any).server;
+registerFakturoidResources(underlyingServer, fakturoidClient);
+registerFakturoidPrompts(underlyingServer);
 
 // For Claude and similar AI tools, always prefer stdio mode 
 // This ensures better compatibility when run as a child process

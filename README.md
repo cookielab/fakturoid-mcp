@@ -1,306 +1,162 @@
 # Fakturoid MCP Server
 
-This project provides a Model Context Protocol (MCP) server that enables AI models to interact with the Fakturoid API, allowing you to integrate accounting and invoicing functionality into your AI tools in Cursor.
+A comprehensive Model Context Protocol (MCP) server for integrating with Fakturoid accounting software. This server provides AI applications with access to your Fakturoid data through **tools**, **resources**, and **prompts**.
 
-## 📋 Features
+## Features
 
-- **Complete Fakturoid API Integration** - Access Fakturoid's accounting and invoicing features
-- **Model Context Protocol Support** - Built on MCP v1.11.0
-- **Easy Integration with Cursor** - Seamlessly connect to Cursor AI tools
-- **OAuth 2.0 Authentication** - Secure access to your Fakturoid account
+### 🔧 Tools (Active Operations)
+Interactive tools that allow AI models to perform actions on your Fakturoid account:
+- **Account Management**: Get account details and user information
+- **Invoice Operations**: Create, read, update, search, and manage invoices
+- **Expense Management**: Handle business expenses and categorization
+- **Contact Management**: Manage subjects (clients, vendors, contacts)
+- **Payment Tracking**: Record and track invoice and expense payments
+- **File Management**: Handle document uploads and management
 
-## 🚀 Getting Started
+### 📚 Resources (Contextual Data)
+Rich contextual data that AI models can access for informed assistance:
+- **Account Information**: Current account details and settings
+- **Recent Invoices**: Latest 20 invoices from your account
+- **Open/Overdue Invoices**: Unpaid invoices requiring attention
+- **Recent Expenses**: Latest business expenses
+- **Contact Lists**: Company and individual contacts
+- **Dashboard Summary**: Key metrics and recent activity overview
 
-### Prerequisites
+### 💡 Prompts (Guided Workflows)
+Pre-built templates for common accounting workflows:
+- **Invoice Creation**: Guided invoice creation with best practices
+- **Expense Categorization**: Proper expense categorization for tax purposes
+- **Payment Follow-up**: Professional overdue payment communications
+- **Monthly Summaries**: Comprehensive financial reporting
+- **Tax Preparation**: Organized tax documentation assistance
+- **Client Analysis**: Business relationship and profitability insights
 
-- Node.js 22.0.0 or higher
-- pnpm package manager (recommended) or npm
-- Fakturoid account with API access
+## Quick Start
 
-### Authentication Setup
-
-Fakturoid API v3 requires OAuth 2.0 authentication. You need to obtain OAuth credentials from your Fakturoid account:
-
-1. Log in to your Fakturoid account
-2. Go to **Settings → User account**
-3. Look for the API section (or Client Credentials section)
-4. Generate or view your **Client ID** and **Client Secret**
-
-### Installation
-
-1. Clone this repository:
+1. **Install dependencies:**
    ```bash
-   git clone https://github.com/yourusername/fakturoid-mcp.git
-   cd fakturoid-mcp
+   npm install
    ```
 
-2. Install dependencies:
+2. **Set up environment variables:**
    ```bash
-   pnpm install
+   cp .env.example .env
+   # Edit .env with your Fakturoid credentials
    ```
 
-3. Create a `.env` file in the project root with your Fakturoid credentials:
-   ```
-   # Fakturoid API Credentials
-   FAKTUROID_ACCOUNT_SLUG=your-account-slug
-   FAKTUROID_CLIENT_ID=your-client-id
-   FAKTUROID_CLIENT_SECRET=your-client-secret
-   FAKTUROID_APP_NAME=Your App Name
-   FAKTUROID_CONTACT_EMAIL=contact-email@example.com
-
-   # Server Configuration
-   PORT=3456
-   ```
-
-   > **Note:** You can find your OAuth credentials in your Fakturoid account settings as described above.
-
-4. Start the development server:
+3. **Build the server:**
    ```bash
-   pnpm dev
+   npm run build
    ```
 
-5. The server will be running at `http://localhost:3456`
+4. **Run the server:**
+   ```bash
+   npm start
+   ```
 
-## 🚀 Running with OAuth Authentication
+## Configuration
 
-After setting up your OAuth credentials, you can run the MCP server in different ways:
+Set these environment variables in your `.env` file:
 
-### Development Mode
-
-For local development with hot reloading:
-
-```bash
-pnpm dev
+```env
+FAKTUROID_ACCOUNT_SLUG=your-account-slug
+FAKTUROID_CLIENT_ID=your-client-id
+FAKTUROID_CLIENT_SECRET=your-client-secret
+FAKTUROID_APP_NAME=your-app-name
+FAKTUROID_CONTACT_EMAIL=your-email@example.com
+PORT=3000
 ```
 
-### Production Mode
+## Usage Examples
 
-Build and run in production mode:
+### Using Resources for Context
+Access real-time Fakturoid data:
+- `fakturoid://account` - Account information
+- `fakturoid://invoices/recent` - Recent invoices
+- `fakturoid://dashboard/summary` - Financial overview
 
-```bash
-pnpm build
-NODE_ENV=production node dist/main.js
-```
+### Using Tools for Actions
+Perform operations on your Fakturoid account:
+- Create new invoices with proper formatting
+- Categorize and record business expenses
+- Search and filter invoices by various criteria
+- Manage client and vendor information
 
-### Testing OAuth Authentication
+### Using Prompts for Workflows
+Get guided assistance with:
+- Professional invoice creation
+- Tax-compliant expense categorization
+- Payment follow-up communications
+- Monthly financial analysis
+- Tax preparation organization
 
-To verify your OAuth authentication is working correctly:
+## API Coverage
 
-```bash
-# Run with debug output
-DEBUG=true NODE_ENV=development node dist/main.js
+This MCP server implements the full Fakturoid API:
 
-# Test a specific API endpoint
-curl -X GET http://localhost:3456/api/test
+- ✅ **Users** - User account management
+- ✅ **Accounts** - Account information and settings
+- ✅ **Invoices** - Complete invoice lifecycle management
+- ✅ **Expenses** - Business expense tracking
+- ✅ **Subjects** - Contact and client management
+- ✅ **Invoice Payments** - Payment recording and tracking
+- ✅ **Expense Payments** - Expense payment management
+- ✅ **Inbox Files** - Document and file management
 
-# Or use the MCP Inspector
-npx @modelcontextprotocol/inspector node dist/main.js
-```
+## MCP Protocol Support
 
-### Command-line Arguments
+This server implements the full Model Context Protocol specification:
 
-The server supports these command-line arguments:
+- ✅ **Tools** - Interactive functions for AI models
+- ✅ **Resources** - Contextual data access
+- ✅ **Prompts** - Templated workflows
+- ✅ **Authentication** - Secure OAuth2 integration
+- ✅ **Error Handling** - Comprehensive error reporting
+- ✅ **Transport Support** - stdio and SSE transports
 
-- `--ai-runtime`: Force stdio mode for AI assistants
-- `--debug`: Enable debug logging
-
-Example:
-```bash
-node dist/main.js --ai-runtime --debug
-```
-
-## 📞 Supported API Endpoints
-
-The Fakturoid MCP server exposes the following tools for AI models to use:
-
-### Users API
-
-- `fakturoid_get_current_user` - Get information about the current user
-
-### Accounts API
-
-- `fakturoid_get_account` - Get details about your Fakturoid account
-- `fakturoid_update_account` - Update your account information
-
-### Invoices API
-
-- `fakturoid_get_invoices` - List invoices with optional filtering
-  - Parameters: page, since, updated_since, until, updated_until, status, subject_id
-- `fakturoid_get_invoice` - Get details of a specific invoice
-  - Parameters: id
-- `fakturoid_create_invoice` - Create a new invoice
-  - Parameters: invoiceData (with subject_id, lines, etc.)
-- `fakturoid_update_invoice` - Update an existing invoice
-  - Parameters: id, invoiceData
-- `fakturoid_delete_invoice` - Delete an invoice
-  - Parameters: id
-
-### Expenses API
-
-- `fakturoid_get_expenses` - List expenses with optional filtering
-  - Parameters: page, since, updated_since, until, updated_until, status
-- `fakturoid_get_expense` - Get details of a specific expense
-  - Parameters: id
-- `fakturoid_create_expense` - Create a new expense
-  - Parameters: expenseData (with supplier_name, etc.)
-- `fakturoid_update_expense` - Update an existing expense
-  - Parameters: id, expenseData
-- `fakturoid_delete_expense` - Delete an expense
-  - Parameters: id
-
-## 🔗 Connecting to Cursor
-
-To connect this MCP server to Cursor, follow these steps:
-
-1. Start the MCP server:
-   ```bash
-   pnpm dev
-   ```
-
-2. In Cursor, open Settings and navigate to the AI tab.
-
-3. Scroll down to the "Model Context Protocol (MCP)" section.
-
-4. Add a new MCP source with the following URL:
-   ```
-   http://localhost:3456/sse
-   ```
-
-5. Save the settings and restart Cursor if necessary.
-
-6. Your Fakturoid MCP tools should now be available in Cursor's AI assistant.
-
-## 🤖 Connecting to Claude
-
-To connect this MCP server to your local Claude desktop app, you have two options:
-
-### Option 1: Web Server Mode (HTTP/SSE)
-
-1. Start the MCP server:
-   ```bash
-   pnpm dev
-   ```
-
-2. Open the Claude desktop app on your computer.
-
-3. Navigate to Settings > Developer > Edit Config.
-
-4. Add a new MCP connection with the local URL:
-   ```
-   http://localhost:3456/sse
-   ```
-
-5. Save the settings and restart Claude.
-
-### Option 2: Direct Integration with OAuth (Recommended)
-
-1. Build the MCP server:
-   ```bash
-   pnpm build
-   ```
-
-2. Open the Claude desktop app on your computer.
-
-3. Navigate to Settings > Developer > Edit Config.
-
-4. Add the following to your `claude_desktop_config.json` file:
-   ```json
-   {
-     "mcpServers": {
-       "fakturoid": {
-         "command": "node",
-         "args": [
-           "/FULL/PATH/TO/fakturoid-mcp/dist/main.js",
-           "--ai-runtime"
-         ],
-         "env": {
-           "FAKTUROID_ACCOUNT_SLUG": "your-account-slug",
-           "FAKTUROID_CLIENT_ID": "your-client-id",
-           "FAKTUROID_CLIENT_SECRET": "your-client-secret",
-           "FAKTUROID_APP_NAME": "FakturoidMCP",
-           "FAKTUROID_CONTACT_EMAIL": "your-contact-email@example.com",
-           "NODE_ENV": "development",
-           "DEBUG": "true"
-         }
-       }
-     }
-   }
-   ```
-
-5. **OAuth Credentials**: Make sure to replace the placeholders with your actual Fakturoid OAuth credentials:
-   - `your-account-slug`: Your Fakturoid account slug (e.g., `mycompany`)
-   - `your-client-id`: Client ID from Fakturoid Settings → User account
-   - `your-client-secret`: Client Secret from Fakturoid Settings → User account
-
-6. **Full Path**: Replace `/FULL/PATH/TO/` with the absolute path to your project directory.
-   - macOS/Linux example: `/Users/username/projects/fakturoid-mcp`
-   - Windows example: `C:\\Users\\username\\projects\\fakturoid-mcp`
-
-7. Save the settings and restart Claude.
-
-8. Your Fakturoid tools should now be available to Claude in your local conversations.
-
-9. To verify it's working, ask Claude to get your current Fakturoid user info or list expenses.
-
-## 🧪 Developing Locally
-
-- Run in development mode with automatic restart: `pnpm dev`
-- Build for production: `pnpm build`
-- Start the production build: `node dist/main.js`
-
-## 🔍 Troubleshooting
-
-### Connection Issues
-- Make sure your MCP server is running and the URL is correct in Cursor settings.
-- Check if the server is accessible from your network (especially relevant for remote connections).
-
-### OAuth Authentication Errors
-- **Invalid Credentials**: Verify your Client ID and Client Secret are correct and not expired.
-- **Token Errors**: If you see "Failed to obtain token" errors, check:
-  - Your credentials have not been revoked
-  - Your account has API access enabled
-  - You're using the correct account slug
-- **Permission Denied**: Ensure your OAuth credentials have the necessary scopes/permissions in Fakturoid.
-- **Debug Mode**: Run with `DEBUG=true` to see detailed authentication logs.
-
-### Claude Desktop Integration Issues
-- **JSON Parsing Error**: If you see `Unexpected token 'U', "Users modu"... is not valid JSON` in Claude Desktop:
-  - This occurs when `console.log` statements write non-JSON data to stdout
-  - Make sure all debugging output uses `console.error` instead of `console.log` 
-  - Rebuild the project with `pnpm build` after any code changes
-  - Restart Claude Desktop to pick up the changes
-- **Server Connection**: Ensure your Claude Desktop config uses the correct path to `dist/main.js`
-- **Environment Variables**: Verify all required environment variables are set in your Claude Desktop config
-
-### Common Error Messages
-- **401 Unauthorized**: Your OAuth credentials are invalid or expired.
-- **403 Forbidden**: Your account doesn't have permission to perform the requested action.
-- **404 Not Found**: The requested resource doesn't exist (check account slug).
-- **429 Too Many Requests**: You've hit API rate limits (the client will retry automatically).
-
-### Tool Usage Issues
-- Ensure you're using the correct tool names as listed in this README.
-- Check the parameters match the expected format.
-
-### Enabling Debug Logs
-To see more detailed logs:
+## Development
 
 ```bash
-DEBUG=true NODE_ENV=development node dist/main.js
+# Install dependencies
+npm install
+
+# Development mode with hot reload
+npm run dev
+
+# Type checking
+npm run type-check
+
+# Build for production
+npm run build
+
+# Run tests
+npm test
 ```
 
-This will show API call attempts, token refresh operations, and any errors encountered.
+## Architecture
 
-## 📄 License
+The server is built with a modular architecture:
 
-This project is licensed under the MIT License.
+- **Client Layer** (`src/fakturoid/client.ts`) - Fakturoid API integration
+- **Tools Layer** (`src/fakturoid/tools.ts` + `src/fakturoid/tools/`) - MCP tool implementations
+- **Resources Layer** (`src/fakturoid/resources.ts`) - MCP resource handlers
+- **Prompts Layer** (`src/fakturoid/prompts.ts`) - MCP prompt templates
+- **Transport Layer** (`src/main.ts`) - MCP protocol handling
 
-### OAuth Token Management
+## License
 
-The MCP server includes automatic OAuth token management:
+MIT License - see LICENSE file for details.
 
-- **Token Caching**: OAuth tokens are cached in memory for better performance
-- **Automatic Refresh**: Tokens are automatically refreshed when they expire (every 2 hours)
-- **Error Handling**: Token failures are properly handled with detailed error messages
+## Contributing
 
-You don't need to manually refresh tokens or handle token expiration. The server takes care of this for you. 
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## Support
+
+- Check the [Fakturoid API documentation](https://www.fakturoid.cz/api/v2.html)
+- Review the [Model Context Protocol specification](https://modelcontextprotocol.io/)
+- Open an issue for bugs or feature requests 

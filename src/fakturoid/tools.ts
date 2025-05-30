@@ -9,7 +9,7 @@ import {
   registerFakturoidInvoicePaymentsTools,
   registerFakturoidExpensePaymentsTools,
   registerFakturoidInboxFilesTools,
-} from './mcp/index.js';
+} from './tools/index.js';
 
 export function registerFakturoidTools(server: McpServer, client: FakturoidClient) {
   registerFakturoidUsersTools(server, client);
