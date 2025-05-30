@@ -12,6 +12,12 @@ import { env } from "./utils/env.js";
 const server = new McpServer({
   name: "Fakturoid MCP",
   version: "1.0.0",
+}, {
+  capabilities: {
+    tools: {},
+    resources: {},
+    prompts: {}
+  }
 });
 
 // Log environment variables in development mode (without sensitive values)
@@ -71,11 +77,11 @@ if (isStdioMode) {
   let transport: SSEServerTransport | undefined = undefined;
 
   app.get("/sse", async (req, res) => {
-    console.log("SSE connection established.");
+    console.error("SSE connection established.");
     transport = new SSEServerTransport("/messages", res);
     await server.connect(transport);
     req.on("close", () => {
-      console.log("SSE connection closed.");
+      console.error("SSE connection closed.");
     });
   });
 
@@ -91,8 +97,8 @@ if (isStdioMode) {
 
   // Start the Express server
   app.listen(PORT, () => {
-    console.log(`SSE Server is running on port ${PORT}`);
-    console.log(`Connect to SSE endpoint at http://localhost:${PORT}/sse`);
-    console.log(`Send messages to http://localhost:${PORT}/messages`);
+    console.error(`SSE Server is running on port ${PORT}`);
+    console.error(`Connect to SSE endpoint at http://localhost:${PORT}/sse`);
+    console.error(`Send messages to http://localhost:${PORT}/messages`);
   });
 }
