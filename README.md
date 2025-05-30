@@ -263,6 +263,15 @@ To connect this MCP server to your local Claude desktop app, you have two option
 - **Permission Denied**: Ensure your OAuth credentials have the necessary scopes/permissions in Fakturoid.
 - **Debug Mode**: Run with `DEBUG=true` to see detailed authentication logs.
 
+### Claude Desktop Integration Issues
+- **JSON Parsing Error**: If you see `Unexpected token 'U', "Users modu"... is not valid JSON` in Claude Desktop:
+  - This occurs when `console.log` statements write non-JSON data to stdout
+  - Make sure all debugging output uses `console.error` instead of `console.log` 
+  - Rebuild the project with `pnpm build` after any code changes
+  - Restart Claude Desktop to pick up the changes
+- **Server Connection**: Ensure your Claude Desktop config uses the correct path to `dist/main.js`
+- **Environment Variables**: Verify all required environment variables are set in your Claude Desktop config
+
 ### Common Error Messages
 - **401 Unauthorized**: Your OAuth credentials are invalid or expired.
 - **403 Forbidden**: Your account doesn't have permission to perform the requested action.
