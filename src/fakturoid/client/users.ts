@@ -1,7 +1,7 @@
-import type { User } from '../models.js';
-import { withRetry, request } from './_shared.js';
-import type { FakturoidClientConfig } from './_shared.js';
+import type { User } from "../models/users.ts";
+import type { FakturoidClientConfig } from "./auth.ts";
+import { request, withRetry } from "./_shared.ts";
 
-export async function getCurrentUser(config: FakturoidClientConfig): Promise<User> {
-  return withRetry(() => request<User>(config, '/user.json'));
-} 
+export function getCurrentUser(config: FakturoidClientConfig): Promise<User> {
+	return withRetry(() => request<User>(config, "/user.json"));
+}
