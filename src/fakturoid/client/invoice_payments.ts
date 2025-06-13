@@ -1,8 +1,8 @@
 import type { InvoicePayment } from "../models/invoicePayment.ts";
 import type { InvoicePaymentParams } from "../models/invoicePaymentParams.ts";
 import type { Pagination } from "../models/pagination.ts";
-import type { FakturoidClientConfig } from "./_shared.js";
-import { accountEndpoint, request, withRetry } from "./_shared.js";
+import type { FakturoidClientConfig } from "./auth.ts";
+import { accountEndpoint, request, withRetry } from "./_shared.ts";
 
 export function getInvoicePayments(
 	config: FakturoidClientConfig,
@@ -45,7 +45,12 @@ export function createInvoicePayment(
 	payment: InvoicePaymentParams,
 ): Promise<InvoicePayment> {
 	return withRetry(() =>
-		request<InvoicePayment>(config, accountEndpoint(config, `/invoices/${invoiceId}/payments.json`), "POST", payment),
+		request<InvoicePayment, InvoicePaymentParams>(
+			config,
+			accountEndpoint(config, `/invoices/${invoiceId}/payments.json`),
+			"POST",
+			payment,
+		),
 	);
 }
 
@@ -56,7 +61,7 @@ export function updateInvoicePayment(
 	payment: Partial<InvoicePaymentParams>,
 ): Promise<InvoicePayment> {
 	return withRetry(() =>
-		request<InvoicePayment>(
+		request<InvoicePayment, Partial<InvoicePaymentParams>>(
 			config,
 			accountEndpoint(config, `/invoices/${invoiceId}/payments/${paymentId}.json`),
 			"PATCH",
