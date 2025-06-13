@@ -1,7 +1,7 @@
 import type { Pagination } from "../models/pagination.ts";
 import type { Subject } from "../models/subject.ts";
 import type { SubjectParams } from "../models/subjectParams.ts";
-import type { FakturoidClientConfig } from "./_shared.ts";
+import type { FakturoidClientConfig } from "./auth.ts";
 import { accountEndpoint, request, withRetry } from "./_shared.ts";
 
 export interface GetSubjectParameters extends Pagination {
@@ -32,7 +32,9 @@ export function getSubject(config: FakturoidClientConfig, id: number): Promise<S
 }
 
 export function createSubject(config: FakturoidClientConfig, subject: SubjectParams): Promise<Subject> {
-	return withRetry(() => request<Subject>(config, accountEndpoint(config, "/subjects.json"), "POST", subject));
+	return withRetry(() =>
+		request<Subject, SubjectParams>(config, accountEndpoint(config, "/subjects.json"), "POST", subject),
+	);
 }
 
 export function updateSubject(
@@ -40,7 +42,9 @@ export function updateSubject(
 	id: number,
 	subject: Partial<SubjectParams>,
 ): Promise<Subject> {
-	return withRetry(() => request<Subject>(config, accountEndpoint(config, `/subjects/${id}.json`), "PATCH", subject));
+	return withRetry(() =>
+		request<Subject, Partial<SubjectParams>>(config, accountEndpoint(config, `/subjects/${id}.json`), "PATCH", subject),
+	);
 }
 
 export function deleteSubject(config: FakturoidClientConfig, id: number): Promise<void> {
