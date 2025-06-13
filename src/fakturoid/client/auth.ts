@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { logger } from "../../utils/logger.ts";
 
 // Fakturoid API base URL
 const BASE_URL = "https://app.fakturoid.cz/api/v3";
@@ -77,8 +78,7 @@ class TokenManager {
 
 			return this.accessToken;
 		} catch (error) {
-			// biome-ignore lint/suspicious/noConsole: It is what it is for now
-			console.error("Error obtaining OAuth token:", error);
+			logger.error("Error obtaining OAuth token:", error);
 			throw error;
 		}
 	}

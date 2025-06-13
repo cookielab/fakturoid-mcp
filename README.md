@@ -5,7 +5,9 @@ A comprehensive Model Context Protocol (MCP) server for integrating with Fakturo
 ## Features
 
 ### 🔧 Tools (Active Operations)
+
 Interactive tools that allow AI models to perform actions on your Fakturoid account:
+
 - **Account Management**: Get account details and user information
 - **Invoice Operations**: Create, read, update, search, and manage invoices
 - **Expense Management**: Handle business expenses and categorization
@@ -14,7 +16,9 @@ Interactive tools that allow AI models to perform actions on your Fakturoid acco
 - **File Management**: Handle document uploads and management
 
 ### 📚 Resources (Contextual Data)
+
 Rich contextual data that AI models can access for informed assistance:
+
 - **Account Information**: Current account details and settings
 - **Recent Invoices**: Latest 20 invoices from your account
 - **Open/Overdue Invoices**: Unpaid invoices requiring attention
@@ -23,7 +27,9 @@ Rich contextual data that AI models can access for informed assistance:
 - **Dashboard Summary**: Key metrics and recent activity overview
 
 ### 💡 Prompts (Guided Workflows)
+
 Pre-built templates for common accounting workflows:
+
 - **Invoice Creation**: Guided invoice creation with best practices
 - **Expense Categorization**: Proper expense categorization for tax purposes
 - **Payment Follow-up**: Professional overdue payment communications
@@ -34,17 +40,20 @@ Pre-built templates for common accounting workflows:
 ## Quick Start
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    cp .env.example .env
-   # Edit .env with your Fakturoid credentials
+   # Edit .env with your Fakturoid OAuth2 credentials
    ```
 
 3. **Build the server:**
+
    ```bash
    npm run build
    ```
@@ -59,31 +68,55 @@ Pre-built templates for common accounting workflows:
 Set these environment variables in your `.env` file:
 
 ```env
+# Environment (development or production)
+NODE_ENV=production
+
+# Fakturoid OAuth2 Credentials
 FAKTUROID_ACCOUNT_SLUG=your-account-slug
-FAKTUROID_CLIENT_ID=your-client-id
-FAKTUROID_CLIENT_SECRET=your-client-secret
-FAKTUROID_APP_NAME=your-app-name
+FAKTUROID_CLIENT_ID=your-oauth-client-id
+FAKTUROID_CLIENT_SECRET=your-oauth-client-secret
+FAKTUROID_APP_NAME=Your App Name
 FAKTUROID_CONTACT_EMAIL=your-email@example.com
-PORT=3000
+
+# Server Configuration
+PORT=3456
+
+# Optional: MCP Configuration
+MCP_FORCE_MODE=stdio  # stdio (default) or sse
+AI_RUNTIME=false      # Set to true when running from Claude
 ```
+
+### Getting Fakturoid OAuth2 Credentials
+
+1. Log in to your Fakturoid account
+2. Go to Settings → API and Integrations
+3. Create a new OAuth2 application
+4. Copy the Client ID and Client Secret
+5. Use your account slug from your Fakturoid URL (e.g., `https://your-account-slug.fakturoid.cz`)
 
 ## Usage Examples
 
 ### Using Resources for Context
+
 Access real-time Fakturoid data:
+
 - `fakturoid://account` - Account information
 - `fakturoid://invoices/recent` - Recent invoices
 - `fakturoid://dashboard/summary` - Financial overview
 
 ### Using Tools for Actions
+
 Perform operations on your Fakturoid account:
+
 - Create new invoices with proper formatting
 - Categorize and record business expenses
 - Search and filter invoices by various criteria
 - Manage client and vendor information
 
 ### Using Prompts for Workflows
+
 Get guided assistance with:
+
 - Professional invoice creation
 - Tax-compliant expense categorization
 - Payment follow-up communications
@@ -124,24 +157,28 @@ npm install
 npm run dev
 
 # Type checking
-npm run type-check
+npm run types
+
+# Linting
+npm run lint
+
+# Format code
+npm run format
 
 # Build for production
 npm run build
-
-# Run tests
-npm test
 ```
 
 ## Architecture
 
 The server is built with a modular architecture:
 
-- **Client Layer** (`src/fakturoid/client.ts`) - Fakturoid API integration
+- **Client Layer** (`src/fakturoid/client.ts`) - Fakturoid API integration with OAuth2
 - **Tools Layer** (`src/fakturoid/tools.ts` + `src/fakturoid/tools/`) - MCP tool implementations
 - **Resources Layer** (`src/fakturoid/resources.ts`) - MCP resource handlers
 - **Prompts Layer** (`src/fakturoid/prompts.ts`) - MCP prompt templates
-- **Transport Layer** (`src/main.ts`) - MCP protocol handling
+- **Transport Layer** (`src/main.ts`) - MCP protocol handling (stdio/SSE)
+- **Environment Layer** (`src/utils/env.ts`) - Configuration and validation
 
 ## License
 
@@ -159,4 +196,4 @@ MIT License - see LICENSE file for details.
 
 - Check the [Fakturoid API documentation](https://www.fakturoid.cz/api/v2.html)
 - Review the [Model Context Protocol specification](https://modelcontextprotocol.io/)
-- Open an issue for bugs or feature requests 
+- Open an issue for bugs or feature requests

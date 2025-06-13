@@ -1,86 +1,83 @@
 import process from "node:process";
 import dotenv from "dotenv";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { logger } from "./logger.ts";
 
-// TODO: Remove the disables here
-// biome-ignore-start lint/complexity/useLiteralKeys: Skipping this for now
-// biome-ignore-start lint/suspicious/noConsole: Skipping this for now
-// biome-ignore-start lint/complexity/noExcessiveCognitiveComplexity: Disabled for now
+const boolean = () =>
+	z.preprocess((value: unknown) => {
+		const normalized = String(value).toLowerCase();
 
-// Load environment variables from .env file
-dotenv.config();
+		return normalized === "true" || normalized === "1";
+	}, z.boolean());
 
-// Determine if we're in development mode
-const isDevelopment = process.env["NODE_ENV"] !== "production";
-
-// Check if running from Claude or similar AI assistant
-const isRunningFromClaudeOrAI =
-	process.env["AI_RUNTIME"] === "true" ||
-	process.argv.includes("--ai-runtime") ||
-	(process.env["FAKTUROID_CLIENT_ID"] && process.env["FAKTUROID_ACCOUNT_SLUG"]);
-
-// Log a debug message about environment mode
-if (isDevelopment || process.env["DEBUG"]) {
-	console.error(`Environment mode: ${isDevelopment ? "development" : "production"}`);
-	console.error(`Claude/AI runtime detected: ${isRunningFromClaudeOrAI ? "yes" : "no"}`);
-}
-
-// Schema for environment variables
-const envSchema = z.object({
-	FAKTUROID_ACCOUNT_SLUG:
-		isDevelopment && !isRunningFromClaudeOrAI ? z.string().default("development-account") : z.string().min(1),
-	FAKTUROID_APP_NAME:
-		isDevelopment && !isRunningFromClaudeOrAI ? z.string().default("Fakturoid MCP Dev") : z.string().min(1),
-	FAKTUROID_CLIENT_ID:
-		isDevelopment && !isRunningFromClaudeOrAI ? z.string().default("dev-client-id") : z.string().min(1),
-	FAKTUROID_CLIENT_SECRET:
-		isDevelopment && !isRunningFromClaudeOrAI ? z.string().default("dev-client-secret") : z.string().min(1),
-	FAKTUROID_CONTACT_EMAIL:
-		isDevelopment && !isRunningFromClaudeOrAI
-			? z.string().email().default("dev-contact@example.com")
-			: z.string().email(),
+const environmentCommonSchema = z.object({
+	AI_RUNTIME: boolean(),
+	MCP_FORCE_MODE: z.string().toLowerCase().default("stdio"),
 	PORT: z
 		.string()
 		.optional()
 		.transform((val) => (val ? Number.parseInt(val, 10) : 3456)),
 });
 
-// Parse environment variables
-const parseEnv = () => {
-	try {
-		return envSchema.parse(process.env);
-	} catch (error) {
-		if (error instanceof z.ZodError) {
-			const missingVars = error.errors.map((err) => err.path.join(".")).join(", ");
+const developmentEnvironmentSchema = environmentCommonSchema.extend({
+	FAKTUROID_ACCOUNT_SLUG: z.string().default("development-account"),
+	FAKTUROID_APP_NAME: z.string().default("Fakturoid MCP Dev"),
+	FAKTUROID_CLIENT_ID: z.string().default("dev-client-id"),
+	FAKTUROID_CLIENT_SECRET: z.string().default("dev-client-secret"),
+	FAKTUROID_CONTACT_EMAIL: z.string().email().default("dev-contact@example.com"),
+	NODE_ENV: z.preprocess((value: unknown) => String(value).toLowerCase(), z.literal("development")),
+});
 
-			console.error(`Error: Missing or invalid environment variables: ${missingVars}`);
-			console.error("Please check your .env file or set these environment variables.");
+const productionEnvironmentSchema = environmentCommonSchema.extend({
+	FAKTUROID_ACCOUNT_SLUG: z.string().min(1),
+	FAKTUROID_APP_NAME: z.string().min(1),
+	FAKTUROID_CLIENT_ID: z.string().min(1),
+	FAKTUROID_CLIENT_SECRET: z.string().min(1),
+	FAKTUROID_CONTACT_EMAIL: z.email(),
+	NODE_ENV: z.preprocess(
+		(value: unknown) => String(value).toLowerCase(),
+		z.literal("production").default("production"),
+	),
+});
 
-			if (isDevelopment || isRunningFromClaudeOrAI) {
-				console.warn("Running in development mode with fallback values. DO NOT USE IN PRODUCTION!");
-			} else {
-				process.exit(1);
-			}
-		}
+const environmentSchema = z.union([developmentEnvironmentSchema, productionEnvironmentSchema]).transform((parsed) => {
+	return {
+		environment: parsed.NODE_ENV,
+		fakturoid: {
+			accountSlug: parsed.FAKTUROID_ACCOUNT_SLUG,
+			appName: parsed.FAKTUROID_APP_NAME,
+			clientID: parsed.FAKTUROID_CLIENT_ID,
+			clientSecret: parsed.FAKTUROID_CLIENT_SECRET,
+			contactEmail: parsed.FAKTUROID_CONTACT_EMAIL,
+		},
+		forceMode: parsed.MCP_FORCE_MODE,
+		isAIRuntime: parsed.AI_RUNTIME,
+		port: parsed.PORT,
+	};
+});
 
-		// In development, return defaults even if validation fails
-		if (isDevelopment) {
-			return {
-				FAKTUROID_ACCOUNT_SLUG: process.env["FAKTUROID_ACCOUNT_SLUG"] || "development-account",
-				FAKTUROID_APP_NAME: process.env["FAKTUROID_APP_NAME"] || "Fakturoid MCP Dev",
-				FAKTUROID_CLIENT_ID: process.env["FAKTUROID_CLIENT_ID"] || "dev-client-id",
-				FAKTUROID_CLIENT_SECRET: process.env["FAKTUROID_CLIENT_SECRET"] || "dev-client-secret",
-				FAKTUROID_CONTACT_EMAIL: process.env["FAKTUROID_CONTACT_EMAIL"] || "dev-contact@example.com",
-				PORT: process.env["PORT"] ? Number.parseInt(process.env["PORT"], 10) : 3456,
-			};
-		}
+type Environment = z.infer<typeof environmentSchema>;
 
-		throw error;
+const parseEnvironment = (): Environment => {
+	dotenv.config();
+
+	const environment = environmentSchema.safeParse(process.env);
+
+	if (!environment.success) {
+		logger.error("Could not properly parse environment variables.");
+		logger.error("Please check your .env file or set these variables manually.");
+		logger.error(z.prettifyError(environment.error));
+
+		process.exit(1);
 	}
+
+	logger.info(`Environment mode: ${environment.data.environment}`);
+	logger.info(`Claude/AI runtime detected: ${environment.data.isAIRuntime ? "yes" : "no"}`);
+
+	return environment.data;
 };
 
-export const env = parseEnv();
+const environment = parseEnvironment();
 
-// biome-ignore-end lint/complexity/useLiteralKeys: Skipping this for now
-// biome-ignore-end lint/suspicious/noConsole: Skipping this for now
-// biome-ignore-end lint/complexity/noExcessiveCognitiveComplexity: Disabled for now
+export { environment };
+export type { Environment };

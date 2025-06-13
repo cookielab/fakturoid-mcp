@@ -36,6 +36,8 @@
 
 		"outDir": "./dist",
 		"noEmit": true,
+		"emitDeclarationOnly": true,
+		"declaration": true,
 		"baseUrl": "src"
 	},
 	"include": ["src"]

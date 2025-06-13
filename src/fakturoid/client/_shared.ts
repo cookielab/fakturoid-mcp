@@ -1,5 +1,6 @@
 import fetch, { type RequestInit } from "node-fetch";
 import { z } from "zod";
+import { logger } from "../../utils/logger.ts";
 import { BASE_URL, type FakturoidClientConfig, getTokenManager } from "./auth.ts";
 
 const ErrorResponseSchema = z.object({
@@ -96,8 +97,9 @@ export async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promis
 
 			if (retries < maxRetries && message.includes("429 Too Many Requests")) {
 				const delay = 2 ** retries * 1000;
-				// biome-ignore lint/suspicious/noConsole: It is what it is for now
-				console.warn(`Rate limited, retrying in ${delay}ms...`);
+
+				logger.warn(`Rate limited, retrying in ${delay}ms...`);
+
 				await new Promise((resolve) => setTimeout(resolve, delay));
 				retries++;
 			} else {

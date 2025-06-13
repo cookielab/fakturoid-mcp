@@ -8,6 +8,7 @@
 	"scripts": {
 		"build": "tsc --noEmit false",
 		"dev": "tsx watch src/main.ts",
+		"types": "tsc",
 		"lint": "biome lint src/",
 		"format": "biome format --write --fix src/"
 	},
@@ -17,7 +18,9 @@
 		"dotenv": "16.5.0",
 		"express": "5.1.0",
 		"node-fetch": "3.3.2",
-		"zod": "^3.22.4"
+		"pino": "9.7.0",
+		"pino-pretty": "13.0.0",
+		"zod": "3.25.64"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.0.0-beta.6",
