@@ -1,13 +1,9 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import process from "node:process";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import express from "express";
-import packageJSON from "../package.json" with { type: "json" };
-import { FakturoidClient } from "./fakturoid/client.ts";
-import { registerFakturoidPrompts } from "./fakturoid/prompts.ts";
-import { registerFakturoidResources } from "./fakturoid/resources.ts";
-import { registerFakturoidTools } from "./fakturoid/tools.ts";
+import { createServer } from "./server.ts";
 import { environment } from "./utils/env.ts";
 import { logger } from "./utils/logger.ts";
 
@@ -63,22 +59,7 @@ const startSSEMode = (server: McpServer): void => {
 };
 
 const startServer = async (): Promise<void> => {
-	const fakturoidClient = new FakturoidClient({
-		accountSlug: environment.fakturoid.accountSlug,
-		appName: environment.fakturoid.appName,
-		clientId: environment.fakturoid.clientID,
-		clientSecret: environment.fakturoid.clientSecret,
-		contactEmail: environment.fakturoid.contactEmail,
-	});
-
-	const server = new McpServer({
-		name: "Fakturoid MCP",
-		version: packageJSON.version,
-	});
-
-	registerFakturoidTools(server, fakturoidClient);
-	registerFakturoidResources(server.server, fakturoidClient);
-	registerFakturoidPrompts(server.server);
+	const server = createServer();
 
 	const isAIRuntime = environment.isAIRuntime || process.argv.includes("--ai-runtime");
 	const isStdioMode = environment.forceMode === "stdio" || isAIRuntime || !process.stdin.isTTY || !process.stdout.isTTY;
