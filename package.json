@@ -1,29 +1,31 @@
 {
-  "name": "mcp-server",
-  "version": "0.1.0",
-  "description": "MCP Server written in TypeScript",
-  "type": "module",
-  "main": "dist/main.js",
-  "bin": "dist/main.js",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsx watch src/main.ts"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "1.11.0",
-    "@types/express": "^5.0.1",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "node-fetch": "^2.7.0",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/node-fetch": "^2.6.12",
-    "tsx": "^4.7.0",
-    "typescript": "^5.8.0"
-  },
-  "engines": {
-    "node": ">=22.0.0"
-  }
+	"name": "mcp-server",
+	"version": "0.1.0",
+	"description": "MCP Server written in TypeScript",
+	"type": "module",
+	"main": "dist/main.js",
+	"bin": "dist/main.js",
+	"scripts": {
+		"build": "tsc --noEmit false",
+		"dev": "tsx watch src/main.ts",
+		"lint": "biome lint src/",
+		"format": "biome format --write --fix src/"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "1.11.0",
+		"@types/express": "5.0.3",
+		"dotenv": "16.5.0",
+		"express": "5.1.0",
+		"node-fetch": "3.3.2",
+		"zod": "^3.22.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.0.0-beta.6",
+		"@types/node": "22.15.31",
+		"tsx": "4.20.2",
+		"typescript": "5.8.3"
+	},
+	"engines": {
+		"node": "23.11.0"
+	}
 }
