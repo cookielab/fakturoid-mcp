@@ -1,4 +1,4 @@
-import type { FakturoidClientConfig } from "./client/_shared.ts";
+import type { FakturoidClientConfig } from "./client/auth.ts";
 import type { GetExpensesParameters } from "./client/expenses.ts";
 import type { GetInboxFilesParameters } from "./client/inbox_files.ts";
 import type { GetInvoicesParameters } from "./client/invoices.ts";
