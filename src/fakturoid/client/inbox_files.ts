@@ -1,8 +1,8 @@
 import type { InboxFileParams } from "../models/inboxFileParams.ts";
 import type { InboxFile } from "../models/inboxFiles.ts";
 import type { Pagination } from "../models/pagination.ts";
-import type { FakturoidClientConfig } from "./_shared.js";
-import { accountEndpoint, request, withRetry } from "./_shared.js";
+import type { FakturoidClientConfig } from "./auth.ts";
+import { accountEndpoint, request, withRetry } from "./_shared.ts";
 
 export interface GetInboxFilesParameters extends Pagination {
 	since?: string;
@@ -31,7 +31,9 @@ export function getInboxFile(config: FakturoidClientConfig, id: number): Promise
 }
 
 export function createInboxFile(config: FakturoidClientConfig, file: InboxFileParams): Promise<InboxFile> {
-	return withRetry(() => request<InboxFile>(config, accountEndpoint(config, "/inbox/files.json"), "POST", file));
+	return withRetry(() =>
+		request<InboxFile, InboxFileParams>(config, accountEndpoint(config, "/inbox/files.json"), "POST", file),
+	);
 }
 
 export function updateInboxFile(
@@ -40,7 +42,7 @@ export function updateInboxFile(
 	fileData: { name: string },
 ): Promise<InboxFile> {
 	return withRetry(() =>
-		request<InboxFile>(config, accountEndpoint(config, `/inbox/files/${id}.json`), "PATCH", fileData),
+		request<InboxFile, { name: string }>(config, accountEndpoint(config, `/inbox/files/${id}.json`), "PATCH", fileData),
 	);
 }
 
