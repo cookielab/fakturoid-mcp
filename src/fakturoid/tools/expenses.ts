@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FakturoidClient } from "../client.ts";
 import type { ExpenseParams } from "../models/expenses.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export function registerFakturoidExpensesTools(server: McpServer, client: FakturoidClient) {
 	server.tool(
@@ -109,7 +109,7 @@ export function registerFakturoidExpensesTools(server: McpServer, client: Faktur
 	server.tool(
 		"fakturoid_update_expense",
 		{
-			expenseData: z.object({}).passthrough(),
+			expenseData: z.looseObject({}),
 			id: z.number(),
 		},
 		async ({ id, expenseData }) => {

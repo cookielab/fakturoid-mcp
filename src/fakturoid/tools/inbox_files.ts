@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FakturoidClient } from "../client.ts";
 import type { InboxFileParams } from "../models/inboxFileParams.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export function registerFakturoidInboxFilesTools(server: McpServer, client: FakturoidClient) {
 	server.tool(

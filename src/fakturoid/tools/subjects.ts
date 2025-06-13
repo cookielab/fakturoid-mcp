@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FakturoidClient } from "../client.ts";
 import type { SubjectParams } from "../models/subjectParams.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export function registerFakturoidSubjectsTools(server: McpServer, client: FakturoidClient) {
 	server.tool(
@@ -75,12 +75,10 @@ export function registerFakturoidSubjectsTools(server: McpServer, client: Faktur
 	server.tool(
 		"fakturoid_create_subject",
 		{
-			subjectData: z
-				.object({
-					name: z.string(),
-					type: z.enum(["company", "person", "government"]).optional(),
-				})
-				.passthrough(),
+			subjectData: z.looseObject({
+				name: z.string(),
+				type: z.enum(["company", "person", "government"]).optional(),
+			}),
 		},
 		async ({ subjectData }) => {
 			try {
@@ -112,7 +110,7 @@ export function registerFakturoidSubjectsTools(server: McpServer, client: Faktur
 		"fakturoid_update_subject",
 		{
 			id: z.number(),
-			subjectData: z.object({}).passthrough(),
+			subjectData: z.looseObject({}),
 		},
 		async ({ id, subjectData }) => {
 			try {

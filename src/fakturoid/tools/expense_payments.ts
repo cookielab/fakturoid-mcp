@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FakturoidClient } from "../client.ts";
 import type { ExpensePaymentParams } from "../models/expensePaymentParams.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export function registerFakturoidExpensePaymentsTools(server: McpServer, client: FakturoidClient) {
 	server.tool(

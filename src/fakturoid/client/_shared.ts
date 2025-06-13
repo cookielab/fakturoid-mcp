@@ -1,12 +1,12 @@
 import fetch, { type RequestInit } from "node-fetch";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { logger } from "../../utils/logger.ts";
 import { BASE_URL, type FakturoidClientConfig, getTokenManager } from "./auth.ts";
 
 const ErrorResponseSchema = z.object({
 	error: z.string().optional(),
 	error_description: z.string().optional(),
-	errors: z.record(z.array(z.string())).optional(),
+	errors: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 export async function getHeaders(config: FakturoidClientConfig, contentType = true): Promise<Record<string, string>> {

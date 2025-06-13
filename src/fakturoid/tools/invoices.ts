@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { FakturoidClient } from "../client.ts";
 import type { InvoiceParams } from "../models/invoices.ts";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export function registerFakturoidInvoicesTools(server: McpServer, client: FakturoidClient) {
 	server.tool(
@@ -75,20 +75,18 @@ export function registerFakturoidInvoicesTools(server: McpServer, client: Faktur
 	server.tool(
 		"fakturoid_create_invoice",
 		{
-			invoiceData: z
-				.object({
-					lines: z.array(
-						z.object({
-							name: z.string(),
-							quantity: z.number(),
-							unit_name: z.string().optional(),
-							unit_price: z.number(),
-							vat_rate: z.number(),
-						}),
-					),
-					subject_id: z.number(),
-				})
-				.passthrough(),
+			invoiceData: z.looseObject({
+				lines: z.array(
+					z.object({
+						name: z.string(),
+						quantity: z.number(),
+						unit_name: z.string().optional(),
+						unit_price: z.number(),
+						vat_rate: z.number(),
+					}),
+				),
+				subject_id: z.number(),
+			}),
 		},
 		async ({ invoiceData }) => {
 			try {
@@ -120,7 +118,7 @@ export function registerFakturoidInvoicesTools(server: McpServer, client: Faktur
 		"fakturoid_update_invoice",
 		{
 			id: z.number(),
-			invoiceData: z.object({}).passthrough(),
+			invoiceData: z.looseObject({}),
 		},
 		async ({ id, invoiceData }) => {
 			try {
