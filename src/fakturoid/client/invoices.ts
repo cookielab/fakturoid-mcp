@@ -1,7 +1,7 @@
 import type { Invoice, InvoiceParams } from "../models/invoices.ts";
 import type { Pagination } from "../models/pagination.ts";
-import type { FakturoidClientConfig } from "./_shared.js";
-import { accountEndpoint, request, withRetry } from "./_shared.js";
+import type { FakturoidClientConfig } from "./auth.ts";
+import { accountEndpoint, request, withRetry } from "./_shared.ts";
 
 export interface GetInvoicesParameters extends Pagination {
 	since?: string;
@@ -31,7 +31,9 @@ export function getInvoice(config: FakturoidClientConfig, id: number): Promise<I
 }
 
 export function createInvoice(config: FakturoidClientConfig, invoice: InvoiceParams): Promise<Invoice> {
-	return withRetry(() => request<Invoice>(config, accountEndpoint(config, "/invoices.json"), "POST", invoice));
+	return withRetry(() =>
+		request<Invoice, InvoiceParams>(config, accountEndpoint(config, "/invoices.json"), "POST", invoice),
+	);
 }
 
 export function updateInvoice(
@@ -39,7 +41,9 @@ export function updateInvoice(
 	id: number,
 	invoice: Partial<InvoiceParams>,
 ): Promise<Invoice> {
-	return withRetry(() => request<Invoice>(config, accountEndpoint(config, `/invoices/${id}.json`), "PATCH", invoice));
+	return withRetry(() =>
+		request<Invoice, Partial<InvoiceParams>>(config, accountEndpoint(config, `/invoices/${id}.json`), "PATCH", invoice),
+	);
 }
 
 export function deleteInvoice(config: FakturoidClientConfig, id: number): Promise<void> {
