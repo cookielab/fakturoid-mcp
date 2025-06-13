@@ -1,7 +1,7 @@
 import type { Expense, ExpenseParams } from "../models/expenses.ts";
 import type { Pagination } from "../models/pagination.ts";
-import type { FakturoidClientConfig } from "./_shared.js";
-import { accountEndpoint, request, withRetry } from "./_shared.js";
+import type { FakturoidClientConfig } from "./auth.ts";
+import { accountEndpoint, request, withRetry } from "./_shared.ts";
 
 export interface GetExpensesParameters extends Pagination {
 	since?: string;
@@ -31,7 +31,9 @@ export function getExpense(config: FakturoidClientConfig, id: number): Promise<E
 }
 
 export function createExpense(config: FakturoidClientConfig, expense: ExpenseParams): Promise<Expense> {
-	return withRetry(() => request<Expense>(config, accountEndpoint(config, "/expenses.json"), "POST", expense));
+	return withRetry(() =>
+		request<Expense, ExpenseParams>(config, accountEndpoint(config, "/expenses.json"), "POST", expense),
+	);
 }
 
 export function updateExpense(
@@ -39,7 +41,9 @@ export function updateExpense(
 	id: number,
 	expense: Partial<ExpenseParams>,
 ): Promise<Expense> {
-	return withRetry(() => request<Expense>(config, accountEndpoint(config, `/expenses/${id}.json`), "PATCH", expense));
+	return withRetry(() =>
+		request<Expense, Partial<ExpenseParams>>(config, accountEndpoint(config, `/expenses/${id}.json`), "PATCH", expense),
+	);
 }
 
 export function deleteExpense(config: FakturoidClientConfig, id: number): Promise<void> {
