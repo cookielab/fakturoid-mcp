@@ -10,13 +10,14 @@
 	},
 	"scripts": {
 		"build": "tsc --noEmit false",
-		"dev": "tsx watch src/main.ts",
+		"dev": "tsx --watch src/main.ts",
 		"types": "tsc",
 		"lint": "biome lint src/",
-		"format": "biome format --write --fix src/"
+		"format": "biome format --write --fix src/",
+		"ui": "DANGEROUSLY_OMIT_AUTH=true MCP_AUTO_OPEN_ENABLED=true pnpx @modelcontextprotocol/inspector"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.11.0",
+		"@modelcontextprotocol/sdk": "1.12.3",
 		"@types/express": "5.0.3",
 		"dotenv": "16.5.0",
 		"express": "5.1.0",
@@ -26,13 +27,16 @@
 		"zod": "3.25.64"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.0-beta.6",
+		"@biomejs/biome": "2.0.0",
+		"@cookielab.io/biome-config": "0.1.0",
+		"@modelcontextprotocol/inspector": "0.14.3",
 		"@types/node": "22.15.31",
+		"tailwindcss": "4.1.10",
 		"tsx": "4.20.2",
 		"typescript": "5.8.3"
 	},
 	"engines": {
-		"node": "23.11.0"
+		"node": "24.2.0"
 	},
-	"packageManager": "pnpm@10.11.0"
+	"packageManager": "pnpm@10.12.1"
 }

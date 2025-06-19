@@ -1,0 +1,9 @@
+{
+	"mcpServers": {
+		"default-server": {
+			"command": "pnpm",
+			"args": ["tsx", "src/main.ts"],
+			"env": {}
+		}
+	}
+}
