@@ -60,7 +60,7 @@ const startSSEMode = (server: McpServer): void => {
 };
 
 const startServer = async (): Promise<void> => {
-	const server = createServer();
+	const server = await createServer();
 
 	const isAIRuntime = environment.isAIRuntime || process.argv.includes("--ai-runtime");
 	const isStdioMode = environment.forceMode === "stdio" || isAIRuntime || !process.stdin.isTTY || !process.stdout.isTTY;

@@ -1,4 +1,4 @@
-import type { FakturoidClientConfig } from "./client/auth.ts";
+import type { FakturoidClientConfig, OAuthConfig } from "./client/auth.ts";
 import type { CreateExpense, GetExpenseFilters, UpdateExpense } from "./model/expense.ts";
 import type { CreateExpensePayment } from "./model/expensePayment.ts";
 import type { CreateGenerator, UpdateGenerator } from "./model/generator.ts";
@@ -85,8 +85,25 @@ import { createWebhook, deleteWebhook, getWebhook, getWebhooks, updateWebhook } 
 export class FakturoidClient {
 	private readonly config: FakturoidClientConfig;
 
-	constructor(config: FakturoidClientConfig) {
+	private constructor(config: FakturoidClientConfig) {
 		this.config = config;
+	}
+
+	static async create(config: OAuthConfig, apiUrl: string, accountSlug?: string): Promise<FakturoidClient> {
+		if (accountSlug != null) {
+			return new FakturoidClient({ ...config, accountSlug: accountSlug, url: apiUrl });
+		}
+
+		const user = await getCurrentUser({ ...config, url: apiUrl });
+		if (user instanceof Error || user.accounts[0] == null) {
+			throw new Error("The user account could not be found.");
+		}
+
+		return new FakturoidClient({
+			...config,
+			accountSlug: user.accounts[0].slug,
+			url: apiUrl,
+		});
 	}
 
 	// Account

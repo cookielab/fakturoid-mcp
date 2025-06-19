@@ -34,7 +34,7 @@ class UnexpectedError extends Error {
 }
 
 const getHeaders = async (
-	clientConfiguration: FakturoidClientConfig,
+	clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">,
 	contentType = true,
 ): Promise<Record<string, string>> => {
 	const tokenManager = getTokenManager(clientConfiguration);
@@ -53,7 +53,7 @@ const getHeaders = async (
 };
 
 const request = async <Response, Body = undefined>(
-	clientConfiguration: FakturoidClientConfig,
+	clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">,
 	endpoint: string,
 	method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
 	body?: Body,

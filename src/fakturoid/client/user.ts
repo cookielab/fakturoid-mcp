@@ -2,7 +2,9 @@ import type { User } from "../model/user.ts";
 import type { FakturoidClientConfig } from "./auth.ts";
 import { request } from "./request.ts";
 
-const getCurrentUser = async (configuration: FakturoidClientConfig): ReturnType<typeof request<User>> => {
+const getCurrentUser = async (
+	configuration: Omit<FakturoidClientConfig, "accountSlug">,
+): ReturnType<typeof request<User>> => {
 	return await request<User>(configuration, "/user.json", "GET");
 };
 

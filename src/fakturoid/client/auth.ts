@@ -1,28 +1,42 @@
-import crypto from "node:crypto";
 import fetch from "node-fetch";
 import { logger } from "../../utils/logger.ts";
 
-interface FakturoidClientConfig {
-	accountSlug: string;
-	clientId: string;
-	clientSecret: string;
-	appName: string;
-	contactEmail: string;
-	url: string;
+interface ClientCredentialsGrant {
+	grant_type: "client_credentials";
 }
+
+interface AuthorizationCodeGrant {
+	grant_type: "authorization_code";
+	code: string;
+	redirectUri: string;
+}
+
+interface RefreshTokenGrant {
+	grant_type: "refresh_token";
+	refresh_token: string;
+}
+
+type TokenGrant = ClientCredentialsGrant | AuthorizationCodeGrant | RefreshTokenGrant;
+
+type FakturoidClientConfig = OAuthConfig & {
+	accountSlug: string;
+	url: string;
+};
 
 interface TokenResponse {
 	access_token: string;
 	token_type: string;
 	expires_in: number;
+	refresh_token?: string;
 }
 
-interface OAuthConfig {
+type OAuthConfig = {
 	clientId: string;
 	clientSecret: string;
 	appName: string;
 	contactEmail: string;
-}
+	grant: TokenGrant;
+};
 
 // Five minutes for now
 const EXPIRATION_MARGIN = 1000 * 60 * 5;
@@ -39,7 +53,7 @@ class TokenManager {
 	/**
 	 * Get a valid access token, obtaining a new one if needed
 	 */
-	async getToken(clientConfiguration: FakturoidClientConfig): Promise<string> {
+	async getToken(clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">): Promise<string> {
 		// Check if we have a valid token
 		if (this.accessToken && this.tokenExpiry && this.tokenExpiry > new Date()) {
 			return this.accessToken;
@@ -52,14 +66,12 @@ class TokenManager {
 	/**
 	 * Force refresh the token
 	 */
-	async refreshToken(clientConfiguration: FakturoidClientConfig): Promise<string> {
+	async refreshToken(clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">): Promise<string> {
 		try {
 			const authorizationToken = Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString("base64");
 
 			const response = await fetch(`${clientConfiguration.url}/oauth/token`, {
-				body: JSON.stringify({
-					grant_type: "client_credentials",
-				}),
+				body: JSON.stringify(this.config.grant),
 				headers: {
 					Accept: "application/json",
 					Authorization: `Basic ${authorizationToken}`,
@@ -75,6 +87,12 @@ class TokenManager {
 			}
 
 			const data = (await response.json()) as TokenResponse;
+			if (data.refresh_token != null) {
+				this.config.grant = {
+					grant_type: "refresh_token",
+					refresh_token: data.refresh_token,
+				};
+			}
 
 			// Store the token and calculate expiry
 			this.accessToken = data.access_token;
@@ -88,29 +106,13 @@ class TokenManager {
 	}
 }
 
-// Create and store a token manager instance per client config
-const tokenManagers = new Map<string, TokenManager>();
+let tokenManager: TokenManager;
 
-function getTokenManager(config: FakturoidClientConfig): TokenManager {
-	// Create a unique key for this client configuration
-	const key = crypto.createHash("sha256").update(`${config.clientId}:${config.accountSlug}`).digest("hex");
-
-	let tokenManager = tokenManagers.get(key);
-	if (tokenManager == null) {
-		const oauthConfig: OAuthConfig = {
-			appName: config.appName,
-			clientId: config.clientId,
-			clientSecret: config.clientSecret,
-			contactEmail: config.contactEmail,
-		};
-
-		tokenManager = new TokenManager(oauthConfig);
-
-		tokenManagers.set(key, tokenManager);
-	}
+const getTokenManager = (config: OAuthConfig): TokenManager => {
+	tokenManager ??= new TokenManager(config);
 
 	return tokenManager;
-}
+};
 
 export { getTokenManager, TokenManager };
 export type { TokenResponse, OAuthConfig, FakturoidClientConfig };
