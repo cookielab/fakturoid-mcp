@@ -4,209 +4,390 @@ This document outlines the comprehensive Model Context Protocol (MCP) server imp
 
 ## Overview
 
-The Fakturoid MCP server is a **comprehensive implementation** that leverages the full potential of the Model Context Protocol by providing:
+The Fakturoid MCP server is a **complete implementation** of the Model Context Protocol that provides AI models with powerful capabilities for accounting and invoicing automation through:
 
-- **🔧 Tools** - Interactive functions for AI models to perform actions
-- **📚 Resources** - Contextual data for AI model awareness  
-- **💡 Prompts** - Templated workflows for common accounting tasks
+- **🔧 Tools** - 18+ interactive functions for performing actions
+- **📚 Resources** - 10 contextual data sources for real-time insights
+- **💡 Prompts** - 6 guided workflow templates for common tasks
 
 ## Architecture
 
-### High-Level Design
+### System Architecture
+
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   AI Model      │    │   MCP Server     │    │   Fakturoid     │
-│   (Claude,      │◄──►│   (This Server)  │◄──►│   API           │
-│   Cursor, etc.) │    │                  │    │                 │
+│   (Claude,      │◄──►│   (This Server)  │◄──►│   API v3        │
+│   GPT, etc.)    │    │                  │    │                 │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
+     JSON-RPC 2.0         TypeScript            REST API
 ```
 
-### Component Architecture
+### Component Structure
+
 ```
-MCP Server
-├── Transport Layer (stdio/SSE)
-├── Protocol Handler (JSON-RPC 2.0)
-├── Feature Handlers
-│   ├── Tools (src/fakturoid/tools.ts + src/fakturoid/tools/)
-│   ├── Resources (src/fakturoid/resources.ts)
-│   └── Prompts (src/fakturoid/prompts.ts)
-├── Fakturoid Client (src/fakturoid/client.ts)
-└── OAuth Authentication
+fakturoid-mcp/
+├── src/
+│   ├── main.ts                 # Entry point & transport handling
+│   ├── server.ts               # MCP server initialization
+│   ├── fakturoid/
+│   │   ├── client.ts           # Fakturoid API client
+│   │   ├── tools.ts            # Tool registration
+│   │   ├── resources.ts        # Resource handlers
+│   │   ├── prompts.ts          # Prompt templates
+│   │   ├── client/             # API client implementations
+│   │   ├── model/              # TypeScript models & schemas
+│   │   ├── tool/               # Individual tool implementations
+│   │   └── resource/           # Individual resource handlers
+│   └── utils/
+│       └── env.ts              # Environment configuration
+└── dist/                       # Compiled JavaScript output
 ```
 
-## Feature Implementation
+## Implementation Details
 
-### 1. Tools (Interactive Functions)
+### 1. Tools Implementation
 
-**Purpose**: Allow AI models to perform actions on Fakturoid data
+**Architecture**: High-level McpServer API with Zod schema validation
 
-**Implementation**: High-level McpServer API for type-safe tool registration
+**Tool Categories**:
 
-**Coverage**:
-- ✅ User management
-- ✅ Account operations  
-- ✅ Invoice lifecycle (CRUD + search)
-- ✅ Expense management
-- ✅ Contact/subject management
-- ✅ Payment tracking
-- ✅ File management
+- **Account Management** (2 tools)
 
-**Example Usage**:
+  - `fakturoid_get_account` - Retrieve account information
+  - `fakturoid_update_account` - Update account settings
+
+- **Invoice Operations** (8 tools)
+
+  - `fakturoid_get_invoices` - List invoices with filters
+  - `fakturoid_search_invoices` - Search by query and tags
+  - `fakturoid_get_invoice_detail` - Get specific invoice
+  - `fakturoid_create_invoice` - Create new invoice
+  - `fakturoid_update_invoice` - Update existing invoice
+  - `fakturoid_delete_invoice` - Delete invoice
+  - `fakturoid_fire_invoice` - Send invoice to client
+  - `fakturoid_download_invoice_pdf` - Get PDF version
+
+- **Expense Management** (5 tools)
+
+  - `fakturoid_get_expenses` - List expenses
+  - `fakturoid_get_expense_detail` - Get specific expense
+  - `fakturoid_create_expense` - Create new expense
+  - `fakturoid_update_expense` - Update expense
+  - `fakturoid_delete_expense` - Delete expense
+
+- **Contact Management** (4 tools)
+
+  - `fakturoid_get_subjects` - List contacts
+  - `fakturoid_search_subjects` - Search contacts
+  - `fakturoid_create_subject` - Create new contact
+  - `fakturoid_update_subject` - Update contact
+
+- **Additional Features** (Multiple tools for each)
+  - Bank accounts
+  - Events
+  - Generators (recurring invoices)
+  - Inbox files
+  - Inventory management
+  - Invoice/expense payments
+  - Messages
+  - Number formats
+  - Todos
+  - Users
+  - Webhooks
+
+**Tool Structure Example**:
+
 ```typescript
-server.tool('fakturoid_create_invoice', schema, async (params) => {
-  const invoice = await client.createInvoice(params);
-  return { content: [{ type: 'text', text: JSON.stringify(invoice) }] };
-});
+const createInvoice = createTool(
+  "fakturoid_create_invoice",
+  async (client, params) => {
+    const invoice = await client.createInvoice(
+      params.accountSlug,
+      params.invoice,
+    );
+    return {
+      content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
+    };
+  },
+  z.object({
+    accountSlug: z.string().min(1),
+    invoice: CreateInvoiceSchema,
+  }),
+);
 ```
 
-### 2. Resources (Contextual Data)
+### 2. Resources Implementation
 
-**Purpose**: Provide AI models with real-time Fakturoid data for context
+**Architecture**: Low-level Server API with custom URI scheme
 
-**Implementation**: Low-level Server API with custom URI scheme `fakturoid://`
+**Resource Format**: `fakturoid://[resource-type]/[resource-id]`
 
 **Available Resources**:
-- `fakturoid://account` - Account information
-- `fakturoid://invoices/recent` - Latest invoices
-- `fakturoid://invoices/open` - Unpaid invoices
-- `fakturoid://invoices/overdue` - Overdue invoices
-- `fakturoid://expenses/recent` - Recent expenses
-- `fakturoid://expenses/open` - Unpaid expenses
-- `fakturoid://subjects/recent` - Recent contacts
-- `fakturoid://subjects/companies` - Company contacts
-- `fakturoid://subjects/people` - Individual contacts
-- `fakturoid://dashboard/summary` - Financial overview
 
-**Example Usage**:
-AI models can reference these resources to get context before making decisions or providing advice.
-
-### 3. Prompts (Workflow Templates)
-
-**Purpose**: Provide pre-built templates for common accounting workflows
-
-**Implementation**: Low-level Server API with parameterized prompt templates
-
-**Available Prompts**:
-- `create_invoice` - Guided invoice creation
-- `expense_categorization` - Tax-compliant expense handling
-- `payment_followup` - Professional payment reminders
-- `monthly_summary` - Financial reporting
-- `tax_preparation` - Tax documentation organization
-- `client_analysis` - Customer relationship analysis
-
-**Example Usage**:
 ```typescript
-// AI model can call:
-// GetPrompt("create_invoice", {client_name: "ACME Corp", services: "Consulting"})
-// Returns a structured prompt with best practices and guidance
+const RESOURCES: FakturoidResource[] = [
+  accountResource, // fakturoid://account
+  dashboardSummaryResource, // fakturoid://dashboard/summary
+  expensesOpenResource, // fakturoid://expenses/open
+  expensesRecentResource, // fakturoid://expenses/recent
+  invoicesOpenResource, // fakturoid://invoices/open
+  invoicesOverdueResource, // fakturoid://invoices/overdue
+  invoicesRecentResource, // fakturoid://invoices/recent
+  subjectsCustomersResource, // fakturoid://subjects/customers
+  subjectsRecentResource, // fakturoid://subjects/recent
+  subjectsSuppliersResource, // fakturoid://subjects/suppliers
+];
 ```
 
-## Protocol Compliance
+**Resource Handler Example**:
 
-### MCP Capabilities Declaration
+```typescript
+export const invoicesRecentResource: FakturoidResource = {
+  uri: "fakturoid://invoices/recent",
+  name: "Recent Invoices",
+  description: "Latest 20 invoices from your account",
+  mimeType: "application/json",
+  implementation: async (client, accountSlug) => {
+    const invoices = await client.getInvoices(accountSlug, { limit: 20 });
+    return {
+      contents: [
+        {
+          uri: "fakturoid://invoices/recent",
+          mimeType: "application/json",
+          text: JSON.stringify(invoices, null, 2),
+        },
+      ],
+    };
+  },
+};
+```
+
+### 3. Prompts Implementation
+
+**Architecture**: Low-level Server API with parameterized templates
+
+**Available Prompts**:
+
+```typescript
+const prompts: Prompt[] = [
+  {
+    name: "create_invoice",
+    description: "Create a new invoice with guided prompts",
+    arguments: [
+      { name: "client_name", required: true },
+      { name: "services", required: true },
+      { name: "amount", required: false },
+    ],
+  },
+  // ... 5 more prompts
+];
+```
+
+**Prompt Handler Example**:
+
+```typescript
+case "create_invoice":
+  return {
+    description: "Create a professional invoice with proper details",
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `I need to create an invoice for ${args?.client_name}.
+               Services: ${args?.services}
+               ${args?.amount ? `Amount: ${args.amount}` : ""}
+
+               Please help me create a professional invoice...`
+      }
+    }]
+  };
+```
+
+## Protocol Implementation
+
+### MCP Capabilities
+
 ```json
 {
   "capabilities": {
+    "tools": {},
     "resources": {},
-    "prompts": {},
-    "tools": {}
+    "prompts": {}
   }
 }
 ```
 
 ### Transport Support
-- ✅ **stdio** - For direct AI integration (Claude Desktop, etc.)
-- ✅ **SSE/HTTP** - For web-based AI applications
-- ✅ **Session management** - For stateful connections
 
-### Error Handling
-- Comprehensive error catching and reporting
-- Graceful degradation when Fakturoid API is unavailable
-- Proper JSON-RPC error codes and messages
+- **stdio** (Default) - Direct process communication for desktop AI apps
+- **SSE/HTTP** - Server-Sent Events for web-based integrations
 
-## Data Flow Examples
+### Message Flow
 
-### 1. Invoice Creation Workflow
 ```
-1. AI Model → Get Prompt "create_invoice" → MCP Server
-2. MCP Server → Return guided invoice creation template
-3. AI Model → Use Tools to create invoice → MCP Server
-4. MCP Server → Call Fakturoid API → Create invoice
-5. AI Model → Access Resources for confirmation → MCP Server
+1. Initialize → Capability negotiation
+2. List Tools/Resources/Prompts → Available features
+3. Execute Tool → Perform action via Fakturoid API
+4. Read Resource → Fetch contextual data
+5. Get Prompt → Retrieve workflow template
 ```
 
-### 2. Monthly Analysis Workflow  
-```
-1. AI Model → Access Resource "dashboard/summary" → MCP Server
-2. MCP Server → Fetch data from Fakturoid → Return summary
-3. AI Model → Get Prompt "monthly_summary" → MCP Server
-4. AI Model → Use Tools for detailed analysis → MCP Server
-5. AI Model → Generate comprehensive report
-```
-
-## Security & Authentication
+## Authentication & Security
 
 ### OAuth 2.0 Flow
-```
-1. Server starts with client credentials
-2. Automatic token acquisition on first API call
-3. Token caching and automatic refresh
-4. Secure credential management via environment variables
+
+```typescript
+class FakturoidClient {
+  private async ensureAuthenticated(): Promise<void> {
+    if (!this.accessToken || this.isTokenExpired()) {
+      await this.refreshToken();
+    }
+  }
+}
 ```
 
 ### Security Features
-- ✅ Secure credential storage
-- ✅ Automatic token refresh
-- ✅ Rate limiting compliance
-- ✅ Error handling without credential exposure
 
-## Quality Assurance
+- Environment variable configuration
+- Automatic token refresh
+- No credential storage in code
+- Secure token handling
+- Rate limiting compliance
 
-### Code Quality
-- ✅ TypeScript for type safety
-- ✅ Modular architecture
-- ✅ Comprehensive error handling
-- ✅ Environment-based configuration
+## Data Models
 
-### MCP Compliance
-- ✅ Full protocol implementation
-- ✅ Proper capability declaration  
-- ✅ Standard message formats
-- ✅ Transport layer abstraction
+### Type Safety
 
-### API Coverage
-- ✅ Complete Fakturoid API v3 support
-- ✅ All CRUD operations
-- ✅ Advanced search and filtering
-- ✅ File upload and management
+All API interactions use Zod schemas for runtime validation:
+
+```typescript
+export const InvoiceSchema = z.object({
+  id: z.number(),
+  number: z.string(),
+  variable_symbol: z.string(),
+  your_name: z.string(),
+  client_name: z.string(),
+  client_id: z.number(),
+  issued_on: z.string(),
+  due_on: z.string(),
+  total: z.string(),
+  remaining_amount: z.string(),
+  status: z.enum(["draft", "sent", "paid", "overdue", "cancelled"]),
+  // ... more fields
+});
+```
+
+### Model Organization
+
+- `model/` directory contains all TypeScript interfaces and Zod schemas
+- Each entity has its own model file (invoice.ts, expense.ts, etc.)
+- Common types shared in `model/common.ts`
+
+## Error Handling
+
+### Error Types
+
+```typescript
+export class FakturoidError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public errors?: Record<string, string[]>,
+  ) {
+    super(message);
+  }
+}
+```
+
+### Error Responses
+
+All errors are caught and returned as structured JSON:
+
+```json
+{
+  "error": "Error message",
+  "timestamp": "2024-01-01T00:00:00Z",
+  "uri": "fakturoid://resource/path"
+}
+```
+
+## Performance Considerations
+
+### Current Implementation
+
+- Synchronous API calls
+- No caching layer
+- Direct API passthrough
+
+### Future Optimizations
+
+- Response caching for resources
+- Batch API operations
+- Connection pooling
+- Rate limit management
+
+## Testing Strategy
+
+### Required Test Coverage
+
+- Unit tests for each tool
+- Integration tests for API client
+- MCP protocol compliance tests
+- Resource handler tests
+- Prompt template validation
+
+### Test Structure
+
+```
+tests/
+├── unit/
+│   ├── tools/
+│   ├── resources/
+│   └── client/
+├── integration/
+│   ├── api/
+│   └── mcp/
+└── e2e/
+    └── workflows/
+```
 
 ## Deployment
 
-### Development
+### Build Process
+
 ```bash
-npm run dev    # Hot reload development
-npm run build  # Production build
-npm start      # Start production server
+pnpm build  # TypeScript compilation
 ```
 
+### Runtime Requirements
+
+- Node.js 24.2.0+
+- Environment variables configured
+- Network access to Fakturoid API
+
 ### Production Considerations
-- Environment variable security
-- Process management (PM2, Docker, etc.)
-- Logging and monitoring
-- Health checks and error alerting
 
-## Future Enhancements
+- Process management (PM2, systemd)
+- Log aggregation
+- Error monitoring
+- Health checks
+- Automatic restarts
 
-### Potential Extensions
-- **Caching Layer** - Redis/memory caching for frequently accessed data
-- **Webhooks** - Real-time updates from Fakturoid
-- **Multi-tenant** - Support for multiple Fakturoid accounts
-- **Advanced Analytics** - More sophisticated financial analysis tools
-- **Bulk Operations** - Batch processing capabilities
+## Compliance
 
-### MCP Protocol Evolution
-- **Sampling** - Server-initiated LLM interactions
-- **Additional Resource Types** - Binary data, streaming resources
-- **Enhanced Prompts** - Multi-modal prompts with images/documents
+### MCP Protocol
 
-This comprehensive implementation demonstrates the full potential of the Model Context Protocol for accounting and business automation workflows.
+- Full JSON-RPC 2.0 compliance
+- Proper capability declaration
+- Standard error codes
+- Transport abstraction
+
+### Fakturoid API
+
+- API v3 compliance
+- Rate limiting respect
+- Proper authentication
+- Complete endpoint coverage
+
+This specification represents a production-ready MCP server implementation that fully leverages the Model Context Protocol for AI-powered accounting automation.

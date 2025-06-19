@@ -1,199 +1,169 @@
 # Fakturoid MCP Server
 
-A comprehensive Model Context Protocol (MCP) server for integrating with Fakturoid accounting software. This server provides AI applications with access to your Fakturoid data through **tools**, **resources**, and **prompts**.
+A comprehensive Model Context Protocol (MCP) server implementation for the Fakturoid API, enabling AI models to interact with accounting and invoicing data through a rich set of tools, resources, and guided workflows.
+
+## Overview
+
+This MCP server provides a complete integration with Fakturoid API v3, demonstrating the full potential of the Model Context Protocol by implementing all three core MCP features:
+
+- **🔧 Tools** - 18+ interactive functions for performing actions on Fakturoid data
+- **📚 Resources** - 10 contextual data sources providing real-time business insights
+- **💡 Prompts** - 6 professional workflow templates for common accounting tasks
 
 ## Features
 
-### 🔧 Tools (Active Operations)
+### Tools (Interactive Functions)
 
-Interactive tools that allow AI models to perform actions on your Fakturoid account:
+The server implements comprehensive coverage of the Fakturoid API:
 
-- **Account Management**: Get account details and user information
-- **Invoice Operations**: Create, read, update, search, and manage invoices
-- **Expense Management**: Handle business expenses and categorization
-- **Contact Management**: Manage subjects (clients, vendors, contacts)
-- **Payment Tracking**: Record and track invoice and expense payments
-- **File Management**: Handle document uploads and management
+- **Account Management** - Get and update account information
+- **Invoice Operations** - Full CRUD operations, search, filtering, and PDF generation
+- **Expense Tracking** - Create, read, update, delete, and categorize expenses
+- **Contact Management** - Manage subjects (companies and individuals)
+- **Payment Processing** - Track and manage invoice and expense payments
+- **Document Management** - Upload and manage files through inbox
+- **Advanced Features** - Recurring generators, inventory management, webhooks
 
-### 📚 Resources (Contextual Data)
+### Resources (Contextual Data)
 
-Rich contextual data that AI models can access for informed assistance:
+Real-time business context through custom `fakturoid://` URI scheme:
 
-- **Account Information**: Current account details and settings
-- **Recent Invoices**: Latest 20 invoices from your account
-- **Open/Overdue Invoices**: Unpaid invoices requiring attention
-- **Recent Expenses**: Latest business expenses
-- **Contact Lists**: Company and individual contacts
-- **Dashboard Summary**: Key metrics and recent activity overview
+- `fakturoid://account` - Account information and settings
+- `fakturoid://dashboard/summary` - Financial overview and key metrics
+- `fakturoid://invoices/recent` - Latest 20 invoices
+- `fakturoid://invoices/open` - All unpaid invoices
+- `fakturoid://invoices/overdue` - Overdue invoices requiring attention
+- `fakturoid://expenses/recent` - Recent business expenses
+- `fakturoid://expenses/open` - Unpaid expenses
+- `fakturoid://subjects/recent` - Recently added contacts
+- `fakturoid://subjects/customers` - Customer contacts
+- `fakturoid://subjects/suppliers` - Supplier contacts
 
-### 💡 Prompts (Guided Workflows)
+### Prompts (Workflow Templates)
 
-Pre-built templates for common accounting workflows:
+Professional templates for common accounting workflows:
 
-- **Invoice Creation**: Guided invoice creation with best practices
-- **Expense Categorization**: Proper expense categorization for tax purposes
-- **Payment Follow-up**: Professional overdue payment communications
-- **Monthly Summaries**: Comprehensive financial reporting
-- **Tax Preparation**: Organized tax documentation assistance
-- **Client Analysis**: Business relationship and profitability insights
+- `create_invoice` - Guided invoice creation with best practices
+- `expense_categorization` - Tax-compliant expense handling
+- `payment_followup` - Professional payment reminder communications
+- `monthly_summary` - Comprehensive financial reporting
+- `tax_preparation` - Tax documentation organization
+- `client_analysis` - Customer relationship and profitability analysis
 
-## Quick Start
+## Installation
 
-1. **Install dependencies:**
+### Prerequisites
+
+- Node.js 24.2.0 or higher
+- pnpm package manager
+- Fakturoid API credentials
+
+### Setup
+
+1. Clone the repository:
 
    ```bash
-   npm install
+   git clone <repository-url>
+   cd fakturoid-mcp
    ```
 
-2. **Set up environment variables:**
+2. Install dependencies:
+
+   ```bash
+   pnpm install
+   ```
+
+3. Set up environment variables:
 
    ```bash
    cp .env.example .env
-   # Edit .env with your Fakturoid OAuth2 credentials
    ```
 
-3. **Build the server:**
+   Edit `.env` and add your Fakturoid API credentials:
+
+   ```
+   FAKTUROID_CLIENT_ID=your_client_id
+   FAKTUROID_CLIENT_SECRET=your_client_secret
+   FAKTUROID_REDIRECT_URI=your_redirect_uri
+   FAKTUROID_USER_AGENT=your_app_name/1.0 (your_email@example.com)
+   ```
+
+4. Build the project:
+   ```bash
+   pnpm build
+   ```
+
+## Usage
+
+### With Claude Desktop
+
+1. Copy the example configuration:
 
    ```bash
-   npm run build
+   cp claude_desktop_config.example.json ~/Library/Application\ Support/Claude/claude_desktop_config.json
    ```
 
-4. **Run the server:**
-   ```bash
-   npm start
-   ```
+2. Update the configuration with your environment variables and correct path to the project.
 
-## Configuration
+3. Restart Claude Desktop to load the MCP server.
 
-Set these environment variables in your `.env` file:
+### Development Mode
 
-```env
-# Environment (development or production)
-NODE_ENV=production
-
-# Fakturoid OAuth2 Credentials
-FAKTUROID_ACCOUNT_SLUG=your-account-slug
-FAKTUROID_CLIENT_ID=your-oauth-client-id
-FAKTUROID_CLIENT_SECRET=your-oauth-client-secret
-FAKTUROID_APP_NAME=Your App Name
-FAKTUROID_CONTACT_EMAIL=your-email@example.com
-
-# Server Configuration
-PORT=3456
-
-# Optional: MCP Configuration
-MCP_FORCE_MODE=stdio  # stdio (default) or sse
-AI_RUNTIME=false      # Set to true when running from Claude
-```
-
-### Getting Fakturoid OAuth2 Credentials
-
-1. Log in to your Fakturoid account
-2. Go to Settings → API and Integrations
-3. Create a new OAuth2 application
-4. Copy the Client ID and Client Secret
-5. Use your account slug from your Fakturoid URL (e.g., `https://your-account-slug.fakturoid.cz`)
-
-## Usage Examples
-
-### Using Resources for Context
-
-Access real-time Fakturoid data:
-
-- `fakturoid://account` - Account information
-- `fakturoid://invoices/recent` - Recent invoices
-- `fakturoid://dashboard/summary` - Financial overview
-
-### Using Tools for Actions
-
-Perform operations on your Fakturoid account:
-
-- Create new invoices with proper formatting
-- Categorize and record business expenses
-- Search and filter invoices by various criteria
-- Manage client and vendor information
-
-### Using Prompts for Workflows
-
-Get guided assistance with:
-
-- Professional invoice creation
-- Tax-compliant expense categorization
-- Payment follow-up communications
-- Monthly financial analysis
-- Tax preparation organization
-
-## API Coverage
-
-This MCP server implements the full Fakturoid API:
-
-- ✅ **Users** - User account management
-- ✅ **Accounts** - Account information and settings
-- ✅ **Invoices** - Complete invoice lifecycle management
-- ✅ **Expenses** - Business expense tracking
-- ✅ **Subjects** - Contact and client management
-- ✅ **Invoice Payments** - Payment recording and tracking
-- ✅ **Expense Payments** - Expense payment management
-- ✅ **Inbox Files** - Document and file management
-
-## MCP Protocol Support
-
-This server implements the full Model Context Protocol specification:
-
-- ✅ **Tools** - Interactive functions for AI models
-- ✅ **Resources** - Contextual data access
-- ✅ **Prompts** - Templated workflows
-- ✅ **Authentication** - Secure OAuth2 integration
-- ✅ **Error Handling** - Comprehensive error reporting
-- ✅ **Transport Support** - stdio and SSE transports
-
-## Development
+Run the server in development mode with hot reload:
 
 ```bash
-# Install dependencies
-npm install
+pnpm dev
+```
 
-# Development mode with hot reload
-npm run dev
+### Testing with MCP Inspector
 
-# Type checking
-npm run types
+Test the server using the MCP Inspector UI:
 
-# Linting
-npm run lint
-
-# Format code
-npm run format
-
-# Build for production
-npm run build
+```bash
+pnpm ui
 ```
 
 ## Architecture
 
-The server is built with a modular architecture:
+```
+MCP Server
+├── Transport Layer (stdio/SSE)
+├── Protocol Handler (JSON-RPC 2.0)
+├── Feature Handlers
+│   ├── Tools (src/fakturoid/tools/)
+│   ├── Resources (src/fakturoid/resources.ts)
+│   └── Prompts (src/fakturoid/prompts.ts)
+├── Fakturoid Client (src/fakturoid/client.ts)
+└── OAuth Authentication
+```
 
-- **Client Layer** (`src/fakturoid/client.ts`) - Fakturoid API integration with OAuth2
-- **Tools Layer** (`src/fakturoid/tools.ts` + `src/fakturoid/tools/`) - MCP tool implementations
-- **Resources Layer** (`src/fakturoid/resources.ts`) - MCP resource handlers
-- **Prompts Layer** (`src/fakturoid/prompts.ts`) - MCP prompt templates
-- **Transport Layer** (`src/main.ts`) - MCP protocol handling (stdio/SSE)
-- **Environment Layer** (`src/utils/env.ts`) - Configuration and validation
+## Code Quality
 
-## License
+- **TypeScript** - Full type safety with strict mode
+- **Zod Validation** - Runtime schema validation for all inputs
+- **Biome** - Code formatting and linting
+- **Modular Design** - Clean separation of concerns
 
-MIT License - see LICENSE file for details.
+## Security
+
+- OAuth 2.0 authentication flow
+- Automatic token refresh
+- Secure credential management via environment variables
+- No hardcoded secrets or API keys
 
 ## Contributing
 
+Contributions are welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+3. Run `pnpm lint` and `pnpm format` before committing
+4. Submit a pull request
 
-## Support
+## License
 
-- Check the [Fakturoid API documentation](https://www.fakturoid.cz/api/v2.html)
-- Review the [Model Context Protocol specification](https://modelcontextprotocol.io/)
-- Open an issue for bugs or feature requests
+[Add your license here]
+
+## Acknowledgments
+
+Built with the [Model Context Protocol SDK](https://github.com/modelcontextprotocol/sdk) for seamless AI integration.

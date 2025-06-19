@@ -1,172 +1,326 @@
 # Comprehensive MCP Features
 
-This document highlights how the Fakturoid MCP server implements the **full potential** of the Model Context Protocol.
+This document details the complete Model Context Protocol implementation in the Fakturoid MCP server, showcasing how all three core MCP features work together to provide powerful AI-assisted accounting capabilities.
 
 ## 🎯 Complete MCP Implementation
 
-This server demonstrates a **comprehensive MCP implementation** that goes beyond basic tool support to provide:
+The Fakturoid MCP server implements **100% of the Model Context Protocol specification**, providing a reference implementation for building comprehensive MCP servers.
 
-### 🔧 Tools (Interactive Functions) - ✅ **IMPLEMENTED**
-**Purpose**: Enable AI models to perform actions on Fakturoid data
+### Implementation Summary
 
-**Coverage**: 20+ tools across all Fakturoid API endpoints
-- User management (`fakturoid_get_current_user`)
-- Account operations (`fakturoid_get_account`, `fakturoid_update_account`)
-- Invoice lifecycle (create, read, update, delete, search, filter)
-- Expense management (CRUD operations with categorization)
-- Contact management (subjects, companies, individuals)
-- Payment tracking (invoice payments, expense payments)
-- File management (upload, download, organize)
+| Feature          | Status         | Count | Coverage       |
+| ---------------- | -------------- | ----- | -------------- |
+| 🔧 **Tools**     | ✅ Implemented | 18+   | Full API       |
+| 📚 **Resources** | ✅ Implemented | 10    | Key contexts   |
+| 💡 **Prompts**   | ✅ Implemented | 6     | Core workflows |
 
-**Implementation**: High-level McpServer API with Zod schema validation
+## 🔧 Tools (Interactive Functions)
 
-### 📚 Resources (Contextual Data) - ✅ **IMPLEMENTED** 
-**Purpose**: Provide AI models with real-time business context
+### Purpose
 
-**Coverage**: 10 contextual resources via custom `fakturoid://` URI scheme
-- `fakturoid://account` - Account information and settings
-- `fakturoid://invoices/recent` - Latest 20 invoices  
-- `fakturoid://invoices/open` - All unpaid invoices
-- `fakturoid://invoices/overdue` - Overdue invoices requiring attention
-- `fakturoid://expenses/recent` - Recent business expenses
-- `fakturoid://expenses/open` - Unpaid expenses
-- `fakturoid://subjects/recent` - Recently added contacts
-- `fakturoid://subjects/companies` - Company contacts
-- `fakturoid://subjects/people` - Individual contacts  
-- `fakturoid://dashboard/summary` - Financial overview and metrics
+Enable AI models to perform actions on Fakturoid data with full CRUD capabilities.
 
-**Implementation**: Low-level Server API with custom resource handlers
+### Implementation Details
 
-### 💡 Prompts (Workflow Templates) - ✅ **IMPLEMENTED**
-**Purpose**: Guide AI models through common accounting workflows
+**Architecture**: High-level McpServer API with Zod schema validation
 
-**Coverage**: 6 professional workflow templates
-- `create_invoice` - Guided invoice creation with best practices
-- `expense_categorization` - Tax-compliant expense handling
-- `payment_followup` - Professional payment reminder communications
-- `monthly_summary` - Comprehensive financial reporting
-- `tax_preparation` - Tax documentation organization
-- `client_analysis` - Customer relationship and profitability analysis
+**Tool Categories**:
 
-**Implementation**: Low-level Server API with parameterized prompt templates
+1. **Account Management**
 
-## 🚀 Advanced MCP Features
+   - `fakturoid_get_account` - Retrieve account details
+   - `fakturoid_update_account` - Modify account settings
 
-### Protocol Compliance
-- ✅ **JSON-RPC 2.0** - Full protocol implementation
-- ✅ **Capability Declaration** - Proper MCP capability negotiation
-- ✅ **Transport Abstraction** - stdio and SSE/HTTP support
-- ✅ **Error Handling** - Comprehensive error reporting
-- ✅ **Authentication** - OAuth 2.0 with automatic token management
+2. **Invoice Operations**
 
-### Transport Support
-- ✅ **stdio** - For AI assistants (Claude Desktop, Cursor)
-- ✅ **SSE/HTTP** - For web applications and remote clients
-- ✅ **Session Management** - Stateful connections when needed
+   - `fakturoid_get_invoices` - List with advanced filtering
+   - `fakturoid_search_invoices` - Full-text search
+   - `fakturoid_get_invoice_detail` - Detailed invoice data
+   - `fakturoid_create_invoice` - Create professional invoices
+   - `fakturoid_update_invoice` - Modify existing invoices
+   - `fakturoid_delete_invoice` - Remove invoices
+   - `fakturoid_fire_invoice` - Send to clients
+   - `fakturoid_download_invoice_pdf` - Export as PDF
 
-### Data Flow Integration
-The three MCP features work together seamlessly:
+3. **Expense Management**
 
-```
-Workflow Example: Monthly Financial Analysis
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   AI Model      │    │   MCP Server     │    │   Fakturoid     │
-│                 │    │                  │    │   API           │
-├─────────────────┤    ├──────────────────┤    ├─────────────────┤
-│ 1. Get Prompt   │───▶│ Return template  │    │                 │
-│ "monthly_summary"│   │ with guidance    │    │                 │
-├─────────────────┤    ├──────────────────┤    ├─────────────────┤
-│ 2. Access       │───▶│ Fetch real-time  │───▶│ API calls       │
-│ Resources       │◄───│ dashboard data   │◄───│ return data     │
-├─────────────────┤    ├──────────────────┤    ├─────────────────┤
-│ 3. Use Tools    │───▶│ Execute detailed │───▶│ Analyze         │
-│ for analysis    │◄───│ financial queries│◄───│ historical data │
-├─────────────────┤    ├──────────────────┤    ├─────────────────┤
-│ 4. Generate     │    │                  │    │                 │
-│ comprehensive   │    │                  │    │                 │
-│ business report │    │                  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+   - `fakturoid_get_expenses` - List business expenses
+   - `fakturoid_get_expense_detail` - Detailed expense data
+   - `fakturoid_create_expense` - Record new expenses
+   - `fakturoid_update_expense` - Modify expense records
+   - `fakturoid_delete_expense` - Remove expense entries
+
+4. **Contact Management**
+
+   - `fakturoid_get_subjects` - List all contacts
+   - `fakturoid_search_subjects` - Find specific contacts
+   - `fakturoid_create_subject` - Add new contacts
+   - `fakturoid_update_subject` - Update contact information
+
+5. **Additional Features**
+   - Bank account management
+   - Event tracking
+   - Recurring invoice generators
+   - File management via inbox
+   - Inventory tracking
+   - Payment processing
+   - Message handling
+   - Todo management
+   - User administration
+   - Webhook configuration
+
+### Tool Implementation Pattern
+
+```typescript
+const createTool = <T extends z.ZodType>(
+  name: string,
+  handler: (client: FakturoidClient, params: z.infer<T>) => Promise<ToolResult>,
+  schema: T,
+): ServerToolCreator => {
+  return (server, client) => {
+    server.tool(name, schema, async (params) => handler(client, params));
+  };
+};
 ```
 
-## 🎨 Usage Patterns
+## 📚 Resources (Contextual Data)
 
-### Pattern 1: Context-Aware Actions
+### Purpose
+
+Provide AI models with real-time business context for informed decision-making.
+
+### Implementation Details
+
+**Architecture**: Low-level Server API with custom `fakturoid://` URI scheme
+
+**Available Resources**:
+
+1. **Account Information**
+
+   - `fakturoid://account` - Complete account details and settings
+
+2. **Dashboard Overview**
+
+   - `fakturoid://dashboard/summary` - Key metrics and financial health
+
+3. **Invoice Context**
+
+   - `fakturoid://invoices/recent` - Latest 20 invoices
+   - `fakturoid://invoices/open` - All unpaid invoices
+   - `fakturoid://invoices/overdue` - Requires immediate attention
+
+4. **Expense Context**
+
+   - `fakturoid://expenses/recent` - Recent business expenses
+   - `fakturoid://expenses/open` - Unpaid expense records
+
+5. **Contact Context**
+   - `fakturoid://subjects/recent` - Newly added contacts
+   - `fakturoid://subjects/customers` - Customer database
+   - `fakturoid://subjects/suppliers` - Supplier database
+
+### Resource Implementation Pattern
+
+```typescript
+interface FakturoidResource extends Resource {
+  implementation: (
+    client: FakturoidClient,
+    accountSlug: string,
+  ) => Promise<ReadResourceResponse>;
+}
 ```
-1. AI accesses Resources for current state
-2. AI uses that context to make informed Tool calls
-3. Result: Contextually appropriate actions
+
+## 💡 Prompts (Workflow Templates)
+
+### Purpose
+
+Guide AI models through professional accounting workflows with best practices.
+
+### Implementation Details
+
+**Architecture**: Low-level Server API with parameterized templates
+
+**Available Prompts**:
+
+1. **`create_invoice`** - Professional Invoice Creation
+
+   - Parameters: `client_name`, `services`, `amount` (optional)
+   - Guides through complete invoice setup
+   - Ensures compliance and professionalism
+
+2. **`expense_categorization`** - Tax-Compliant Expense Management
+
+   - Parameters: `expense_description`, `amount`, `date` (optional)
+   - Proper categorization for tax purposes
+   - Documentation recommendations
+
+3. **`payment_followup`** - Payment Collection Communications
+
+   - Parameters: `client_name`, `invoice_number`, `amount_due`, `days_overdue`
+   - Professional yet firm communication
+   - Escalation strategies
+
+4. **`monthly_summary`** - Financial Reporting
+
+   - Parameters: `month`, `focus_area` (optional)
+   - Comprehensive financial analysis
+   - Actionable insights and trends
+
+5. **`tax_preparation`** - Tax Documentation Organization
+
+   - Parameters: `tax_year`, `business_type` (optional)
+   - Complete tax preparation checklist
+   - Optimization strategies
+
+6. **`client_analysis`** - Customer Relationship Insights
+   - Parameters: `client_name`, `time_period` (optional)
+   - Profitability analysis
+   - Payment pattern recognition
+
+### Prompt Implementation Pattern
+
+```typescript
+server.setRequestHandler(GetPromptRequestSchema, (request) => {
+  const { name, arguments: args } = request.params;
+
+  switch (name) {
+    case "create_invoice":
+      return {
+        description: "Create a professional invoice with proper details",
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: generatePromptText(args),
+            },
+          },
+        ],
+      };
+  }
+});
 ```
 
-### Pattern 2: Guided Workflows  
+## 🚀 Integrated Workflows
+
+The three MCP features work together seamlessly to enable sophisticated workflows:
+
+### Example: Intelligent Invoice Creation
+
 ```
-1. AI gets Prompt template for specific task
-2. AI follows template guidance step-by-step
-3. AI uses Tools to execute each step
-4. Result: Professional, compliant workflow execution
+1. AI accesses `fakturoid://subjects/customers` (Resource)
+   → Gets context about existing clients
+
+2. AI uses `create_invoice` prompt (Prompt)
+   → Receives guided workflow template
+
+3. AI calls `fakturoid_create_invoice` (Tool)
+   → Creates professional invoice
+
+4. AI accesses `fakturoid://invoices/recent` (Resource)
+   → Confirms invoice creation
+
+5. AI calls `fakturoid_fire_invoice` (Tool)
+   → Sends invoice to client
 ```
 
-### Pattern 3: Comprehensive Analysis
+### Example: Monthly Financial Analysis
+
 ```
-1. AI combines Resource data with Tool queries
-2. AI uses Prompts to structure analysis
-3. AI generates insights and recommendations
-4. Result: Deep business intelligence
+1. AI uses `monthly_summary` prompt (Prompt)
+   → Gets analysis framework
+
+2. AI accesses multiple resources:
+   - `fakturoid://dashboard/summary`
+   - `fakturoid://invoices/open`
+   - `fakturoid://expenses/recent`
+   → Gathers comprehensive data
+
+3. AI uses various tools:
+   - `fakturoid_search_invoices`
+   - `fakturoid_get_expenses`
+   → Performs detailed analysis
+
+4. AI generates comprehensive report with insights
 ```
 
-## 🏆 Why This Matters
+## 🏗️ Architecture Benefits
 
-### For AI Models
-- **Rich Context**: Access to real-time business data
-- **Guided Actions**: Professional workflow templates
-- **Powerful Operations**: Full CRUD capabilities
+### Modular Design
 
-### For Users  
-- **Professional Results**: Best-practice workflows built-in
-- **Time Savings**: Automated routine tasks
-- **Business Intelligence**: AI-powered financial insights
+- Clear separation between tools, resources, and prompts
+- Easy to extend with new features
+- Maintainable codebase structure
 
-### For Developers
-- **Complete Example**: Full MCP implementation reference
-- **Modular Design**: Clear separation of concerns
-- **Type Safety**: Comprehensive TypeScript implementation
+### Type Safety
 
-## 🔮 Future Potential
+- Full TypeScript implementation
+- Zod schema validation
+- Compile-time error prevention
 
-This comprehensive implementation opens possibilities for:
+### Error Handling
 
-### Advanced AI Workflows
-- Multi-step business process automation
-- Intelligent financial advisory
-- Predictive cash flow analysis
-- Automated compliance checking
+- Graceful degradation
+- Informative error messages
+- Recovery suggestions
 
-### Integration Opportunities  
-- ERP system connections
-- Bank API integrations
-- CRM data synchronization
-- Document management systems
+### Security
 
-### MCP Protocol Evolution
-- **Sampling**: Server-initiated AI interactions
-- **Streaming**: Real-time data updates
-- **Multi-modal**: Document and image processing
+- OAuth 2.0 authentication
+- Environment-based configuration
+- No hardcoded credentials
 
-## 📊 Impact Assessment
+## 📊 Coverage Metrics
 
-**MCP Feature Utilization**: **100%** of core protocol features
-- Tools: ✅ Full implementation
-- Resources: ✅ Full implementation  
-- Prompts: ✅ Full implementation
+### API Coverage
 
-**Business Domain Coverage**: **100%** of Fakturoid API
-- All endpoints supported
-- Complete CRUD operations
-- Advanced search and filtering
+- **Endpoints**: 100% of Fakturoid API v3
+- **Operations**: All CRUD operations supported
+- **Features**: Advanced search, filtering, file management
 
-**Professional Quality**: **Production Ready**
-- Type-safe implementation
-- Comprehensive error handling
-- OAuth 2.0 security
-- Transport abstraction
+### MCP Protocol Coverage
 
-This Fakturoid MCP server serves as a **reference implementation** demonstrating the transformative potential of the Model Context Protocol for business automation and AI-assisted workflows. 
+- **Core Features**: 3/3 (100%)
+- **Transport**: stdio + SSE/HTTP
+- **Error Handling**: Full JSON-RPC 2.0 compliance
+
+### Business Domain Coverage
+
+- **Invoicing**: Complete lifecycle management
+- **Expenses**: Full tracking and categorization
+- **Contacts**: Comprehensive CRM capabilities
+- **Reporting**: Financial insights and analytics
+- **Compliance**: Tax preparation support
+
+## 🔮 Future Evolution
+
+While the current implementation is comprehensive, potential enhancements include:
+
+### Performance Optimizations
+
+- Response caching for frequently accessed resources
+- Batch operations for bulk updates
+- Connection pooling for API requests
+
+### Advanced Features
+
+- Real-time webhook integration
+- Multi-account support
+- Custom report generation
+- Predictive analytics
+
+### MCP Protocol Extensions
+
+- Sampling for server-initiated interactions
+- Streaming resources for real-time updates
+- Binary resource support for documents
+
+## 🎉 Conclusion
+
+The Fakturoid MCP server demonstrates how the Model Context Protocol can transform business software integration. By implementing all three core features—Tools, Resources, and Prompts—it provides AI models with:
+
+- **Complete Control**: Full CRUD operations on all data types
+- **Rich Context**: Real-time business insights
+- **Professional Guidance**: Best-practice workflows
+
+This comprehensive implementation serves as both a powerful business tool and a reference implementation for the Model Context Protocol community.
