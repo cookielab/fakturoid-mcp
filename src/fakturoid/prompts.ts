@@ -142,9 +142,9 @@ export function registerFakturoidPrompts(server: Server) {
 					messages: [
 						{
 							content: {
-								text: `I need to create an invoice for ${args?.["client_name"] || "[CLIENT_NAME]"}.
+								text: `I need to create an invoice for ${args?.["client_name"] ?? "[CLIENT_NAME]"}.
 
-Services provided: ${args?.["services"] || "[SERVICES_DESCRIPTION]"}
+Services provided: ${args?.["services"] ?? "[SERVICES_DESCRIPTION]"}
 ${args?.["amount"] ? `Amount: ${args["amount"]}` : ""}
 
 Please help me:
@@ -169,8 +169,8 @@ Use the Fakturoid tools to create this invoice and make sure it follows best pra
 							content: {
 								text: `I have a business expense that needs to be properly categorized:
 
-Expense: ${args?.["expense_description"] || "[EXPENSE_DESCRIPTION]"}
-Amount: ${args?.["amount"] || "[AMOUNT]"}
+Expense: ${args?.["expense_description"] ?? "[EXPENSE_DESCRIPTION]"}
+Amount: ${args?.["amount"] ?? "[AMOUNT]"}
 ${args?.["date"] ? `Date: ${args["date"]}` : ""}
 
 Please help me:
@@ -195,9 +195,9 @@ Use the Fakturoid tools to record this expense properly.`,
 							content: {
 								text: `I need to follow up on an overdue payment:
 
-Client: ${args?.["client_name"] || "[CLIENT_NAME]"}
-Invoice Number: ${args?.["invoice_number"] || "[INVOICE_NUMBER]"}
-Amount Due: ${args?.["amount_due"] || "[AMOUNT]"}
+Client: ${args?.["client_name"] ?? "[CLIENT_NAME]"}
+Invoice Number: ${args?.["invoice_number"] ?? "[INVOICE_NUMBER]"}
+Amount Due: ${args?.["amount_due"] ?? "[AMOUNT]"}
 ${args?.["days_overdue"] ? `Days Overdue: ${args["days_overdue"]}` : ""}
 
 Please help me:
@@ -220,7 +220,7 @@ First, use Fakturoid tools to get the current status of this invoice, then provi
 					messages: [
 						{
 							content: {
-								text: `I need a comprehensive financial summary for ${args?.["month"] || "[MONTH]"}.
+								text: `I need a comprehensive financial summary for ${args?.["month"] ?? "[MONTH]"}.
 
 ${args?.["focus_area"] ? `Focus on: ${args["focus_area"]}` : ""}
 
@@ -246,7 +246,7 @@ Use Fakturoid tools to gather all necessary data and provide actionable insights
 					messages: [
 						{
 							content: {
-								text: `I need help preparing for tax filing for ${args?.["tax_year"] || "[TAX_YEAR]"}.
+								text: `I need help preparing for tax filing for ${args?.["tax_year"] ?? "[TAX_YEAR]"}.
 
 ${args?.["business_type"] ? `Business Type: ${args["business_type"]}` : ""}
 
@@ -272,7 +272,7 @@ Use Fakturoid tools to compile comprehensive tax preparation materials.`,
 					messages: [
 						{
 							content: {
-								text: `I want to analyze my business relationship with ${args?.["client_name"] || "[CLIENT_NAME]"}.
+								text: `I want to analyze my business relationship with ${args?.["client_name"] ?? "[CLIENT_NAME]"}.
 
 ${args?.["time_period"] ? `Analysis Period: ${args["time_period"]}` : ""}
 

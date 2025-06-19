@@ -24,6 +24,7 @@ const startStdio = async (server: McpServer): Promise<void> => {
 
 const startSSEMode = (server: McpServer): void => {
 	const app = express();
+	app.disable("x-powered-by");
 
 	let transport: SSEServerTransport | undefined;
 

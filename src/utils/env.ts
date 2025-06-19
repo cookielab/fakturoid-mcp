@@ -24,7 +24,7 @@ const developmentEnvironmentSchema = environmentCommonSchema.extend({
 	FAKTUROID_APP_NAME: z.string().default("Fakturoid MCP Dev"),
 	FAKTUROID_CLIENT_ID: z.string().default("dev-client-id"),
 	FAKTUROID_CLIENT_SECRET: z.string().default("dev-client-secret"),
-	FAKTUROID_CONTACT_EMAIL: z.string().email().default("dev-contact@example.com"),
+	FAKTUROID_CONTACT_EMAIL: z.email().default("dev-contact@example.com"),
 	NODE_ENV: z.preprocess((value: unknown) => String(value).toLowerCase(), z.literal("development")),
 });
 

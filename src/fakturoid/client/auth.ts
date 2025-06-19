@@ -1,8 +1,6 @@
+import crypto from "node:crypto";
 import fetch from "node-fetch";
 import { logger } from "../../utils/logger.ts";
-
-// Fakturoid API base URL
-const BASE_URL = "https://app.fakturoid.cz/api/v3";
 
 interface FakturoidClientConfig {
 	accountSlug: string;
@@ -10,6 +8,7 @@ interface FakturoidClientConfig {
 	clientSecret: string;
 	appName: string;
 	contactEmail: string;
+	url: string;
 }
 
 interface TokenResponse {
@@ -25,10 +24,13 @@ interface OAuthConfig {
 	contactEmail: string;
 }
 
+// Five minutes for now
+const EXPIRATION_MARGIN = 1000 * 60 * 5;
+
 class TokenManager {
 	private accessToken: string | null = null;
 	private tokenExpiry: Date | null = null;
-	private config: OAuthConfig;
+	private readonly config: OAuthConfig;
 
 	constructor(config: OAuthConfig) {
 		this.config = config;
@@ -37,28 +39,30 @@ class TokenManager {
 	/**
 	 * Get a valid access token, obtaining a new one if needed
 	 */
-	async getToken(): Promise<string> {
+	async getToken(clientConfiguration: FakturoidClientConfig): Promise<string> {
 		// Check if we have a valid token
 		if (this.accessToken && this.tokenExpiry && this.tokenExpiry > new Date()) {
 			return this.accessToken;
 		}
 
 		// Get a new token
-		return await this.refreshToken();
+		return await this.refreshToken(clientConfiguration);
 	}
 
 	/**
 	 * Force refresh the token
 	 */
-	async refreshToken(): Promise<string> {
+	async refreshToken(clientConfiguration: FakturoidClientConfig): Promise<string> {
 		try {
-			const response = await fetch(`${BASE_URL}/oauth/token`, {
+			const authorizationToken = Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString("base64");
+
+			const response = await fetch(`${clientConfiguration.url}/oauth/token`, {
 				body: JSON.stringify({
 					grant_type: "client_credentials",
 				}),
 				headers: {
 					Accept: "application/json",
-					Authorization: `Basic ${Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString("base64")}`,
+					Authorization: `Basic ${authorizationToken}`,
 					"Content-Type": "application/json",
 					"User-Agent": `${this.config.appName} (${this.config.contactEmail})`,
 				},
@@ -72,9 +76,9 @@ class TokenManager {
 
 			const data = (await response.json()) as TokenResponse;
 
-			// Store the token and calculate expiry (subtract 5 minutes for safety margin)
+			// Store the token and calculate expiry
 			this.accessToken = data.access_token;
-			this.tokenExpiry = new Date(Date.now() + (data.expires_in - 300) * 1000);
+			this.tokenExpiry = new Date(Date.now() + data.expires_in * 1000 - EXPIRATION_MARGIN);
 
 			return this.accessToken;
 		} catch (error) {
@@ -89,7 +93,7 @@ const tokenManagers = new Map<string, TokenManager>();
 
 function getTokenManager(config: FakturoidClientConfig): TokenManager {
 	// Create a unique key for this client configuration
-	const key = `${config.clientId}:${config.accountSlug}`;
+	const key = crypto.createHash("sha256").update(`${config.clientId}:${config.accountSlug}`).digest("hex");
 
 	let tokenManager = tokenManagers.get(key);
 	if (tokenManager == null) {
@@ -108,5 +112,5 @@ function getTokenManager(config: FakturoidClientConfig): TokenManager {
 	return tokenManager;
 }
 
-export { getTokenManager, TokenManager, BASE_URL };
+export { getTokenManager, TokenManager };
 export type { TokenResponse, OAuthConfig, FakturoidClientConfig };

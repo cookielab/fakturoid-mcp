@@ -13,12 +13,22 @@ const createServer = (): McpServer => {
 		clientId: environment.fakturoid.clientID,
 		clientSecret: environment.fakturoid.clientSecret,
 		contactEmail: environment.fakturoid.contactEmail,
+		url: "https://app.fakturoid.cz/api/v3",
 	});
 
-	const server = new McpServer({
-		name: "Fakturoid MCP",
-		version: packageJSON.version,
-	});
+	const server = new McpServer(
+		{
+			name: "Fakturoid MCP",
+			version: packageJSON.version,
+		},
+		{
+			capabilities: {
+				prompts: {},
+				resources: {},
+				tools: {},
+			},
+		},
+	);
 
 	registerFakturoidTools(server, fakturoidClient);
 	registerFakturoidResources(server.server, fakturoidClient);
