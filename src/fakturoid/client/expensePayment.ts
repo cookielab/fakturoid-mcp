@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateExpensePayment, ExpensePayment } from "../model/expensePayment.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request } from "./request.ts";
 
 /**
@@ -7,7 +7,7 @@ import { request } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/expense-payments#create-payment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param expenseId
  * @param paymentData
@@ -15,17 +15,12 @@ import { request } from "./request.ts";
  * @returns Created expense payment or Error.
  */
 const createExpensePayment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	expenseId: number,
 	paymentData: CreateExpensePayment,
-): ReturnType<typeof request<ExpensePayment, CreateExpensePayment>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/expenses/${expenseId}/payments.json`,
-		"POST",
-		paymentData,
-	);
+): ReturnType<typeof request<ExpensePayment>> => {
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${expenseId}/payments.json`, "POST", paymentData);
 };
 
 /**
@@ -33,7 +28,7 @@ const createExpensePayment = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expense-payments#delete-expense-payment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param expenseId
  * @param paymentId
@@ -41,16 +36,12 @@ const createExpensePayment = async (
  * @returns Success or Error.
  */
 const deleteExpensePayment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	expenseId: number,
 	paymentId: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/expenses/${expenseId}/payments/${paymentId}.json`,
-		"DELETE",
-	);
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${expenseId}/payments/${paymentId}.json`, "DELETE");
 };
 
 export { createExpensePayment, deleteExpensePayment };

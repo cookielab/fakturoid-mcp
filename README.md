@@ -54,7 +54,7 @@ Professional templates for common accounting workflows:
 
 ### Prerequisites
 
-- Node.js 24.2.0 or higher
+- Node.js 24.2.0 (see `.node-version`)
 - pnpm package manager
 - Fakturoid API credentials
 
@@ -82,10 +82,12 @@ Professional templates for common accounting workflows:
    Edit `.env` and add your Fakturoid API credentials:
 
    ```
-   FAKTUROID_CLIENT_ID=your_client_id
-   FAKTUROID_CLIENT_SECRET=your_client_secret
-   FAKTUROID_REDIRECT_URI=your_redirect_uri
-   FAKTUROID_USER_AGENT=your_app_name/1.0 (your_email@example.com)
+   API_URL=https://app.fakturoid.cz/api/v3
+   APP_NAME=FakturoidMCP
+   CLIENT_ID=your_client_id
+   CLIENT_SECRET=your_client_secret
+   CONTACT_EMAIL=your_email@example.com
+   PORT=5173  # Optional, defaults to 5173
    ```
 
 4. Build the project:
@@ -123,18 +125,104 @@ Test the server using the MCP Inspector UI:
 pnpm ui
 ```
 
+The server will be available at `http://localhost:5173/sse`
+
 ## Architecture
+
+The server uses a flexible authentication strategy pattern that allows for different authentication methods:
 
 ```
 MCP Server
-├── Transport Layer (stdio/SSE)
+├── Transport Layer (SSE)
 ├── Protocol Handler (JSON-RPC 2.0)
+├── Authentication Strategy
+│   ├── Abstract Strategy (src/auth/strategy.ts)
+│   └── Local Strategy (src/auth/localStrategy.ts)
 ├── Feature Handlers
 │   ├── Tools (src/fakturoid/tools/)
 │   ├── Resources (src/fakturoid/resources.ts)
 │   └── Prompts (src/fakturoid/prompts.ts)
 ├── Fakturoid Client (src/fakturoid/client.ts)
-└── OAuth Authentication
+└── OAuth 2.0 Authentication
+```
+
+### Key Architecture Features
+
+- **Authentication Strategy Pattern**: Extensible authentication system supporting multiple auth methods
+- \*\*Automatic Account Detection\*\*: No need to manually specify account slug - automatically determined from the authenticated user
+- **Simplified Tool Interface**: All tools now work without requiring explicit account slug parameters
+- **SSE-Only Transport**: Server runs exclusively in Server-Sent Events mode for improved reliability
+
+## Implementing Custom Authentication Strategies
+
+The server uses an extensible authentication strategy pattern that allows you to implement custom authentication methods. All strategies must extend the abstract `AuthenticationStrategy` class.
+
+### Required Methods
+
+```typescript
+abstract class AuthenticationStrategy<Configuration extends object = object> {
+  abstract getContactEmail(): Promise<string> | string;
+  abstract getHeaders(
+    headers: Record<string, string>,
+  ): Promise<Record<string, string>>;
+  abstract getAccessToken(): Promise<string>;
+  abstract refreshToken(): Promise<string>;
+}
+```
+
+### Example: LocalStrategy
+
+The included `LocalStrategy` (see `src/auth/localStrategy.ts`) demonstrates a complete implementation using OAuth 2.0 client credentials:
+
+```typescript
+class LocalStrategy extends AuthenticationStrategy<Configuration> {
+  async getAccessToken() {
+    // Check if cached token is still valid
+    if (this.accessToken && this.tokenExpiry && this.tokenExpiry > new Date()) {
+      return this.accessToken;
+    }
+    // Otherwise refresh the token
+    return await this.refreshToken();
+  }
+
+  async refreshToken(): Promise<string> {
+    // Implement OAuth 2.0 client credentials flow
+    const response = await fetch(`${this.configuration.baseURL}/oauth/token`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ grant_type: "client_credentials" }),
+    });
+    // Parse response and cache token with expiry
+    // ...
+  }
+
+  async getHeaders(headers: Record<string, string>) {
+    const token = await this.getAccessToken();
+    return {
+      ...headers,
+      Authorization: `Bearer ${token}`,
+    };
+  }
+}
+```
+
+### Creating Your Own Strategy
+
+To implement a custom authentication strategy:
+
+1. Extend the `AuthenticationStrategy` class
+2. Define your configuration interface
+3. Implement all required methods
+4. Use your strategy when creating the server:
+
+```typescript
+import { MyCustomStrategy } from "./auth/myCustomStrategy.ts";
+
+const strategy = new MyCustomStrategy(myConfig);
+const server = await createServer(strategy);
 ```
 
 ## Code Quality

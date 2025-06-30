@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateGenerator, Generator, UpdateGenerator } from "../model/generator.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,18 +7,15 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/generators#generators-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  *
  * @returns List of all generators.
  */
-const getGenerators = async (
-	configuration: FakturoidClientConfig,
-	accountSlug: string,
-): Promise<Generator[] | Error> => {
+const getGenerators = async (strategy: AuthenticationStrategy, accountSlug: string): Promise<Generator[] | Error> => {
 	const path = `/accounts/${accountSlug}/generators.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -26,18 +23,18 @@ const getGenerators = async (
  *
  * @see https://www.fakturoid.cz/api/v3/generators#generator-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Generator or Error.
  */
 const getGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<Generator>> => {
-	return await request(configuration, `/accounts/${accountSlug}/generators/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/generators/${id}.json`, "GET");
 };
 
 /**
@@ -45,18 +42,18 @@ const getGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/generators#create-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param generatorData
  *
  * @returns Created generator or Error.
  */
 const createGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	generatorData: CreateGenerator,
 ): ReturnType<typeof request<Generator, CreateGenerator>> => {
-	return await request(configuration, `/accounts/${accountSlug}/generators.json`, "POST", generatorData);
+	return await request(strategy, `/accounts/${accountSlug}/generators.json`, "POST", generatorData);
 };
 
 /**
@@ -64,7 +61,7 @@ const createGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/generators#update-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param generatorData
@@ -72,12 +69,12 @@ const createGenerator = async (
  * @returns Updated generator or Error.
  */
 const updateGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	generatorData: UpdateGenerator,
 ): ReturnType<typeof request<Generator, UpdateGenerator>> => {
-	return await request(configuration, `/accounts/${accountSlug}/generators/${id}.json`, "PATCH", generatorData);
+	return await request(strategy, `/accounts/${accountSlug}/generators/${id}.json`, "PATCH", generatorData);
 };
 
 /**
@@ -85,18 +82,18 @@ const updateGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/generators#delete-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
-): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/generators/${id}.json`, "DELETE");
+): ReturnType<typeof request<undefined, UpdateGenerator>> => {
+	return await request(strategy, `/accounts/${accountSlug}/generators/${id}.json`, "DELETE");
 };
 
 export { getGenerators, getGenerator, createGenerator, updateGenerator, deleteGenerator };

@@ -1,4 +1,4 @@
-import type { FakturoidClientConfig, OAuthConfig } from "./client/auth.ts";
+import type { AuthenticationStrategy } from "../auth/strategy.ts";
 import type { CreateExpense, GetExpenseFilters, UpdateExpense } from "./model/expense.ts";
 import type { CreateExpensePayment } from "./model/expensePayment.ts";
 import type { CreateGenerator, UpdateGenerator } from "./model/generator.ts";
@@ -82,114 +82,100 @@ import { getTodos, toggleTodoCompletion } from "./client/todo.ts";
 import { getCurrentUser, getUsersForAccount } from "./client/user.ts";
 import { createWebhook, deleteWebhook, getWebhook, getWebhooks, updateWebhook } from "./client/webhook.ts";
 
-export class FakturoidClient {
-	private readonly config: FakturoidClientConfig;
+export class FakturoidClient<Configuration extends object, Strategy extends AuthenticationStrategy<Configuration>> {
+	private readonly strategy: Strategy;
+	private readonly accountSlug: string;
 
-	private constructor(config: FakturoidClientConfig) {
-		this.config = config;
+	private constructor(strategy: Strategy, accountSlug: string) {
+		this.strategy = strategy;
+		this.accountSlug = accountSlug;
 	}
 
-	static async create(config: OAuthConfig, apiUrl: string, accountSlug?: string): Promise<FakturoidClient> {
-		if (accountSlug != null) {
-			return new FakturoidClient({ ...config, accountSlug: accountSlug, url: apiUrl });
-		}
-
-		const user = await getCurrentUser({ ...config, url: apiUrl });
+	static async create<
+		StaticConfiguration extends object,
+		StaticStrategy extends AuthenticationStrategy<StaticConfiguration>,
+	>(strategy: StaticStrategy): Promise<FakturoidClient<StaticConfiguration, StaticStrategy>> {
+		const user = await getCurrentUser(strategy);
 		if (user instanceof Error || user.accounts[0] == null) {
 			throw new Error("The user account could not be found.");
 		}
 
-		return new FakturoidClient({
-			...config,
-			accountSlug: user.accounts[0].slug,
-			url: apiUrl,
-		});
+		return new FakturoidClient(strategy, user.accounts[0].slug);
 	}
 
 	// Account
-	getAccountDetail = (accountSlug: string) => getAccountDetail(this.config, accountSlug);
+	getAccountDetail = () => getAccountDetail(this.strategy, this.accountSlug);
 
 	// Bank Account
-	getBankAccounts = (accountSlug: string) => getBankAccounts(this.config, accountSlug);
+	getBankAccounts = () => getBankAccounts(this.strategy, this.accountSlug);
 
 	// Event
-	getEvents = (accountSlug: string) => getEvents(this.config, accountSlug);
+	getEvents = () => getEvents(this.strategy, this.accountSlug);
 
 	// Expense
-	getExpenses = (accountSlug: string, filters?: GetExpenseFilters) => getExpenses(this.config, accountSlug, filters);
-	searchExpenses = (accountSlug: string, query?: string, tags?: string[]) =>
-		searchExpenses(this.config, accountSlug, query, tags);
-	getExpenseDetail = (accountSlug: string, id: number) => getExpenseDetail(this.config, accountSlug, id);
-	downloadExpenseAttachment = (accountSlug: string, expenseId: number, attachmentId: number) =>
-		downloadExpenseAttachment(this.config, accountSlug, expenseId, attachmentId);
-	fireExpenseAction = (accountSlug: string, id: number, event: "lock" | "unlock") =>
-		fireExpenseAction(this.config, accountSlug, id, event);
-	createExpense = (accountSlug: string, expenseData: CreateExpense) =>
-		createExpense(this.config, accountSlug, expenseData);
-	updateExpense = (accountSlug: string, id: number, updateData: UpdateExpense) =>
-		updateExpense(this.config, accountSlug, id, updateData);
-	deleteExpense = (accountSlug: string, id: number) => deleteExpense(this.config, accountSlug, id);
+	getExpenses = (filters?: GetExpenseFilters) => getExpenses(this.strategy, this.accountSlug, filters);
+	searchExpenses = (query?: string, tags?: string[]) => searchExpenses(this.strategy, this.accountSlug, query, tags);
+	getExpenseDetail = (id: number) => getExpenseDetail(this.strategy, this.accountSlug, id);
+	downloadExpenseAttachment = (expenseId: number, attachmentId: number) =>
+		downloadExpenseAttachment(this.strategy, this.accountSlug, expenseId, attachmentId);
+	fireExpenseAction = (id: number, event: "lock" | "unlock") =>
+		fireExpenseAction(this.strategy, this.accountSlug, id, event);
+	createExpense = (expenseData: CreateExpense) => createExpense(this.strategy, this.accountSlug, expenseData);
+	updateExpense = (id: number, updateData: UpdateExpense) =>
+		updateExpense(this.strategy, this.accountSlug, id, updateData);
+	deleteExpense = (id: number) => deleteExpense(this.strategy, this.accountSlug, id);
 
 	// Expense Payment
-	createExpensePayment = (accountSlug: string, expenseId: number, paymentData: CreateExpensePayment) =>
-		createExpensePayment(this.config, accountSlug, expenseId, paymentData);
-	deleteExpensePayment = (accountSlug: string, expenseId: number, paymentId: number) =>
-		deleteExpensePayment(this.config, accountSlug, expenseId, paymentId);
+	createExpensePayment = (expenseId: number, paymentData: CreateExpensePayment) =>
+		createExpensePayment(this.strategy, this.accountSlug, expenseId, paymentData);
+	deleteExpensePayment = (expenseId: number, paymentId: number) =>
+		deleteExpensePayment(this.strategy, this.accountSlug, expenseId, paymentId);
 
 	// Generator
-	getGenerators = (accountSlug: string) => getGenerators(this.config, accountSlug);
-	getGenerator = (accountSlug: string, id: number) => getGenerator(this.config, accountSlug, id);
-	createGenerator = (accountSlug: string, generatorData: CreateGenerator) =>
-		createGenerator(this.config, accountSlug, generatorData);
-	updateGenerator = (accountSlug: string, id: number, generatorData: UpdateGenerator) =>
-		updateGenerator(this.config, accountSlug, id, generatorData);
-	deleteGenerator = (accountSlug: string, id: number) => deleteGenerator(this.config, accountSlug, id);
+	getGenerators = () => getGenerators(this.strategy, this.accountSlug);
+	getGenerator = (id: number) => getGenerator(this.strategy, this.accountSlug, id);
+	createGenerator = (generatorData: CreateGenerator) => createGenerator(this.strategy, this.accountSlug, generatorData);
+	updateGenerator = (id: number, generatorData: UpdateGenerator) =>
+		updateGenerator(this.strategy, this.accountSlug, id, generatorData);
+	deleteGenerator = (id: number) => deleteGenerator(this.strategy, this.accountSlug, id);
 
 	// Inbox File
-	getInboxFiles = (accountSlug: string) => getInboxFiles(this.config, accountSlug);
-	createInboxFile = (accountSlug: string, inboxFileData: CreateInboxFile) =>
-		createInboxFile(this.config, accountSlug, inboxFileData);
-	sendInboxFileToOcr = (accountSlug: string, id: number) => sendInboxFileToOcr(this.config, accountSlug, id);
-	downloadInboxFile = (accountSlug: string, id: number) => downloadInboxFile(this.config, accountSlug, id);
-	deleteInboxFile = (accountSlug: string, id: number) => deleteInboxFile(this.config, accountSlug, id);
+	getInboxFiles = () => getInboxFiles(this.strategy, this.accountSlug);
+	createInboxFile = (inboxFileData: CreateInboxFile) => createInboxFile(this.strategy, this.accountSlug, inboxFileData);
+	sendInboxFileToOcr = (id: number) => sendInboxFileToOcr(this.strategy, this.accountSlug, id);
+	downloadInboxFile = (id: number) => downloadInboxFile(this.strategy, this.accountSlug, id);
+	deleteInboxFile = (id: number) => deleteInboxFile(this.strategy, this.accountSlug, id);
 
 	// Inventory Item
-	getInventoryItems = (accountSlug: string) => getInventoryItems(this.config, accountSlug);
-	getInventoryItem = (accountSlug: string, id: number) => getInventoryItem(this.config, accountSlug, id);
-	createInventoryItem = (accountSlug: string, inventoryItemData: CreateInventoryItem) =>
-		createInventoryItem(this.config, accountSlug, inventoryItemData);
-	updateInventoryItem = (accountSlug: string, id: number, inventoryItemData: UpdateInventoryItem) =>
-		updateInventoryItem(this.config, accountSlug, id, inventoryItemData);
-	deleteInventoryItem = (accountSlug: string, id: number) => deleteInventoryItem(this.config, accountSlug, id);
-	archiveInventoryItem = (accountSlug: string, id: number) => archiveInventoryItem(this.config, accountSlug, id);
-	unarchiveInventoryItem = (accountSlug: string, id: number) => unarchiveInventoryItem(this.config, accountSlug, id);
+	getInventoryItems = () => getInventoryItems(this.strategy, this.accountSlug);
+	getInventoryItem = (id: number) => getInventoryItem(this.strategy, this.accountSlug, id);
+	createInventoryItem = (inventoryItemData: CreateInventoryItem) =>
+		createInventoryItem(this.strategy, this.accountSlug, inventoryItemData);
+	updateInventoryItem = (id: number, inventoryItemData: UpdateInventoryItem) =>
+		updateInventoryItem(this.strategy, this.accountSlug, id, inventoryItemData);
+	deleteInventoryItem = (id: number) => deleteInventoryItem(this.strategy, this.accountSlug, id);
+	archiveInventoryItem = (id: number) => archiveInventoryItem(this.strategy, this.accountSlug, id);
+	unarchiveInventoryItem = (id: number) => unarchiveInventoryItem(this.strategy, this.accountSlug, id);
 
 	// Inventory Move
-	getInventoryMoves = (accountSlug: string, inventoryItemId: number) =>
-		getInventoryMoves(this.config, accountSlug, inventoryItemId);
-	getInventoryMove = (accountSlug: string, inventoryItemId: number, id: number) =>
-		getInventoryMove(this.config, accountSlug, inventoryItemId, id);
-	createInventoryMove = (accountSlug: string, inventoryItemId: number, inventoryMoveData: CreateInventoryMove) =>
-		createInventoryMove(this.config, accountSlug, inventoryItemId, inventoryMoveData);
-	updateInventoryMove = (
-		accountSlug: string,
-		inventoryItemId: number,
-		id: number,
-		inventoryMoveData: UpdateInventoryMove,
-	) => updateInventoryMove(this.config, accountSlug, inventoryItemId, id, inventoryMoveData);
-	deleteInventoryMove = (accountSlug: string, inventoryItemId: number, id: number) =>
-		deleteInventoryMove(this.config, accountSlug, inventoryItemId, id);
+	getInventoryMoves = (inventoryItemId: number) => getInventoryMoves(this.strategy, this.accountSlug, inventoryItemId);
+	getInventoryMove = (inventoryItemId: number, id: number) =>
+		getInventoryMove(this.strategy, this.accountSlug, inventoryItemId, id);
+	createInventoryMove = (inventoryItemId: number, inventoryMoveData: CreateInventoryMove) =>
+		createInventoryMove(this.strategy, this.accountSlug, inventoryItemId, inventoryMoveData);
+	updateInventoryMove = (inventoryItemId: number, id: number, inventoryMoveData: UpdateInventoryMove) =>
+		updateInventoryMove(this.strategy, this.accountSlug, inventoryItemId, id, inventoryMoveData);
+	deleteInventoryMove = (inventoryItemId: number, id: number) =>
+		deleteInventoryMove(this.strategy, this.accountSlug, inventoryItemId, id);
 
 	// Invoice
-	getInvoices = (accountSlug: string, filters?: GetInvoicesFilters) => getInvoices(this.config, accountSlug, filters);
-	searchInvoices = (accountSlug: string, query?: string, tags?: string[]) =>
-		searchInvoices(this.config, accountSlug, query, tags);
-	getInvoiceDetail = (accountSlug: string, id: number) => getInvoiceDetail(this.config, accountSlug, id);
-	downloadInvoicePDF = (accountSlug: string, id: number) => downloadInvoicePDF(this.config, accountSlug, id);
-	downloadInvoiceAttachment = (accountSlug: string, invoiceId: number, attachmentId: number) =>
-		downloadInvoiceAttachment(this.config, accountSlug, invoiceId, attachmentId);
+	getInvoices = (filters?: GetInvoicesFilters) => getInvoices(this.strategy, this.accountSlug, filters);
+	searchInvoices = (query?: string, tags?: string[]) => searchInvoices(this.strategy, this.accountSlug, query, tags);
+	getInvoiceDetail = (id: number) => getInvoiceDetail(this.strategy, this.accountSlug, id);
+	downloadInvoicePDF = (id: number) => downloadInvoicePDF(this.strategy, this.accountSlug, id);
+	downloadInvoiceAttachment = (invoiceId: number, attachmentId: number) =>
+		downloadInvoiceAttachment(this.strategy, this.accountSlug, invoiceId, attachmentId);
 	fireInvoiceAction = (
-		accountSlug: string,
 		id: number,
 		event:
 			| "mark_as_sent"
@@ -199,62 +185,58 @@ export class FakturoidClient {
 			| "unlock"
 			| "mark_as_uncollectible"
 			| "undo_uncollectible",
-	) => fireInvoiceAction(this.config, accountSlug, id, event);
-	createInvoice = (accountSlug: string, invoiceData: CreateInvoice) =>
-		createInvoice(this.config, accountSlug, invoiceData);
-	updateInvoice = (accountSlug: string, id: number, updateData: UpdateInvoice) =>
-		updateInvoice(this.config, accountSlug, id, updateData);
-	deleteInvoice = (accountSlug: string, id: number) => deleteInvoice(this.config, accountSlug, id);
+	) => fireInvoiceAction(this.strategy, this.accountSlug, id, event);
+	createInvoice = (invoiceData: CreateInvoice) => createInvoice(this.strategy, this.accountSlug, invoiceData);
+	updateInvoice = (id: number, updateData: UpdateInvoice) =>
+		updateInvoice(this.strategy, this.accountSlug, id, updateData);
+	deleteInvoice = (id: number) => deleteInvoice(this.strategy, this.accountSlug, id);
 
 	// Invoice Message
-	sendInvoiceMessage = (accountSlug: string, invoiceId: number, messageData: InvoiceMessage) =>
-		sendInvoiceMessage(this.config, accountSlug, invoiceId, messageData);
+	sendInvoiceMessage = (invoiceId: number, messageData: InvoiceMessage) =>
+		sendInvoiceMessage(this.strategy, this.accountSlug, invoiceId, messageData);
 
 	// Invoice Payment
-	createInvoicePayment = (accountSlug: string, invoiceId: number, paymentData: CreateInvoicePayment) =>
-		createInvoicePayment(this.config, accountSlug, invoiceId, paymentData);
-	createTaxDocument = (accountSlug: string, invoiceId: number, paymentId: number) =>
-		createTaxDocument(this.config, accountSlug, invoiceId, paymentId);
-	deleteInvoicePayment = (accountSlug: string, invoiceId: number, paymentId: number) =>
-		deleteInvoicePayment(this.config, accountSlug, invoiceId, paymentId);
+	createInvoicePayment = (invoiceId: number, paymentData: CreateInvoicePayment) =>
+		createInvoicePayment(this.strategy, this.accountSlug, invoiceId, paymentData);
+	createTaxDocument = (invoiceId: number, paymentId: number) =>
+		createTaxDocument(this.strategy, this.accountSlug, invoiceId, paymentId);
+	deleteInvoicePayment = (invoiceId: number, paymentId: number) =>
+		deleteInvoicePayment(this.strategy, this.accountSlug, invoiceId, paymentId);
 
 	// Number Format
-	getNumberFormats = (accountSlug: string) => getNumberFormats(this.config, accountSlug);
+	getNumberFormats = () => getNumberFormats(this.strategy, this.accountSlug);
 
 	// Recurring Generator
-	getRecurringGenerators = (accountSlug: string) => getRecurringGenerators(this.config, accountSlug);
-	getRecurringGenerator = (accountSlug: string, id: number) => getRecurringGenerator(this.config, accountSlug, id);
-	createRecurringGenerator = (accountSlug: string, recurringGeneratorData: CreateRecurringGenerator) =>
-		createRecurringGenerator(this.config, accountSlug, recurringGeneratorData);
-	updateRecurringGenerator = (accountSlug: string, id: number, recurringGeneratorData: UpdateRecurringGenerator) =>
-		updateRecurringGenerator(this.config, accountSlug, id, recurringGeneratorData);
-	deleteRecurringGenerator = (accountSlug: string, id: number) =>
-		deleteRecurringGenerator(this.config, accountSlug, id);
+	getRecurringGenerators = () => getRecurringGenerators(this.strategy, this.accountSlug);
+	getRecurringGenerator = (id: number) => getRecurringGenerator(this.strategy, this.accountSlug, id);
+	createRecurringGenerator = (recurringGeneratorData: CreateRecurringGenerator) =>
+		createRecurringGenerator(this.strategy, this.accountSlug, recurringGeneratorData);
+	updateRecurringGenerator = (id: number, recurringGeneratorData: UpdateRecurringGenerator) =>
+		updateRecurringGenerator(this.strategy, this.accountSlug, id, recurringGeneratorData);
+	deleteRecurringGenerator = (id: number) => deleteRecurringGenerator(this.strategy, this.accountSlug, id);
 
 	// Subject
-	getSubjects = (accountSlug: string, filters?: GetSubjectsFilters) => getSubjects(this.config, accountSlug, filters);
-	searchSubjects = (accountSlug: string, query?: string) => searchSubjects(this.config, accountSlug, query);
-	getSubjectDetail = (accountSlug: string, id: number) => getSubjectDetail(this.config, accountSlug, id);
-	createSubject = (accountSlug: string, subjectData: SubjectCreate) =>
-		createSubject(this.config, accountSlug, subjectData);
-	updateSubject = (accountSlug: string, id: number, updateData: SubjectUpdate) =>
-		updateSubject(this.config, accountSlug, id, updateData);
-	deleteSubject = (accountSlug: string, id: number) => deleteSubject(this.config, accountSlug, id);
+	getSubjects = (filters?: GetSubjectsFilters) => getSubjects(this.strategy, this.accountSlug, filters);
+	searchSubjects = (query?: string) => searchSubjects(this.strategy, this.accountSlug, query);
+	getSubjectDetail = (id: number) => getSubjectDetail(this.strategy, this.accountSlug, id);
+	createSubject = (subjectData: SubjectCreate) => createSubject(this.strategy, this.accountSlug, subjectData);
+	updateSubject = (id: number, updateData: SubjectUpdate) =>
+		updateSubject(this.strategy, this.accountSlug, id, updateData);
+	deleteSubject = (id: number) => deleteSubject(this.strategy, this.accountSlug, id);
 
 	// Todo
-	getTodos = (accountSlug: string) => getTodos(this.config, accountSlug);
-	toggleTodoCompletion = (accountSlug: string, id: number) => toggleTodoCompletion(this.config, accountSlug, id);
+	getTodos = () => getTodos(this.strategy, this.accountSlug);
+	toggleTodoCompletion = (id: number) => toggleTodoCompletion(this.strategy, this.accountSlug, id);
 
 	// User
-	getCurrentUser = () => getCurrentUser(this.config);
-	getUsersForAccount = (accountSlug: string) => getUsersForAccount(this.config, accountSlug);
+	getCurrentUser = () => getCurrentUser(this.strategy);
+	getUsersForAccount = () => getUsersForAccount(this.strategy, this.accountSlug);
 
 	// Webhook
-	getWebhooks = (accountSlug: string) => getWebhooks(this.config, accountSlug);
-	getWebhook = (accountSlug: string, id: number) => getWebhook(this.config, accountSlug, id);
-	createWebhook = (accountSlug: string, webhookData: CreateWebhook) =>
-		createWebhook(this.config, accountSlug, webhookData);
-	updateWebhook = (accountSlug: string, id: number, webhookData: UpdateWebhook) =>
-		updateWebhook(this.config, accountSlug, id, webhookData);
-	deleteWebhook = (accountSlug: string, id: number) => deleteWebhook(this.config, accountSlug, id);
+	getWebhooks = () => getWebhooks(this.strategy, this.accountSlug);
+	getWebhook = (id: number) => getWebhook(this.strategy, this.accountSlug, id);
+	createWebhook = (webhookData: CreateWebhook) => createWebhook(this.strategy, this.accountSlug, webhookData);
+	updateWebhook = (id: number, webhookData: UpdateWebhook) =>
+		updateWebhook(this.strategy, this.accountSlug, id, webhookData);
+	deleteWebhook = (id: number) => deleteWebhook(this.strategy, this.accountSlug, id);
 }

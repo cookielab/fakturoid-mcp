@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { Event } from "../model/event.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { requestAllPages } from "./request.ts";
 
 /**
@@ -12,10 +12,8 @@ import { requestAllPages } from "./request.ts";
  *
  * @returns List of all events.
  */
-const getEvents = async (configuration: FakturoidClientConfig, accountSlug: string): Promise<Event[] | Error> => {
-	const path = `/accounts/${accountSlug}/events.json`;
-
-	return await requestAllPages(configuration, path);
+const getEvents = async (strategy: AuthenticationStrategy, accountSlug: string): Promise<Event[] | Error> => {
+	return await requestAllPages(strategy, `/accounts/${accountSlug}/events.json`);
 };
 
 export { getEvents };

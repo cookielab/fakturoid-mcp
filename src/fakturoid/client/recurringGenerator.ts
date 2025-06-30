@@ -1,9 +1,9 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type {
 	CreateRecurringGenerator,
 	RecurringGenerator,
 	UpdateRecurringGenerator,
 } from "../model/recurringGenerator.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -11,18 +11,18 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/recurring-generators#recurring-generators-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  *
  * @returns List of all recurring generators.
  */
 const getRecurringGenerators = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 ): Promise<RecurringGenerator[] | Error> => {
 	const path = `/accounts/${accountSlug}/recurring_generators.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -30,18 +30,18 @@ const getRecurringGenerators = async (
  *
  * @see https://www.fakturoid.cz/api/v3/recurring-generators#recurring-generator-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Recurring generator or Error.
  */
 const getRecurringGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<RecurringGenerator>> => {
-	return await request(configuration, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "GET");
 };
 
 /**
@@ -49,23 +49,18 @@ const getRecurringGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/recurring-generators#create-recurring-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param recurringGeneratorData
  *
  * @returns Created recurring generator or Error.
  */
 const createRecurringGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	recurringGeneratorData: CreateRecurringGenerator,
 ): ReturnType<typeof request<RecurringGenerator, CreateRecurringGenerator>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/recurring_generators.json`,
-		"POST",
-		recurringGeneratorData,
-	);
+	return await request(strategy, `/accounts/${accountSlug}/recurring_generators.json`, "POST", recurringGeneratorData);
 };
 
 /**
@@ -73,7 +68,7 @@ const createRecurringGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/recurring-generators#update-recurring-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param recurringGeneratorData
@@ -81,13 +76,13 @@ const createRecurringGenerator = async (
  * @returns Updated recurring generator or Error.
  */
 const updateRecurringGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	recurringGeneratorData: UpdateRecurringGenerator,
 ): ReturnType<typeof request<RecurringGenerator, UpdateRecurringGenerator>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/recurring_generators/${id}.json`,
 		"PATCH",
 		recurringGeneratorData,
@@ -99,18 +94,18 @@ const updateRecurringGenerator = async (
  *
  * @see https://www.fakturoid.cz/api/v3/recurring-generators#delete-recurring-generator
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteRecurringGenerator = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "DELETE", {});
 };
 
 export {

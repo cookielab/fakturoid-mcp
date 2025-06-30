@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { InvoiceMessage } from "../model/invoiceMessage.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request } from "./request.ts";
 
 /**
@@ -19,7 +19,7 @@ import { request } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/invoice-messages#create-message
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceId
  * @param messageData
@@ -27,17 +27,12 @@ import { request } from "./request.ts";
  * @returns Success or Error.
  */
 const sendInvoiceMessage = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceId: number,
 	messageData: InvoiceMessage,
 ): ReturnType<typeof request<undefined, InvoiceMessage>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/invoices/${invoiceId}/message.json`,
-		"POST",
-		messageData,
-	);
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${invoiceId}/message.json`, "POST", messageData);
 };
 
 export { sendInvoiceMessage };

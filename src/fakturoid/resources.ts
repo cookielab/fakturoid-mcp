@@ -1,4 +1,5 @@
 import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import type { AuthenticationStrategy } from "../auth/strategy.ts";
 import type { FakturoidClient } from "./client.ts";
 import type { FakturoidResource } from "./resource/common.ts";
 import {
@@ -30,7 +31,9 @@ const RESOURCES: FakturoidResource[] = [
 	subjectsSuppliersResource,
 ] as const;
 
-const getAccountSlug = async (client: FakturoidClient): Promise<string> => {
+const getAccountSlug = async <Configuration extends object, Strategy extends AuthenticationStrategy<Configuration>>(
+	client: FakturoidClient<Configuration, Strategy>,
+): Promise<string> => {
 	const account = await client.getCurrentUser();
 	if (account instanceof Error) {
 		throw account;
@@ -40,7 +43,13 @@ const getAccountSlug = async (client: FakturoidClient): Promise<string> => {
 	return account.accounts[0]!.slug;
 };
 
-const registerFakturoidResources = (server: Server, client: FakturoidClient) => {
+const registerFakturoidResources = <
+	Configuration extends object,
+	Strategy extends AuthenticationStrategy<Configuration>,
+>(
+	server: Server,
+	client: FakturoidClient<Configuration, Strategy>,
+) => {
 	let accountSlug: string;
 
 	// List { resources: resources available resources

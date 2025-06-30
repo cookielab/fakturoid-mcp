@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateInventoryItem, InventoryItem, UpdateInventoryItem } from "../model/inventoryItem.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,18 +7,18 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#inventory-items-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  *
  * @returns List of all inventory items.
  */
 const getInventoryItems = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 ): Promise<InventoryItem[] | Error> => {
 	const path = `/accounts/${accountSlug}/inventory_items.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -26,18 +26,18 @@ const getInventoryItems = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#inventory-item-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Inventory item or Error.
  */
 const getInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<InventoryItem>> => {
-	return await request(configuration, `/accounts/${accountSlug}/inventory_items/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items/${id}.json`, "GET");
 };
 
 /**
@@ -45,18 +45,18 @@ const getInventoryItem = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#create-inventory-item
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemData
  *
  * @returns Created inventory item or Error.
  */
 const createInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemData: CreateInventoryItem,
 ): ReturnType<typeof request<InventoryItem, CreateInventoryItem>> => {
-	return await request(configuration, `/accounts/${accountSlug}/inventory_items.json`, "POST", inventoryItemData);
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items.json`, "POST", inventoryItemData);
 };
 
 /**
@@ -64,7 +64,7 @@ const createInventoryItem = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#update-inventory-item
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param inventoryItemData
@@ -72,17 +72,12 @@ const createInventoryItem = async (
  * @returns Updated inventory item or Error.
  */
 const updateInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	inventoryItemData: UpdateInventoryItem,
 ): ReturnType<typeof request<InventoryItem, UpdateInventoryItem>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/inventory_items/${id}.json`,
-		"PATCH",
-		inventoryItemData,
-	);
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items/${id}.json`, "PATCH", inventoryItemData);
 };
 
 /**
@@ -90,18 +85,18 @@ const updateInventoryItem = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#delete-inventory-item
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/inventory_items/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items/${id}.json`, "DELETE");
 };
 
 /**
@@ -109,18 +104,18 @@ const deleteInventoryItem = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#archive-inventory-item
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Archived inventory item or Error.
  */
 const archiveInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<InventoryItem>> => {
-	return await request(configuration, `/accounts/${accountSlug}/inventory_items/${id}/archive.json`, "POST");
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items/${id}/archive.json`, "POST");
 };
 
 /**
@@ -128,18 +123,18 @@ const archiveInventoryItem = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-items#unarchive-inventory-item
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Unarchived inventory item or Error.
  */
 const unarchiveInventoryItem = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<InventoryItem>> => {
-	return await request(configuration, `/accounts/${accountSlug}/inventory_items/${id}/unarchive.json`, "POST");
+	return await request(strategy, `/accounts/${accountSlug}/inventory_items/${id}/unarchive.json`, "POST");
 };
 
 export {

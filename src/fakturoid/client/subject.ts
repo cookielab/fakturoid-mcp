@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { GetSubjectsFilters, Subject, SubjectCreate, SubjectUpdate } from "../model/subject.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,14 +7,14 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#subjects-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param filters - Optional filters for the subject list
  *
  * @returns List of all subjects.
  */
 const getSubjects = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	filters?: GetSubjectsFilters,
 ): Promise<Subject[] | Error> => {
@@ -28,7 +28,7 @@ const getSubjects = async (
 
 	const path = `/accounts/${accountSlug}/subjects.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -36,14 +36,14 @@ const getSubjects = async (
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#subjects-search
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param query - Search query
  *
  * @returns List of matching subjects.
  */
 const searchSubjects = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	query?: string,
 ): Promise<Subject[] | Error> => {
@@ -53,7 +53,7 @@ const searchSubjects = async (
 
 	const path = `/accounts/${accountSlug}/subjects/search.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -61,18 +61,18 @@ const searchSubjects = async (
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#subject-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Subject detail.
  */
 const getSubjectDetail = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<Subject>> => {
-	return await request(configuration, `/accounts/${accountSlug}/subjects/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/subjects/${id}.json`, "GET");
 };
 
 /**
@@ -80,18 +80,18 @@ const getSubjectDetail = async (
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#create-subject
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param subjectData
  *
  * @returns Created subject or Error.
  */
 const createSubject = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	subjectData: SubjectCreate,
 ): ReturnType<typeof request<Subject, SubjectCreate>> => {
-	return await request(configuration, `/accounts/${accountSlug}/subjects.json`, "POST", subjectData);
+	return await request(strategy, `/accounts/${accountSlug}/subjects.json`, "POST", subjectData);
 };
 
 /**
@@ -99,7 +99,7 @@ const createSubject = async (
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#update-subject
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param updateData
@@ -107,12 +107,12 @@ const createSubject = async (
  * @returns Updated subject or Error.
  */
 const updateSubject = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	updateData: SubjectUpdate,
 ): ReturnType<typeof request<Subject, SubjectUpdate>> => {
-	return await request(configuration, `/accounts/${accountSlug}/subjects/${id}.json`, "PATCH", updateData);
+	return await request(strategy, `/accounts/${accountSlug}/subjects/${id}.json`, "PATCH", updateData);
 };
 
 /**
@@ -120,18 +120,18 @@ const updateSubject = async (
  *
  * @see https://www.fakturoid.cz/api/v3/subjects#delete-subject
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteSubject = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/subjects/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/subjects/${id}.json`, "DELETE");
 };
 
 export { getSubjects, searchSubjects, getSubjectDetail, createSubject, updateSubject, deleteSubject };

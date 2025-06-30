@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { Todo } from "../model/todo.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,15 +7,15 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/todos#todos-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  *
  * @returns List of all todos.
  */
-const getTodos = async (configuration: FakturoidClientConfig, accountSlug: string): Promise<Todo[] | Error> => {
+const getTodos = async (strategy: AuthenticationStrategy, accountSlug: string): Promise<Todo[] | Error> => {
 	const path = `/accounts/${accountSlug}/todos.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -23,18 +23,18 @@ const getTodos = async (configuration: FakturoidClientConfig, accountSlug: strin
  *
  * @see https://www.fakturoid.cz/api/v3/todos#toggle-todo-completion
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Updated todo or Error.
  */
 const toggleTodoCompletion = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<Todo>> => {
-	return await request(configuration, `/accounts/${accountSlug}/todos/${id}/toggle_completion.json`, "POST");
+	return await request(strategy, `/accounts/${accountSlug}/todos/${id}/toggle_completion.json`, "POST");
 };
 
 export { getTodos, toggleTodoCompletion };

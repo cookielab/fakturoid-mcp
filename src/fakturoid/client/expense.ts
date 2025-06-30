@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateExpense, Expense, GetExpenseFilters, UpdateExpense } from "../model/expense.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,14 +7,14 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#expenses-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param filters - Optional filters for the expense list
  *
  * @returns List of all expenses.
  */
 const getExpenses = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	filters?: GetExpenseFilters,
 ): Promise<Expense[] | Error> => {
@@ -32,7 +32,7 @@ const getExpenses = async (
 
 	const path = `/accounts/${accountSlug}/expenses.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -40,7 +40,7 @@ const getExpenses = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#fulltext-search
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param query - Search query
  * @param tags - Tags to search for
@@ -48,7 +48,7 @@ const getExpenses = async (
  * @returns List of matching expenses.
  */
 const searchExpenses = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	query?: string,
 	tags?: string[],
@@ -62,7 +62,7 @@ const searchExpenses = async (
 
 	const path = `/accounts/${accountSlug}/expenses/search.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -70,18 +70,18 @@ const searchExpenses = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#expense-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Expense detail.
  */
 const getExpenseDetail = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<Expense>> => {
-	return await request(configuration, `/accounts/${accountSlug}/expenses/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}.json`, "GET");
 };
 
 /**
@@ -89,7 +89,7 @@ const getExpenseDetail = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#download-attachment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param expenseId
  * @param attachmentId
@@ -97,13 +97,13 @@ const getExpenseDetail = async (
  * @returns Attachment binary data or Error.
  */
 const downloadExpenseAttachment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	expenseId: number,
 	attachmentId: number,
 ): ReturnType<typeof request<Blob>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/expenses/${expenseId}/attachments/${attachmentId}/download`,
 		"GET",
 	);
@@ -114,7 +114,7 @@ const downloadExpenseAttachment = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#expense-actions
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param event - The action to fire ("lock" or "unlock")
@@ -122,18 +122,14 @@ const downloadExpenseAttachment = async (
  * @returns Success or Error.
  */
 const fireExpenseAction = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	event: "lock" | "unlock",
 ): ReturnType<typeof request<undefined>> => {
 	const queryParams = new URLSearchParams([["event", event]]);
 
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/expenses/${id}/fire.json?${queryParams.toString()}`,
-		"POST",
-	);
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}/fire.json?${queryParams.toString()}`, "POST");
 };
 
 /**
@@ -141,18 +137,18 @@ const fireExpenseAction = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#create-expense
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param expenseData
  *
  * @returns Created expense or Error.
  */
 const createExpense = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	expenseData: CreateExpense,
-): ReturnType<typeof request<Expense, CreateExpense>> => {
-	return await request(configuration, `/accounts/${accountSlug}/expenses.json`, "POST", expenseData);
+): ReturnType<typeof request<Expense>> => {
+	return await request(strategy, `/accounts/${accountSlug}/expenses.json`, "POST", expenseData);
 };
 
 /**
@@ -160,7 +156,7 @@ const createExpense = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#update-expense
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param updateData
@@ -168,12 +164,12 @@ const createExpense = async (
  * @returns Updated expense or Error.
  */
 const updateExpense = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	updateData: UpdateExpense,
-): ReturnType<typeof request<Expense, UpdateExpense>> => {
-	return await request(configuration, `/accounts/${accountSlug}/expenses/${id}.json`, "PATCH", updateData);
+): ReturnType<typeof request<Expense>> => {
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}.json`, "PATCH", updateData);
 };
 
 /**
@@ -181,18 +177,18 @@ const updateExpense = async (
  *
  * @see https://www.fakturoid.cz/api/v3/expenses#delete-expense
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteExpense = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/expenses/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}.json`, "DELETE");
 };
 
 export {

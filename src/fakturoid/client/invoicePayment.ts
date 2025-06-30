@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateInvoicePayment, InvoicePayment } from "../model/invoicePayment.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request } from "./request.ts";
 
 /**
@@ -7,7 +7,7 @@ import { request } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/invoice-payments#create-payment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceId
  * @param paymentData
@@ -15,17 +15,12 @@ import { request } from "./request.ts";
  * @returns Created payment or Error.
  */
 const createInvoicePayment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceId: number,
 	paymentData: CreateInvoicePayment,
 ): ReturnType<typeof request<InvoicePayment, CreateInvoicePayment>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/invoices/${invoiceId}/payments.json`,
-		"POST",
-		paymentData,
-	);
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${invoiceId}/payments.json`, "POST", paymentData);
 };
 
 /**
@@ -33,7 +28,7 @@ const createInvoicePayment = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoice-payments#create-tax-document
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceId
  * @param paymentId
@@ -41,13 +36,13 @@ const createInvoicePayment = async (
  * @returns Updated payment with tax document ID or Error.
  */
 const createTaxDocument = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceId: number,
 	paymentId: number,
 ): ReturnType<typeof request<InvoicePayment>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/invoices/${invoiceId}/payments/${paymentId}/create_tax_document.json`,
 		"POST",
 	);
@@ -58,7 +53,7 @@ const createTaxDocument = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoice-payments#delete-invoice-payment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceId
  * @param paymentId
@@ -66,16 +61,12 @@ const createTaxDocument = async (
  * @returns Success or Error.
  */
 const deleteInvoicePayment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceId: number,
 	paymentId: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(
-		configuration,
-		`/accounts/${accountSlug}/invoices/${invoiceId}/payments/${paymentId}.json`,
-		"DELETE",
-	);
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${invoiceId}/payments/${paymentId}.json`, "DELETE");
 };
 
 export { createInvoicePayment, createTaxDocument, deleteInvoicePayment };

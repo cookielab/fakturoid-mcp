@@ -2,12 +2,12 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://dashboard/summary";
 
-const dashboardSummaryResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
+const dashboardSummaryResourceImplementation: FakturoidResource["implementation"] = async (client) => {
 	// Create a summary by fetching key data
 	const [summaryAccount, summaryInvoices, summaryExpenses] = await Promise.all([
-		client.getAccountDetail(accountSlug),
-		client.getInvoices(accountSlug),
-		client.getExpenses(accountSlug),
+		client.getAccountDetail(),
+		client.getInvoices(),
+		client.getExpenses(),
 	]);
 
 	if (summaryAccount instanceof Error) {

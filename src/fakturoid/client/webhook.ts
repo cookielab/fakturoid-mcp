@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateWebhook, UpdateWebhook, Webhook } from "../model/webhook.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,15 +7,15 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/webhooks#webhooks-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  *
  * @returns List of all webhooks.
  */
-const getWebhooks = async (configuration: FakturoidClientConfig, accountSlug: string): Promise<Webhook[] | Error> => {
+const getWebhooks = async (strategy: AuthenticationStrategy, accountSlug: string): Promise<Webhook[] | Error> => {
 	const path = `/accounts/${accountSlug}/webhooks.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -23,18 +23,18 @@ const getWebhooks = async (configuration: FakturoidClientConfig, accountSlug: st
  *
  * @see https://www.fakturoid.cz/api/v3/webhooks#webhook-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Webhook or Error.
  */
 const getWebhook = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<Webhook>> => {
-	return await request(configuration, `/accounts/${accountSlug}/webhooks/${id}.json`, "GET");
+	return await request(strategy, `/accounts/${accountSlug}/webhooks/${id}.json`, "GET");
 };
 
 /**
@@ -42,18 +42,18 @@ const getWebhook = async (
  *
  * @see https://www.fakturoid.cz/api/v3/webhooks#create-webhook
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param webhookData
  *
  * @returns Created webhook or Error.
  */
 const createWebhook = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	webhookData: CreateWebhook,
 ): ReturnType<typeof request<Webhook, CreateWebhook>> => {
-	return await request(configuration, `/accounts/${accountSlug}/webhooks.json`, "POST", webhookData);
+	return await request(strategy, `/accounts/${accountSlug}/webhooks.json`, "POST", webhookData);
 };
 
 /**
@@ -61,7 +61,7 @@ const createWebhook = async (
  *
  * @see https://www.fakturoid.cz/api/v3/webhooks#update-webhook
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param webhookData
@@ -69,12 +69,12 @@ const createWebhook = async (
  * @returns Updated webhook or Error.
  */
 const updateWebhook = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	webhookData: UpdateWebhook,
 ): ReturnType<typeof request<Webhook, UpdateWebhook>> => {
-	return await request(configuration, `/accounts/${accountSlug}/webhooks/${id}.json`, "PATCH", webhookData);
+	return await request(strategy, `/accounts/${accountSlug}/webhooks/${id}.json`, "PATCH", webhookData);
 };
 
 /**
@@ -82,18 +82,18 @@ const updateWebhook = async (
  *
  * @see https://www.fakturoid.cz/api/v3/webhooks#delete-webhook
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteWebhook = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/webhooks/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/webhooks/${id}.json`, "DELETE");
 };
 
 export { getWebhooks, getWebhook, createWebhook, updateWebhook, deleteWebhook };

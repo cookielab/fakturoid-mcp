@@ -2,8 +2,8 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://expenses/recent";
 
-const expensesRecentResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
-	const recentExpenses = await client.getExpenses(accountSlug, { page_count: 1 });
+const expensesRecentResourceImplementation: FakturoidResource["implementation"] = async (client) => {
+	const recentExpenses = await client.getExpenses({ page_count: 1 });
 	if (recentExpenses instanceof Error) {
 		throw recentExpenses;
 	}

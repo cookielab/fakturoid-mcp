@@ -2,8 +2,8 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://invoices/open";
 
-const invoicesOpenResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
-	const openInvoices = await client.getInvoices(accountSlug, { status: "open" });
+const invoicesOpenResourceImplementation: FakturoidResource["implementation"] = async (client) => {
+	const openInvoices = await client.getInvoices({ status: "open" });
 	if (openInvoices instanceof Error) {
 		throw openInvoices;
 	}

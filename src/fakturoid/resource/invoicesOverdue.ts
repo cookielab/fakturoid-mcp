@@ -2,8 +2,8 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://invoices/overdue";
 
-const invoicesOverdueResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
-	const overdueInvoices = await client.getInvoices(accountSlug, { status: "overdue" });
+const invoicesOverdueResourceImplementation: FakturoidResource["implementation"] = async (client) => {
+	const overdueInvoices = await client.getInvoices({ status: "overdue" });
 	if (overdueInvoices instanceof Error) {
 		throw overdueInvoices;
 	}

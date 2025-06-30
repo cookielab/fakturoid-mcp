@@ -1,4 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { AuthenticationStrategy } from "../auth/strategy.ts";
 import type { FakturoidClient } from "./client.ts";
 import type { ServerToolCreator } from "./tool/common.ts";
 import { account } from "./tool/account.ts";
@@ -20,8 +21,14 @@ import { todo } from "./tool/todo.ts";
 import { user } from "./tool/user.ts";
 import { webhook } from "./tool/webhook.ts";
 
-const registerFakturoidTools = (server: McpServer, client: FakturoidClient): void => {
-	const tools: ServerToolCreator[] = [
+const registerFakturoidTools = <
+	Configuration extends object = object,
+	Strategy extends AuthenticationStrategy<Configuration> = AuthenticationStrategy<Configuration>,
+>(
+	server: McpServer,
+	client: FakturoidClient<Configuration, Strategy>,
+): void => {
+	const tools: ServerToolCreator<Configuration, Strategy>[] = [
 		account,
 		bankAccount,
 		event,

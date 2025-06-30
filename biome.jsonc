@@ -1,4 +1,12 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"extends": ["@cookielab.io/biome-config/node"]
+	"extends": ["@cookielab.io/biome-config/node"],
+
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noUnresolvedImports": "off"
+			}
+		}
+	}
 }

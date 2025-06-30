@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateInvoice, GetInvoicesFilters, Invoice, UpdateInvoice } from "../model/invoice.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,14 +7,14 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#invoices-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param filters - Optional filters for the invoice list
  *
  * @returns List of all invoices.
  */
 const getInvoices = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	filters?: GetInvoicesFilters,
 ): Promise<Invoice[] | Error> => {
@@ -34,7 +34,7 @@ const getInvoices = async (
 
 	const path = `/accounts/${accountSlug}/invoices.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -42,7 +42,7 @@ const getInvoices = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#fulltext-search
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param query - Search query
  * @param tags - Optional array of tags to search
@@ -50,7 +50,7 @@ const getInvoices = async (
  * @returns List of matching invoices.
  */
 const searchInvoices = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	query?: string,
 	tags?: string[],
@@ -64,7 +64,7 @@ const searchInvoices = async (
 
 	const path = `/accounts/${accountSlug}/invoices/search.json?${queryParams.toString()}`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -72,18 +72,18 @@ const searchInvoices = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#invoice-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Invoice detail.
  */
 const getInvoiceDetail = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
-): ReturnType<typeof request<Invoice>> => {
-	return await request(configuration, `/accounts/${accountSlug}/invoices/${id}.json`, "GET");
+): Promise<Invoice | Error> => {
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${id}.json`, "GET");
 };
 
 /**
@@ -91,19 +91,19 @@ const getInvoiceDetail = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#download-invoice-pdf
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns PDF blob or Error.
  */
 const downloadInvoicePDF = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): Promise<Blob | Error> => {
 	const response = await request<Blob>(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/invoices/${id}/download.pdf`,
 		"GET",
 		undefined,
@@ -118,7 +118,7 @@ const downloadInvoicePDF = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#download-attachment
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceId
  * @param attachmentId
@@ -126,13 +126,13 @@ const downloadInvoicePDF = async (
  * @returns Attachment blob or Error.
  */
 const downloadInvoiceAttachment = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceId: number,
 	attachmentId: number,
 ): Promise<Blob | Error> => {
 	const response = await request<Blob>(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/invoices/${invoiceId}/attachments/${attachmentId}/download`,
 		"GET",
 		undefined,
@@ -147,7 +147,7 @@ const downloadInvoiceAttachment = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#invoice-actions
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param event - Action to fire
@@ -155,13 +155,13 @@ const downloadInvoiceAttachment = async (
  * @returns Success or Error.
  */
 const fireInvoiceAction = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	event: "mark_as_sent" | "cancel" | "undo_cancel" | "lock" | "unlock" | "mark_as_uncollectible" | "undo_uncollectible",
 ): Promise<undefined | Error> => {
 	const response = await request<undefined>(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/invoices/${id}/fire.json?event=${event}`,
 		"POST",
 	);
@@ -174,18 +174,18 @@ const fireInvoiceAction = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#create-invoice
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param invoiceData
  *
  * @returns Created invoice or Error.
  */
 const createInvoice = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	invoiceData: CreateInvoice,
 ): ReturnType<typeof request<Invoice, CreateInvoice>> => {
-	return await request(configuration, `/accounts/${accountSlug}/invoices.json`, "POST", invoiceData);
+	return await request(strategy, `/accounts/${accountSlug}/invoices.json`, "POST", invoiceData);
 };
 
 /**
@@ -193,7 +193,7 @@ const createInvoice = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#update-invoice
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  * @param updateData
@@ -201,12 +201,12 @@ const createInvoice = async (
  * @returns Updated invoice or Error.
  */
 const updateInvoice = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 	updateData: UpdateInvoice,
 ): ReturnType<typeof request<Invoice, UpdateInvoice>> => {
-	return await request(configuration, `/accounts/${accountSlug}/invoices/${id}.json`, "PATCH", updateData);
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${id}.json`, "PATCH", updateData);
 };
 
 /**
@@ -214,18 +214,18 @@ const updateInvoice = async (
  *
  * @see https://www.fakturoid.cz/api/v3/invoices#delete-invoice
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param id
  *
  * @returns Success or Error.
  */
 const deleteInvoice = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(configuration, `/accounts/${accountSlug}/invoices/${id}.json`, "DELETE");
+	return await request(strategy, `/accounts/${accountSlug}/invoices/${id}.json`, "DELETE");
 };
 
 export {

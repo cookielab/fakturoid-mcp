@@ -1,9 +1,9 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import {
 	APIErrorSchema,
 	type GeneralError as GeneralErrorType,
 	type InvalidDataError as InvalidDataErrorType,
 } from "../model/error.ts";
-import { type FakturoidClientConfig, getTokenManager } from "./auth.ts";
 
 const PAGE_SIZE = 40 as const;
 
@@ -33,36 +33,20 @@ class UnexpectedError extends Error {
 	}
 }
 
-const getHeaders = async (
-	clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">,
-	contentType = true,
-): Promise<Record<string, string>> => {
-	const tokenManager = getTokenManager(clientConfiguration);
-	const accessToken = await tokenManager.getToken(clientConfiguration);
-
-	const headers: Record<string, string> = {
-		Authorization: `Bearer ${accessToken}`,
-		"User-Agent": `${clientConfiguration.appName} (${clientConfiguration.contactEmail})`,
-	};
-
-	if (contentType) {
-		headers["Content-Type"] = "application/json";
-	}
-
-	return headers;
-};
-
 const request = async <Response, Body = undefined>(
-	clientConfiguration: Omit<FakturoidClientConfig, "accountSlug">,
+	strategy: AuthenticationStrategy,
 	endpoint: string,
 	method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
 	body?: Body,
 	queryParameters?: Record<string, string>,
 ): Promise<Response | InvalidDataError | GeneralError | UnexpectedError> => {
 	const parameters = new URLSearchParams(Object.entries(queryParameters ?? {})).toString();
-	const url = `${clientConfiguration.url}/${endpoint}?${parameters}`;
+	const url = `${strategy.apiURL}/${endpoint}?${parameters}`;
 
-	const headers = await getHeaders(clientConfiguration, body != null);
+	const headers = await strategy.getHeaders({
+		"Content-Type": "application/json",
+		"User-Agent": `${strategy.appName} (${await strategy.getContactEmail()})`,
+	});
 
 	const requestData: RequestInit = {
 		body: body != null ? JSON.stringify(body) : null,
@@ -91,7 +75,7 @@ const request = async <Response, Body = undefined>(
 };
 
 async function* paginatedRequest<Item>(
-	clientConfiguration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	endpoint: string,
 	queryParameters?: Record<string, string>,
 	page?: number,
@@ -100,7 +84,7 @@ async function* paginatedRequest<Item>(
 
 	while (true) {
 		// biome-ignore lint/nursery/noAwaitInLoop: Usage in generator
-		const response = await request<Item[]>(clientConfiguration, endpoint, "GET", undefined, {
+		const response = await request<Item[]>(strategy, endpoint, "GET", undefined, {
 			...queryParameters,
 			page: String(currentPage),
 		});
@@ -120,14 +104,14 @@ async function* paginatedRequest<Item>(
 }
 
 const requestAllPages = async <Item>(
-	clientConfiguration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	endpoint: string,
 	pageCount?: number,
 ): Promise<Item[] | InvalidDataError | GeneralError | UnexpectedError> => {
 	const items: Item[] = [];
 	let currentPage = 0;
 
-	for await (const itemsPage of paginatedRequest<Item>(clientConfiguration, endpoint)) {
+	for await (const itemsPage of paginatedRequest<Item>(strategy, endpoint)) {
 		if (itemsPage instanceof Error) {
 			return itemsPage;
 		}

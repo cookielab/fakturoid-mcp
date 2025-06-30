@@ -2,8 +2,8 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://subjects/suppliers";
 
-const subjectsSuppliersResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
-	const subjects = await client.getSubjects(accountSlug);
+const subjectsSuppliersResourceImplementation: FakturoidResource["implementation"] = async (client) => {
+	const subjects = await client.getSubjects();
 	if (subjects instanceof Error) {
 		throw subjects;
 	}

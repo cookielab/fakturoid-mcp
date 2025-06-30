@@ -1,5 +1,5 @@
+import type { AuthenticationStrategy } from "../../auth/strategy.ts";
 import type { CreateInventoryMove, InventoryMove, UpdateInventoryMove } from "../model/inventoryMove.ts";
-import type { FakturoidClientConfig } from "./auth.ts";
 import { request, requestAllPages } from "./request.ts";
 
 /**
@@ -7,20 +7,20 @@ import { request, requestAllPages } from "./request.ts";
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-moves#inventory-moves-index
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemId
  *
  * @returns List of all inventory moves for the inventory item.
  */
 const getInventoryMoves = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemId: number,
 ): Promise<InventoryMove[] | Error> => {
 	const path = `/accounts/${accountSlug}/inventory_items/${inventoryItemId}/inventory_moves.json`;
 
-	return await requestAllPages(configuration, path);
+	return await requestAllPages(strategy, path);
 };
 
 /**
@@ -28,7 +28,7 @@ const getInventoryMoves = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-moves#inventory-move-detail
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemId
  * @param id
@@ -36,13 +36,13 @@ const getInventoryMoves = async (
  * @returns Inventory move or Error.
  */
 const getInventoryMove = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemId: number,
 	id: number,
 ): ReturnType<typeof request<InventoryMove>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/inventory_items/${inventoryItemId}/inventory_moves/${id}.json`,
 		"GET",
 	);
@@ -53,7 +53,7 @@ const getInventoryMove = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-moves#create-inventory-move
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemId
  * @param inventoryMoveData
@@ -61,13 +61,13 @@ const getInventoryMove = async (
  * @returns Created inventory move or Error.
  */
 const createInventoryMove = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemId: number,
 	inventoryMoveData: CreateInventoryMove,
 ): ReturnType<typeof request<InventoryMove, CreateInventoryMove>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/inventory_items/${inventoryItemId}/inventory_moves.json`,
 		"POST",
 		inventoryMoveData,
@@ -79,7 +79,7 @@ const createInventoryMove = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-moves#update-inventory-move
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemId
  * @param id
@@ -88,14 +88,14 @@ const createInventoryMove = async (
  * @returns Updated inventory move or Error.
  */
 const updateInventoryMove = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemId: number,
 	id: number,
 	inventoryMoveData: UpdateInventoryMove,
 ): ReturnType<typeof request<InventoryMove, UpdateInventoryMove>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/inventory_items/${inventoryItemId}/inventory_moves/${id}.json`,
 		"PATCH",
 		inventoryMoveData,
@@ -107,7 +107,7 @@ const updateInventoryMove = async (
  *
  * @see https://www.fakturoid.cz/api/v3/inventory-moves#delete-inventory-move
  *
- * @param configuration
+ * @param strategy
  * @param accountSlug
  * @param inventoryItemId
  * @param id
@@ -115,13 +115,13 @@ const updateInventoryMove = async (
  * @returns Success or Error.
  */
 const deleteInventoryMove = async (
-	configuration: FakturoidClientConfig,
+	strategy: AuthenticationStrategy,
 	accountSlug: string,
 	inventoryItemId: number,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
 	return await request(
-		configuration,
+		strategy,
 		`/accounts/${accountSlug}/inventory_items/${inventoryItemId}/inventory_moves/${id}.json`,
 		"DELETE",
 	);

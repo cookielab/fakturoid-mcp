@@ -6,7 +6,8 @@
 	"main": "dist/main.js",
 	"bin": "dist/main.js",
 	"exports": {
-		".": "./src/server.ts"
+		".": "./src/server.ts",
+		"./strategy": "./src/auth/strategy.ts"
 	},
 	"scripts": {
 		"build": "tsc --noEmit false",
@@ -14,11 +15,10 @@
 		"types": "tsc",
 		"lint": "biome lint src/",
 		"format": "biome format --write --fix src/",
-		"ui": "DANGEROUSLY_OMIT_AUTH=true MCP_AUTO_OPEN_ENABLED=true pnpx @modelcontextprotocol/inspector"
+		"ui": "pnpx @modelcontextprotocol/inspector"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "1.12.3",
-		"@types/express": "5.0.3",
+		"@modelcontextprotocol/sdk": "1.13.2",
 		"dotenv": "16.5.0",
 		"express": "5.1.0",
 		"node-fetch": "3.3.2",
@@ -27,9 +27,10 @@
 		"zod": "3.25.64"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.0",
-		"@cookielab.io/biome-config": "0.1.0",
+		"@biomejs/biome": "2.0.6",
+		"@cookielab.io/biome-config": "0.3.1",
 		"@modelcontextprotocol/inspector": "0.14.3",
+		"@types/express": "5.0.3",
 		"@types/node": "22.15.31",
 		"tailwindcss": "4.1.10",
 		"tsx": "4.20.2",

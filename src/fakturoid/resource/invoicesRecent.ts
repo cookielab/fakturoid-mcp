@@ -2,8 +2,8 @@ import type { FakturoidResource } from "./common.ts";
 
 const URI = "fakturoid://invoices/recent";
 
-const invoicesRecentResourceImplementation: FakturoidResource["implementation"] = async (client, accountSlug) => {
-	const recentInvoices = await client.getInvoices(accountSlug, { page_count: 1 });
+const invoicesRecentResourceImplementation: FakturoidResource["implementation"] = async (client) => {
+	const recentInvoices = await client.getInvoices({ page_count: 1 });
 	if (recentInvoices instanceof Error) {
 		throw recentInvoices;
 	}
