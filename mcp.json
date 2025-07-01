@@ -1,4 +1,18 @@
 {
-	"type": "sse",
-	"url": "http://localhost:5173/sse"
+	"mcpServers": {
+		"http": {
+			"type": "http",
+			"url": "http://localhost:5173/mcp"
+		},
+
+		"sse": {
+			"type": "sse",
+			"url": "http://localhost:5173/sse"
+		},
+
+		"stdio": {
+			"args": ["dev"],
+			"command": "pnpm"
+		}
+	}
 }

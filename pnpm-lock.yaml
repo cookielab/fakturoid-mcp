@@ -37,8 +37,8 @@ importers:
         specifier: 0.3.1
         version: 0.3.1(@biomejs/biome@2.0.6)
       '@modelcontextprotocol/inspector':
-        specifier: 0.14.3
-        version: 0.14.3(@types/node@22.15.31)(tailwindcss@4.1.10)(typescript@5.8.3)
+        specifier: 0.15.0
+        version: 0.15.0(@types/node@22.15.31)(tailwindcss@4.1.10)(typescript@5.8.3)
       '@types/express':
         specifier: 5.0.3
         version: 5.0.3
@@ -294,20 +294,20 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@modelcontextprotocol/inspector-cli@0.14.3':
-    resolution: {integrity: sha512-cAjCfwJUfN1WHc/sGgY/yAQ7K02WOKIso+LzVoKzEr50Nf4R+WKEuq6lhnLfG3f61sU823V8TxRscc8NTYTgww==}
+  '@modelcontextprotocol/inspector-cli@0.15.0':
+    resolution: {integrity: sha512-mZxRqxYub6qFi3oypLI63yCm9TAxlTO8asE9FeAU4+HFlvKxQrujcfpckcWjqGKhZ0uVH1YUE+VwDx70nz+I5w==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector-client@0.14.3':
-    resolution: {integrity: sha512-kbpUYzImbB3VOolyzASfmz08m6kDQvFC0iYv4bF/ZZiwJHaqAPi/i/BIZSrpfRGbAnH+ECqjeRsxRjD6S8pr+g==}
+  '@modelcontextprotocol/inspector-client@0.15.0':
+    resolution: {integrity: sha512-zIKxvp5HX1yE+kPOhI42/TVNuM9/RYEizdVmlpov7H38Mg9DeN9DptHYrsVLy8ZEJD1XFAu/eLl+ZtS3ceANNg==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector-server@0.14.3':
-    resolution: {integrity: sha512-nstKV26OUHj0Dh4S+M44JsU8UGfCrxfChmczR3GZ1658t6cBLBvw2EeqUgQa4BJ0X/KbDdIgZMX0oYKEE1hYcA==}
+  '@modelcontextprotocol/inspector-server@0.15.0':
+    resolution: {integrity: sha512-x1qtDEUeSHURtBH1/WN30NX7O/Imb3u2IoY+T2YCf4mGiB24eo4hEudiZmnuKSDGwDs4BAj2keiFeL3/EwkH9w==}
     hasBin: true
 
-  '@modelcontextprotocol/inspector@0.14.3':
-    resolution: {integrity: sha512-WtEDqVwXnICveGd39BOF0Q3WxCPQg3MhBzMEDDZp2AZn+pO+eTiRR4bqxTiGkqHUjHODckHkSpu2FQ/A+x5mnQ==}
+  '@modelcontextprotocol/inspector@0.15.0':
+    resolution: {integrity: sha512-PN1R7InR48Y6wU8s/vHWc0KOYAjlYQkgCpjUQsNFB078ebdv+empkMI6d1Gg+UIRx8mTrwtbBgv0A6ookGG+0w==}
     hasBin: true
 
   '@modelcontextprotocol/sdk@1.13.2':
@@ -1116,10 +1116,10 @@ packages:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
 
-  lucide-react@0.447.0:
-    resolution: {integrity: sha512-SZ//hQmvi+kDKrNepArVkYK7/jfeZ5uFNEnYmd45RKZcbGD78KLnrcNXmgeg6m+xNHFvTG+CblszXCy4n6DN4w==}
+  lucide-react@0.523.0:
+    resolution: {integrity: sha512-rUjQoy7egZT9XYVXBK1je9ckBnNp7qzRZOhLQx5RcEp2dCGlXo+mv6vf7Am4LimEcFBJIIZzSGfgTqc9QCrPSw==}
     peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   make-error@1.3.6:
     resolution: {integrity: sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==}
@@ -1721,7 +1721,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@modelcontextprotocol/inspector-cli@0.14.3':
+  '@modelcontextprotocol/inspector-cli@0.15.0':
     dependencies:
       '@modelcontextprotocol/sdk': 1.13.2
       commander: 13.1.0
@@ -1729,7 +1729,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/inspector-client@0.14.3(tailwindcss@4.1.10)':
+  '@modelcontextprotocol/inspector-client@0.15.0(tailwindcss@4.1.10)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.13.2
       '@radix-ui/react-checkbox': 1.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1746,7 +1746,7 @@ snapshots:
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       cmdk: 1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      lucide-react: 0.447.0(react@18.3.1)
+      lucide-react: 0.523.0(react@18.3.1)
       pkce-challenge: 4.1.0
       prismjs: 1.30.0
       react: 18.3.1
@@ -1762,7 +1762,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@modelcontextprotocol/inspector-server@0.14.3':
+  '@modelcontextprotocol/inspector-server@0.15.0':
     dependencies:
       '@modelcontextprotocol/sdk': 1.13.2
       cors: 2.8.5
@@ -1774,11 +1774,11 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@modelcontextprotocol/inspector@0.14.3(@types/node@22.15.31)(tailwindcss@4.1.10)(typescript@5.8.3)':
+  '@modelcontextprotocol/inspector@0.15.0(@types/node@22.15.31)(tailwindcss@4.1.10)(typescript@5.8.3)':
     dependencies:
-      '@modelcontextprotocol/inspector-cli': 0.14.3
-      '@modelcontextprotocol/inspector-client': 0.14.3(tailwindcss@4.1.10)
-      '@modelcontextprotocol/inspector-server': 0.14.3
+      '@modelcontextprotocol/inspector-cli': 0.15.0
+      '@modelcontextprotocol/inspector-client': 0.15.0(tailwindcss@4.1.10)
+      '@modelcontextprotocol/inspector-server': 0.15.0
       '@modelcontextprotocol/sdk': 1.13.2
       concurrently: 9.1.2
       open: 10.1.2
@@ -2553,7 +2553,7 @@ snapshots:
     dependencies:
       js-tokens: 4.0.0
 
-  lucide-react@0.447.0(react@18.3.1):
+  lucide-react@0.523.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 

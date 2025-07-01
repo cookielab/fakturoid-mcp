@@ -82,12 +82,15 @@ Professional templates for common accounting workflows:
    Edit `.env` and add your Fakturoid API credentials:
 
    ```
+   # Fakturoid OAuth Credentials
+   CLIENT_ID=your-client-id
+   CLIENT_SECRET=your-client-secret
+
+   # Fakturoid API URL
    API_URL=https://app.fakturoid.cz/api/v3
-   APP_NAME=FakturoidMCP
-   CLIENT_ID=your_client_id
-   CLIENT_SECRET=your_client_secret
-   CONTACT_EMAIL=your_email@example.com
-   PORT=5173  # Optional, defaults to 5173
+
+   # MCP Transport type (stdio, sse, or http)
+   MCP_TRANSPORT=http
    ```
 
 4. Build the project:
@@ -97,17 +100,70 @@ Professional templates for common accounting workflows:
 
 ## Usage
 
+### Transport Modes
+
+The server supports three transport modes, configurable via the `MCP_TRANSPORT` environment variable:
+
+1. **STDIO** (default) - Standard input/output communication, ideal for direct AI tool integration
+2. **SSE** (deprecated) - Server-Sent Events, replaced by Streamable HTTP transport as of MCP protocol version 2024-11-05
+3. **HTTP** (recommended for web) - Streamable HTTP transport with SSE support, suitable for stateless HTTP clients and web-based integrations
+
 ### With Claude Desktop
 
-1. Copy the example configuration:
+The server can be configured in Claude Desktop using any of the three transport modes. Example configurations are provided in `mcp.json`:
+
+1. Copy the appropriate configuration:
 
    ```bash
    cp claude_desktop_config.example.json ~/Library/Application\ Support/Claude/claude_desktop_config.json
    ```
 
-2. Update the configuration with your environment variables and correct path to the project.
+2. Choose your preferred transport mode and update the configuration:
 
-3. Restart Claude Desktop to load the MCP server.
+   **For STDIO mode (recommended for Claude Desktop):**
+
+   ```json
+   {
+     "mcpServers": {
+       "fakturoid": {
+         "command": "pnpm",
+         "args": ["dev"]
+       }
+     }
+   }
+   ```
+
+   **For SSE mode (deprecated - use HTTP mode instead):**
+
+   ```json
+   {
+     "mcpServers": {
+       "fakturoid": {
+         "type": "sse",
+         "url": "http://localhost:5173/sse"
+       }
+     }
+   }
+   ```
+
+   > **⚠️ Deprecation Notice**: SSE as a standalone transport is deprecated as of MCP protocol version 2024-11-05. Use HTTP mode instead, which incorporates SSE as an optional streaming mechanism.
+
+   **For HTTP mode:**
+
+   ```json
+   {
+     "mcpServers": {
+       "fakturoid": {
+         "type": "http",
+         "url": "http://localhost:5173/mcp"
+       }
+     }
+   }
+   ```
+
+3. Update the configuration with your environment variables and correct path to the project.
+
+4. Restart Claude Desktop to load the MCP server.
 
 ### Development Mode
 
@@ -125,7 +181,64 @@ Test the server using the MCP Inspector UI:
 pnpm ui
 ```
 
-The server will be available at `http://localhost:5173/sse`
+The inspector will launch and connect to your server based on the configured transport mode:
+
+- **STDIO**: Direct process communication
+- **SSE** (deprecated): Available at `http://localhost:5173/sse`
+- **HTTP**: Available at `http://localhost:5173/mcp`
+
+## Migrating from SSE to HTTP Transport
+
+If you're currently using the deprecated SSE transport, migrating to HTTP transport is straightforward:
+
+### Configuration Changes
+
+1. **Update your `.env` file**:
+
+   ```bash
+   # Change from:
+   MCP_TRANSPORT=sse
+
+   # To:
+   MCP_TRANSPORT=http
+   ```
+
+2. **Update Claude Desktop configuration**:
+
+   ```json
+   // Change from:
+   {
+     "mcpServers": {
+       "fakturoid": {
+         "type": "sse",
+         "url": "http://localhost:5173/sse"
+       }
+     }
+   }
+
+   // To:
+   {
+     "mcpServers": {
+       "fakturoid": {
+         "type": "http",
+         "url": "http://localhost:5173/mcp"
+       }
+     }
+   }
+   ```
+
+### Key Differences
+
+- **Endpoint**: Changes from `/sse` to `/mcp`
+- **Protocol**: HTTP transport supports bidirectional communication with session management
+- **Streaming**: SSE functionality is still available within HTTP transport when needed
+- **Performance**: Better connection handling and resumability support
+
+### Why Migrate?
+
+1. **Future-proof**: SSE transport is deprecated in MCP protocol version 2024-11-05
+2. **Better Features**: HTTP transport includes session management, resumability, and better error handling
+3. **Active Development**: All new features will be added to HTTP transport only
 
 ## Architecture
 
@@ -133,7 +246,10 @@ The server uses a flexible authentication strategy pattern that allows for diffe
 
 ```
 MCP Server
-├── Transport Layer (SSE)
+├── Transport Layer
+│   ├── STDIO (Standard I/O)
+│   ├── SSE (Server-Sent Events - deprecated)
+│   └── HTTP (Streamable HTTP with SSE support)
 ├── Protocol Handler (JSON-RPC 2.0)
 ├── Authentication Strategy
 │   ├── Abstract Strategy (src/auth/strategy.ts)
@@ -149,9 +265,11 @@ MCP Server
 ### Key Architecture Features
 
 - **Authentication Strategy Pattern**: Extensible authentication system supporting multiple auth methods
-- \*\*Automatic Account Detection\*\*: No need to manually specify account slug - automatically determined from the authenticated user
+- **Automatic Account Detection**: No need to manually specify account slug - automatically determined from the authenticated user
 - **Simplified Tool Interface**: All tools now work without requiring explicit account slug parameters
-- **SSE-Only Transport**: Server runs exclusively in Server-Sent Events mode for improved reliability
+- **Multiple Transport Options**: Supports STDIO, SSE (deprecated), and HTTP transport modes for maximum flexibility
+- **Session Management**: HTTP transport includes session management for stateless clients
+- **Backwards Compatibility**: Maintains support for legacy SSE transport while encouraging migration to HTTP transport
 
 ## Implementing Custom Authentication Strategies
 
