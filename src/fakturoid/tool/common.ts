@@ -31,6 +31,8 @@ const createTool = <
 				);
 			}
 
+			// Yeah, we don't care for that, Typescript.
+			// @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
 			return server.tool(name, inputSchema as unknown as zodV3.ZodRawShape, (input) =>
 				implementation(client, input as InputSchema extends z.ZodObject ? z.infer<InputSchema> : undefined),
 			);
