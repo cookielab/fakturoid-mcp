@@ -10,6 +10,7 @@ const DEVELOPMENT_OPTIONS = {
 		},
 		target: "pino-pretty",
 	},
+	level: "debug",
 } as const satisfies LoggerOptions<never, boolean>;
 
 const PRODUCTION_OPTIONS = {

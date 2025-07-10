@@ -56,6 +56,7 @@ const request = async <Response, Body = undefined>(
 
 	const response = await fetch(url, requestData);
 	const responseBody = await response.text();
+
 	if (!response.ok) {
 		const parsedError = APIErrorSchema.safeParse(responseBody);
 		if (!parsedError.success) {
@@ -94,6 +95,9 @@ async function* paginatedRequest<Item>(
 		}
 
 		if (response.length < PAGE_SIZE) {
+			// Must yield, as returned values are not consumed in `for await` loops.
+			yield response;
+
 			return;
 		}
 
