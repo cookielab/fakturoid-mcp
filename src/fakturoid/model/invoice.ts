@@ -1,28 +1,30 @@
 import { z } from "zod/v4";
 import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.ts";
 
-const DocumentTypeEnum = z.enum([
+const INVOICE_DOCUMENT_TYPE = [
 	"partial_proforma",
 	"proforma",
 	"correction",
 	"tax_document",
 	"final_invoice",
 	"invoice",
-]);
+] as const;
 
-const ProformaFollowupDocumentEnum = z.enum(["final_invoice_paid", "final_invoice", "tax_document", "none"]);
+const INVOICE_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
 
-const StatusEnum = z.enum(["open", "sent", "overdue", "paid", "cancelled", "uncollectible"]);
+const INVOICE_PROFORMA_FOLLOWUP_DOCUMENT = ["final_invoice_paid", "final_invoice", "tax_document", "none"] as const;
 
-const IbanVisibilityEnum = z.enum(["automatically", "always"]);
+const INVOICE_STATUS = ["open", "sent", "overdue", "paid", "cancelled", "uncollectible"] as const;
 
-const PaymentMethodEnum = z.enum(["bank", "cash", "cod", "card", "paypal", "custom"]);
+const INVOICE_IBAN_VISIBILITY = ["automatically", "always"] as const;
 
-const LanguageEnum = z.enum(["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"]);
+const INVOICE_PAYMENT_METHOD = ["bank", "cash", "cod", "card", "paypal", "custom"] as const;
 
-const OssEnum = z.enum(["disabled", "service", "goods"]);
+const INVOICE_LANGUAGE = ["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"] as const;
 
-const VatPriceModeEnum = z.enum(["without_vat", "from_total_with_vat"]);
+const INVOICE_OSS = ["disabled", "service", "goods"] as const;
+
+const INVOICE_VAT_PRICE_MODE = ["without_vat", "from_total_with_vat"] as const;
 
 // EET Record schema (readonly)
 const EetRecordSchema = z.object({
@@ -76,7 +78,7 @@ const PaymentSchema = z.object({
 
 const InventorySchema = z.object({
 	article_number: z.string().nullable().readonly(),
-	article_number_type: z.enum(["ian", "ean", "isbn"]).nullable().readonly(),
+	article_number_type: z.enum(INVOICE_ARTICLE_NUMBER_TYPE).nullable().readonly(),
 	item_id: z.number().readonly(),
 	move_id: z.number().readonly(),
 	sku: z.string().readonly(),
@@ -200,7 +202,7 @@ const InvoiceSchema = z.object({
 	/** Custom payment method */
 	custom_payment_method: z.string().nullable().optional(),
 	/** Type of document */
-	document_type: DocumentTypeEnum.optional(),
+	document_type: z.enum(INVOICE_DOCUMENT_TYPE).optional(),
 	/** Number of days until the invoice becomes overdue */
 	due: z.number().optional(),
 	/** Date when the invoice becomes overdue */
@@ -222,13 +224,13 @@ const InvoiceSchema = z.object({
 	/** IBAN */
 	iban: z.string().nullable().optional(),
 	/** Controls IBAN visibility on the document */
-	iban_visibility: IbanVisibilityEnum.default("automatically").optional(),
+	iban_visibility: z.enum(INVOICE_IBAN_VISIBILITY).default("automatically").optional(),
 	/** Unique identifier in Fakturoid */
 	id: z.number().readonly(),
 	/** Date of issue */
 	issued_on: z.string().optional(),
 	/** Language of the document */
-	language: LanguageEnum.optional(),
+	language: z.enum(INVOICE_LANGUAGE).optional(),
 	/** List of lines to invoice */
 	lines: z.array(LineSchema).optional(),
 	/** Date and time when the document was locked */
@@ -246,13 +248,13 @@ const InvoiceSchema = z.object({
 	/** Order number in your application */
 	order_number: z.string().nullable().optional(),
 	/** Use OSS mode */
-	oss: OssEnum.default("disabled").optional(),
+	oss: z.enum(INVOICE_OSS).default("disabled").optional(),
 	/** List of paid advances (if final invoice) */
 	paid_advances: z.array(PaidAdvanceSchema).readonly(),
 	/** Date when the document was marked as paid */
 	paid_on: z.string().nullable().readonly(),
 	/** Payment method */
-	payment_method: PaymentMethodEnum.optional(),
+	payment_method: z.enum(INVOICE_PAYMENT_METHOD).optional(),
 	/** List of payments */
 	payments: z.array(PaymentSchema).readonly(),
 	/** Enable PayPal payment button on invoice */
@@ -262,7 +264,7 @@ const InvoiceSchema = z.object({
 	/** Private note */
 	private_note: z.string().nullable().optional(),
 	/** What to issue after a proforma is paid */
-	proforma_followup_document: ProformaFollowupDocumentEnum.nullable().optional(),
+	proforma_followup_document: z.enum(INVOICE_PROFORMA_FOLLOWUP_DOCUMENT).nullable().optional(),
 	/** Webinvoice web address */
 	public_html_url: z.string().readonly(),
 	/** Related document ID */
@@ -278,7 +280,7 @@ const InvoiceSchema = z.object({
 	/** Show „Do not pay, …" on document webinvoice and PDF */
 	show_already_paid_note_in_pdf: z.boolean().default(false).optional(),
 	/** Current state of the document */
-	status: StatusEnum.readonly(),
+	status: z.enum(INVOICE_STATUS).readonly(),
 	/** Subject identifier in your application */
 	subject_custom_id: z.string().nullable().optional(),
 	/** Subject ID */
@@ -312,7 +314,7 @@ const InvoiceSchema = z.object({
 	/** Variable symbol */
 	variable_symbol: z.string().optional(),
 	/** Calculate VAT from base or final amount */
-	vat_price_mode: VatPriceModeEnum.nullable().optional(),
+	vat_price_mode: z.enum(INVOICE_VAT_PRICE_MODE).nullable().optional(),
 	/** VAT rates summary */
 	vat_rates_summary: z.array(VatRatesSummarySchema).readonly(),
 	/** Date when the client visited the webinvoice */
@@ -519,6 +521,9 @@ type CreateLine = z.infer<typeof CreateLineSchema>;
 type UpdateLine = z.infer<typeof UpdateLineSchema>;
 type Attachment = z.infer<typeof AttachmentSchema>;
 type GetInvoicesFilters = z.infer<typeof GetInvoicesFiltersSchema>;
+type PaidAdvance = z.infer<typeof PaidAdvanceSchema>;
+type Payment = z.infer<typeof PaymentSchema>;
+type VatRatesSummary = z.infer<typeof VatRatesSummarySchema>;
 
 export {
 	LineSchema,
@@ -529,5 +534,26 @@ export {
 	UpdateInvoiceSchema,
 	AttachmentSchema,
 	GetInvoicesFiltersSchema,
+	INVOICE_ARTICLE_NUMBER_TYPE,
+	INVOICE_DOCUMENT_TYPE,
+	INVOICE_IBAN_VISIBILITY,
+	INVOICE_LANGUAGE,
+	INVOICE_OSS,
+	INVOICE_PAYMENT_METHOD,
+	INVOICE_PROFORMA_FOLLOWUP_DOCUMENT,
+	INVOICE_STATUS,
+	INVOICE_VAT_PRICE_MODE,
 };
-export type { Invoice, CreateInvoice, UpdateInvoice, Line, CreateLine, UpdateLine, Attachment, GetInvoicesFilters };
+export type {
+	Invoice,
+	CreateInvoice,
+	UpdateInvoice,
+	Line,
+	CreateLine,
+	UpdateLine,
+	Attachment,
+	GetInvoicesFilters,
+	PaidAdvance,
+	Payment,
+	VatRatesSummary,
+};

@@ -129,13 +129,14 @@ class LocalStrategy extends AuthenticationStrategy<Configuration> {
 		return this.contactEmail;
 	}
 
-	async getHeaders(headers: Record<string, string>) {
+	async getHeaders(headers: Record<string, string> | Headers) {
 		const token = await this.getAccessToken();
+		const initHeaders = headers instanceof Headers ? Object.fromEntries(headers.entries()) : headers;
 
-		return {
-			...headers,
+		return new Headers({
+			...initHeaders,
 			Authorization: `Bearer ${token}`,
-		};
+		});
 	}
 }
 

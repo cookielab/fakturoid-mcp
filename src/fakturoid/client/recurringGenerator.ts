@@ -105,7 +105,7 @@ const deleteRecurringGenerator = async (
 	accountSlug: string,
 	id: number,
 ): ReturnType<typeof request<undefined>> => {
-	return await request(strategy, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "DELETE", {});
+	return await request(strategy, `/accounts/${accountSlug}/recurring_generators/${id}.json`, "DELETE");
 };
 
 export {

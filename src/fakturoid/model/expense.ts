@@ -2,11 +2,13 @@ import { z } from "zod/v4";
 import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.ts";
 import { ExpensePaymentSchema } from "./expensePayment.ts";
 
+const EXPENSE_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
+
 const LineInventorySchema = z.object({
 	/** Article number (if present) */
 	article_number: z.string().optional().readonly(),
 	/** Article number type (only if article_number is present) */
-	article_number_type: z.enum(["ian", "ean", "isbn"]).optional().readonly(),
+	article_number_type: z.enum(EXPENSE_ARTICLE_NUMBER_TYPE).optional().readonly(),
 	/** ID of the related inventory item */
 	item_id: z.number().readonly(),
 	/** ID of the related inventory move */
@@ -312,5 +314,14 @@ type CreateExpense = z.infer<typeof CreateExpenseSchema>;
 type UpdateExpense = z.infer<typeof UpdateExpenseSchema>;
 type GetExpenseFilters = z.infer<typeof GetExpenseFiltersSchema>;
 
-export { ExpenseSchema, CreateExpenseSchema, UpdateExpenseSchema, GetExpenseFiltersSchema };
-export type { Expense, CreateExpense, UpdateExpense, GetExpenseFilters };
+type Line = z.infer<typeof LineSchema>;
+type AttachmentResponse = z.infer<typeof AttachmentResponseSchema>;
+
+export {
+	ExpenseSchema,
+	CreateExpenseSchema,
+	UpdateExpenseSchema,
+	GetExpenseFiltersSchema,
+	EXPENSE_ARTICLE_NUMBER_TYPE,
+};
+export type { Expense, CreateExpense, UpdateExpense, GetExpenseFilters, Line, AttachmentResponse };

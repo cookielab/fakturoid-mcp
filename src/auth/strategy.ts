@@ -10,7 +10,7 @@ abstract class AuthenticationStrategy<Configuration extends object = object> {
 	}
 
 	abstract getContactEmail(): Promise<string> | string;
-	abstract getHeaders(headers: Record<string, string>): Promise<Record<string, string>>;
+	abstract getHeaders(headers: Record<string, string> | Headers): Promise<Headers>;
 	abstract getAccessToken(): Promise<string>;
 	abstract refreshToken(): Promise<string>;
 }

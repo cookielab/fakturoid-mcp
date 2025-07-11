@@ -40,8 +40,11 @@ const request = async <Response, Body = undefined>(
 	body?: Body,
 	queryParameters?: Record<string, string>,
 ): Promise<Response | InvalidDataError | GeneralError | UnexpectedError> => {
-	const parameters = new URLSearchParams(Object.entries(queryParameters ?? {})).toString();
-	const url = `${strategy.apiURL}/${endpoint}?${parameters}`;
+	const url = new URL(`${endpoint}`, strategy.apiURL);
+
+	for (const [key, value] of Object.entries(queryParameters ?? {})) {
+		url.searchParams.append(key, value);
+	}
 
 	const headers = await strategy.getHeaders({
 		"Content-Type": "application/json",
@@ -50,17 +53,17 @@ const request = async <Response, Body = undefined>(
 
 	const requestData: RequestInit = {
 		body: body != null ? JSON.stringify(body) : null,
-		headers: headers,
+		headers: Object.fromEntries(headers.entries()),
 		method: method,
 	};
 
-	const response = await fetch(url, requestData);
-	const responseBody = await response.text();
+	const response = await fetch(url.toString(), requestData);
+	const responseBody = await response.blob();
 
 	if (!response.ok) {
 		const parsedError = APIErrorSchema.safeParse(responseBody);
 		if (!parsedError.success) {
-			return new UnexpectedError(responseBody);
+			return new UnexpectedError(await responseBody.text());
 		}
 
 		if ("errors" in parsedError.data) {
@@ -72,7 +75,7 @@ const request = async <Response, Body = undefined>(
 
 	const isJSON = response.headers.get("content-type")?.includes("application/json") ?? false;
 
-	return (isJSON ? JSON.parse(responseBody) : responseBody) as Response;
+	return (isJSON ? JSON.parse(await responseBody.text()) : responseBody) as Response;
 };
 
 async function* paginatedRequest<Item>(

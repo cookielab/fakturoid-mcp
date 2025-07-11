@@ -1,5 +1,9 @@
 import { z } from "zod/v4";
 
+const SUBJECT_SETTING = ["inherit", "on", "off"] as const;
+const SUBJECT_TYPE = ["customer", "supplier", "both"] as const;
+const SUBJECT_WEBINVOICE_HISTORY = ["disabled", "recent", "client_portal"] as const;
+
 const SubjectSchema = z.object({
 	/** Whether to update subject data from ARES. Used to override account settings.
 	 *
@@ -97,16 +101,16 @@ const SubjectSchema = z.object({
 	registration_no: z.string().nullable(),
 
 	/** Whether to attach estimate PDF in email. Used to override account settings */
-	setting_estimate_pdf_attachments: z.enum(["inherit", "on", "off"]).default("inherit"),
+	setting_estimate_pdf_attachments: z.enum(SUBJECT_SETTING).default("inherit"),
 
 	/** Whether to attach invoice PDF in email. Used to override account settings */
-	setting_invoice_pdf_attachments: z.enum(["inherit", "on", "off"]).default("inherit"),
+	setting_invoice_pdf_attachments: z.enum(SUBJECT_SETTING).default("inherit"),
 
 	/** Whether to send overdue invoice email reminders. Used to override account settings */
-	setting_invoice_send_reminders: z.enum(["inherit", "on", "off"]).default("inherit"),
+	setting_invoice_send_reminders: z.enum(SUBJECT_SETTING).default("inherit"),
 
 	/** Whether to update subject data from ARES. Used to override account settings. Updating this will also update the deprecated `ares_update` attribute. If both this and the deprecated attribute are present, the new one takes precedence. */
-	setting_update_from_ares: z.enum(["inherit", "on", "off"]).default("inherit"),
+	setting_update_from_ares: z.enum(SUBJECT_SETTING).default("inherit"),
 
 	/** Street */
 	street: z.string().nullable(),
@@ -121,7 +125,7 @@ const SubjectSchema = z.object({
 	thank_you_email_text: z.string().nullable(),
 
 	/** Type of subject */
-	type: z.enum(["customer", "supplier", "both"]).default("customer"),
+	type: z.enum(SUBJECT_TYPE).default("customer"),
 
 	/** Unreliable VAT-payer */
 	unreliable: z.boolean().nullable().readonly(),
@@ -151,7 +155,7 @@ const SubjectSchema = z.object({
 	web: z.string().nullable(),
 
 	/** Web Invoice history */
-	webinvoice_history: z.enum(["disabled", "recent", "client_portal"]).nullable().default(null),
+	webinvoice_history: z.enum(SUBJECT_WEBINVOICE_HISTORY).nullable().default(null),
 
 	/** ZIP or postal code */
 	zip: z.string().nullable(),
@@ -311,5 +315,13 @@ type SubjectCreate = z.infer<typeof SubjectCreateSchema>;
 type SubjectUpdate = z.infer<typeof SubjectUpdateSchema>;
 type GetSubjectsFilters = z.infer<typeof GetSubjectsFiltersSchema>;
 
-export { SubjectSchema, SubjectCreateSchema, SubjectUpdateSchema, GetSubjectsFiltersSchema };
+export {
+	SubjectSchema,
+	SubjectCreateSchema,
+	SubjectUpdateSchema,
+	GetSubjectsFiltersSchema,
+	SUBJECT_SETTING,
+	SUBJECT_TYPE,
+	SUBJECT_WEBINVOICE_HISTORY,
+};
 export type { Subject, SubjectCreate, SubjectUpdate, GetSubjectsFilters };

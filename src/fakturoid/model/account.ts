@@ -1,5 +1,11 @@
 import { z } from "zod/v4";
 
+const ACCOUNT_ESTIMATE = ["estimate", "quote"] as const;
+const ACCOUNT_INVOICE_LANGUAGE = ["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"] as const;
+const ACCOUNT_PAYMENT_METHOD = ["bank", "card", "cash", "cod", "paypal"] as const;
+const ACCOUNT_VAT_MODE = ["vat_payer", "non_vat_payer", "identified_person"] as const;
+const ACCOUNT_VAT_PRICE_MODE = ["with_vat", "without_vat", "numerical_with_vat", "from_total_with_vat"] as const;
+
 const AccountSchema = z.object({
 	city: z.string().readonly(),
 
@@ -13,7 +19,7 @@ const AccountSchema = z.object({
 	currency: z.string().readonly(),
 
 	/** Default estimate in English. When value is null, then 'estimate' is used */
-	default_estimate_type: z.enum(["estimate", "quote"]).nullable().readonly(),
+	default_estimate_type: z.enum(ACCOUNT_ESTIMATE).nullable().readonly(),
 
 	/** Digitoo service auto processing enabled */
 	digitoo_auto_processing_enabled: z.boolean().readonly(),
@@ -49,13 +55,13 @@ const AccountSchema = z.object({
 		.readonly(),
 
 	/** Default invoice language */
-	invoice_language: z.enum(["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"]).readonly(),
+	invoice_language: z.enum(ACCOUNT_INVOICE_LANGUAGE).readonly(),
 
 	/** Text before lines */
 	invoice_note: z.string().readonly(),
 
 	/** Default payment method. When value is null, then 'bank' method is used */
-	invoice_payment_method: z.enum(["bank", "card", "cash", "cod", "paypal"]).nullable().readonly(),
+	invoice_payment_method: z.enum(ACCOUNT_PAYMENT_METHOD).nullable().readonly(),
 
 	/** PayPal enabled for all invoices? */
 	invoice_paypal: z.boolean().readonly(),
@@ -113,13 +119,13 @@ const AccountSchema = z.object({
 	updated_at: z.string().readonly(),
 
 	/** VAT mode */
-	vat_mode: z.enum(["vat_payer", "non_vat_payer", "identified_person"]).readonly(),
+	vat_mode: z.enum(ACCOUNT_VAT_MODE).readonly(),
 
 	/** Tax identification number */
 	vat_no: z.string().readonly(),
 
 	/** VAT calculation mode */
-	vat_price_mode: z.enum(["with_vat", "without_vat", "numerical_with_vat", "from_total_with_vat"]).readonly(),
+	vat_price_mode: z.enum(ACCOUNT_VAT_PRICE_MODE).readonly(),
 
 	/** Default VAT rate */
 	vat_rate: z.number().int().readonly(),
@@ -134,4 +140,11 @@ const AccountSchema = z.object({
 type Account = z.infer<typeof AccountSchema>;
 
 export type { Account };
-export { AccountSchema };
+export {
+	AccountSchema,
+	ACCOUNT_ESTIMATE,
+	ACCOUNT_INVOICE_LANGUAGE,
+	ACCOUNT_PAYMENT_METHOD,
+	ACCOUNT_VAT_MODE,
+	ACCOUNT_VAT_PRICE_MODE,
+};

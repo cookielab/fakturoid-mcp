@@ -1,11 +1,18 @@
 import { z } from "zod/v4";
 import { LegacyBankDetailsSchema } from "./common.ts";
 
+const RECURRING_GENERATOR_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
+const RECURRING_GENERATOR_LANGUAGE = ["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"] as const;
+const RECURRING_GENERATOR_OSS = ["disabled", "service", "goods"] as const;
+const RECURRING_GENERATOR_PAYMENT_METHOD = ["bank", "cash", "cod", "card", "paypal", "custom"] as const;
+const RECURRING_GENERATOR_IBAN_VISIBILITY = ["automatically", "always"] as const;
+const RECURRING_GENERATOR_VAT_PRICE_MODE = ["without_vat", "from_total_with_vat"] as const;
+
 const InventorySchema = z.object({
 	/** Article number (if present) */
 	article_number: z.string().optional(),
 	/** Article number type (only if article_number is present) */
-	article_number_type: z.enum(["ian", "ean", "isbn"]).optional(),
+	article_number_type: z.enum(RECURRING_GENERATOR_ARTICLE_NUMBER_TYPE).optional(),
 	/** ID of the related inventory item */
 	item_id: z.number().int(),
 	/** ID of the related inventory move */
@@ -107,11 +114,11 @@ const RecurringGeneratorSchema = z.object({
 	/** Generator HTML web address */
 	html_url: z.string().readonly(),
 	/** Controls IBAN visibility on the document webinvoice and PDF. IBAN must be valid to show */
-	iban_visibility: z.enum(["automatically", "always"]).default("automatically"),
+	iban_visibility: z.enum(RECURRING_GENERATOR_IBAN_VISIBILITY).default("automatically"),
 	/** Unique identifier in Fakturoid */
 	id: z.number().int().readonly(),
 	/** Invoice language */
-	language: z.enum(["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"]).optional(),
+	language: z.enum(RECURRING_GENERATOR_LANGUAGE).optional(),
 	/** Issue an invoice on the last day of the month */
 	last_day_in_month: z.boolean().default(false),
 	/** Display IBAN, BIC (SWIFT) and bank account number for legacy generators set without bank account ID */
@@ -135,9 +142,9 @@ const RecurringGeneratorSchema = z.object({
 	/** Order number */
 	order_number: z.string().nullable().optional(),
 	/** Use OSS mode on invoice */
-	oss: z.enum(["disabled", "service", "goods"]).default("disabled"),
+	oss: z.enum(RECURRING_GENERATOR_OSS).default("disabled"),
 	/** Payment method */
-	payment_method: z.enum(["bank", "cash", "cod", "card", "paypal", "custom"]).optional(),
+	payment_method: z.enum(RECURRING_GENERATOR_PAYMENT_METHOD).optional(),
 	/** Show PayPal pay button on invoice */
 	paypal: z.boolean().default(false),
 	/** Issue invoice as a proforma */
@@ -167,7 +174,7 @@ const RecurringGeneratorSchema = z.object({
 	/** Generator API address */
 	url: z.string().readonly(),
 	/** Calculate VAT from base or final amount */
-	vat_price_mode: z.enum(["without_vat", "from_total_with_vat"]).nullable().optional(),
+	vat_price_mode: z.enum(RECURRING_GENERATOR_VAT_PRICE_MODE).nullable().optional(),
 });
 
 const CreateRecurringGeneratorSchema = RecurringGeneratorSchema.pick({
@@ -259,5 +266,18 @@ type RecurringGenerator = z.infer<typeof RecurringGeneratorSchema>;
 type CreateRecurringGenerator = z.infer<typeof CreateRecurringGeneratorSchema>;
 type UpdateRecurringGenerator = z.infer<typeof UpdateRecurringGeneratorSchema>;
 
-export { RecurringGeneratorSchema, CreateRecurringGeneratorSchema, UpdateRecurringGeneratorSchema };
-export type { RecurringGenerator, CreateRecurringGenerator, UpdateRecurringGenerator };
+type Line = z.infer<typeof LineSchema>;
+type Inventory = z.infer<typeof InventorySchema>;
+
+export {
+	RecurringGeneratorSchema,
+	CreateRecurringGeneratorSchema,
+	UpdateRecurringGeneratorSchema,
+	RECURRING_GENERATOR_ARTICLE_NUMBER_TYPE,
+	RECURRING_GENERATOR_LANGUAGE,
+	RECURRING_GENERATOR_OSS,
+	RECURRING_GENERATOR_PAYMENT_METHOD,
+	RECURRING_GENERATOR_IBAN_VISIBILITY,
+	RECURRING_GENERATOR_VAT_PRICE_MODE,
+};
+export type { RecurringGenerator, CreateRecurringGenerator, UpdateRecurringGenerator, Line, Inventory };
