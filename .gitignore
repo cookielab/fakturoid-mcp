@@ -25,5 +25,8 @@ pnpm-debug.log*
 *.ntvs*
 *.njsproj
 *.sln
-*.sw? 
+*.sw?
 .cursor
+
+coverage
+test_report

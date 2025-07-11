@@ -4,7 +4,7 @@ variables:
   PNPM_STORE_PATH: .pnpm-store
 
 stages:
-  - lint
+  - check
   - build
 
 default:
@@ -24,13 +24,38 @@ default:
       - $PNPM_STORE_PATH
 
 lint:
-  stage: lint
+  stage: check
 
   script:
     - pnpm lint
 
+test:
+  stage: check
+
+  script:
+    - pnpm test
+
+  coverage: /All files[^\|]*\|[^\|]*\s+([\d\.]+)/
+
+  artifacts:
+    untracked: false
+    when: always
+    access: all
+    expire_in: "30 days"
+
+    reports:
+      junit:
+        - "./**/junit.xml"
+
+      coverage_report:
+        coverage_format: cobertura
+        path: "./**/cobertura-coverage.xml"
+
 build:
   stage: build
+
+  needs:
+    - test
 
   script:
     - pnpm build
