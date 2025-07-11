@@ -40,11 +40,11 @@ const request = async <Response, Body = undefined>(
 	body?: Body,
 	queryParameters?: Record<string, string>,
 ): Promise<Response | InvalidDataError | GeneralError | UnexpectedError> => {
-	const url = new URL(`${endpoint}`, strategy.apiURL);
+	const params = Object.entries(queryParameters ?? {})
+		.map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+		.join("&");
 
-	for (const [key, value] of Object.entries(queryParameters ?? {})) {
-		url.searchParams.append(key, value);
-	}
+	const url = `${strategy.apiURL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}${params.length > 0 ? `?${params}` : ""}`;
 
 	const headers = await strategy.getHeaders({
 		"Content-Type": "application/json",
@@ -84,7 +84,7 @@ async function* paginatedRequest<Item>(
 	queryParameters?: Record<string, string>,
 	page?: number,
 ): AsyncGenerator<Item[], undefined | InvalidDataError | GeneralError | UnexpectedError, undefined> {
-	let currentPage = page ?? 0;
+	let currentPage = page ?? 1;
 
 	while (true) {
 		// biome-ignore lint/nursery/noAwaitInLoop: Usage in generator
@@ -113,12 +113,13 @@ async function* paginatedRequest<Item>(
 const requestAllPages = async <Item>(
 	strategy: AuthenticationStrategy,
 	endpoint: string,
+	queryParameters?: Record<string, string>,
 	pageCount?: number,
 ): Promise<Item[] | InvalidDataError | GeneralError | UnexpectedError> => {
 	const items: Item[] = [];
 	let currentPage = 0;
 
-	for await (const itemsPage of paginatedRequest<Item>(strategy, endpoint)) {
+	for await (const itemsPage of paginatedRequest<Item>(strategy, endpoint, queryParameters)) {
 		if (itemsPage instanceof Error) {
 			return itemsPage;
 		}

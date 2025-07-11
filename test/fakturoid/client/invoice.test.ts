@@ -36,7 +36,7 @@ describe("Invoice", () => {
 
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(invoices)));
-		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/invoices.json?page=0", {
+		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/invoices.json?page=1", {
 			body: null,
 			headers: Object.fromEntries(
 				new Headers({
@@ -67,7 +67,7 @@ describe("Invoice", () => {
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(invoices)));
 		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith(
 			// biome-ignore lint/nursery/noSecrets: Not a secret
-			"https://test.example/accounts/test/invoices.json?since=2023-01-01&updated_since=2023-01-01&subject_id=123&status=open&page=0",
+			"https://test.example/accounts/test/invoices.json?since=2023-01-01&updated_since=2023-01-01&subject_id=123&status=open&page=1",
 			{
 				body: null,
 				headers: Object.fromEntries(
@@ -94,7 +94,7 @@ describe("Invoice", () => {
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(invoices)));
 		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith(
 			// biome-ignore lint/nursery/noSecrets: Not a secret
-			"https://test.example/accounts/test/invoices/search.json?query=search+query&tags=tag1%2Ctag2&page=0",
+			"https://test.example/accounts/test/invoices/search.json?query=search%20query&tags=tag1%2Ctag2&page=1",
 			{
 				body: null,
 				headers: Object.fromEntries(

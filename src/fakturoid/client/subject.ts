@@ -18,7 +18,7 @@ const getSubjects = async (
 	accountSlug: string,
 	filters?: GetSubjectsFilters,
 ): Promise<Subject[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[
 			["since", filters?.since],
 			["updated_since", filters?.updated_since],
@@ -26,9 +26,9 @@ const getSubjects = async (
 		].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/subjects.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/subjects.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**
@@ -47,13 +47,13 @@ const searchSubjects = async (
 	accountSlug: string,
 	query?: string,
 ): Promise<Subject[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[["query", query]].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/subjects/search.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/subjects/search.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**

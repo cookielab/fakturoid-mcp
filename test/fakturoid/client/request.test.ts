@@ -163,7 +163,7 @@ describe("Request", () => {
 
 		mockedFetch.mockResolvedValueOnce(createResponse(firstPage)).mockResolvedValueOnce(createResponse(secondPage));
 
-		const result = await requestAllPages(strategy, "/test", 1);
+		const result = await requestAllPages(strategy, "/test", {}, 1);
 
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(firstPage)));

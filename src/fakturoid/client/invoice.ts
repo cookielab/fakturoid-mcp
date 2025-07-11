@@ -18,7 +18,7 @@ const getInvoices = async (
 	accountSlug: string,
 	filters?: GetInvoicesFilters,
 ): Promise<Invoice[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[
 			["since", filters?.since],
 			["until", filters?.until],
@@ -32,9 +32,9 @@ const getInvoices = async (
 		].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/invoices.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/invoices.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**
@@ -55,16 +55,16 @@ const searchInvoices = async (
 	query?: string,
 	tags?: string[],
 ): Promise<Invoice[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[
 			["query", query],
 			["tags", tags?.join(",")],
 		].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/invoices/search.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/invoices/search.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**

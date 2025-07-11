@@ -34,7 +34,7 @@ describe("Inventory Item", () => {
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(inventoryItems)));
 		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith(
-			"https://test.example/accounts/test/inventory_items.json?page=0",
+			"https://test.example/accounts/test/inventory_items.json?page=1",
 			{
 				body: null,
 				headers: Object.fromEntries(

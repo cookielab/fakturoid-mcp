@@ -31,7 +31,7 @@ describe("Inbox File", () => {
 
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(inboxFiles)));
-		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/inbox_files.json?page=0", {
+		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/inbox_files.json?page=1", {
 			body: null,
 			headers: Object.fromEntries(
 				new Headers({

@@ -33,7 +33,7 @@ describe("Recurring Generator", () => {
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(generators)));
 		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith(
-			"https://test.example/accounts/test/recurring_generators.json?page=0",
+			"https://test.example/accounts/test/recurring_generators.json?page=1",
 			{
 				body: null,
 				headers: Object.fromEntries(

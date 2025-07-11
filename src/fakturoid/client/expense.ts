@@ -18,7 +18,7 @@ const getExpenses = async (
 	accountSlug: string,
 	filters?: GetExpenseFilters,
 ): Promise<Expense[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[
 			["since", filters?.since],
 			["updated_since", filters?.updated_since],
@@ -30,9 +30,9 @@ const getExpenses = async (
 		].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/expenses.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/expenses.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**
@@ -53,16 +53,16 @@ const searchExpenses = async (
 	query?: string,
 	tags?: string[],
 ): Promise<Expense[] | Error> => {
-	const queryParams = new URLSearchParams(
+	const queryParams = Object.fromEntries(
 		[
 			["query", query],
 			["tags", tags?.join(",")],
 		].filter((value): value is [string, string] => value[1] != null),
 	);
 
-	const path = `/accounts/${accountSlug}/expenses/search.json?${queryParams.toString()}`;
+	const path = `/accounts/${accountSlug}/expenses/search.json`;
 
-	return await requestAllPages(strategy, path);
+	return await requestAllPages(strategy, path, queryParams);
 };
 
 /**
@@ -127,9 +127,9 @@ const fireExpenseAction = async (
 	id: number,
 	event: "lock" | "unlock",
 ): ReturnType<typeof request<undefined>> => {
-	const queryParams = new URLSearchParams([["event", event]]);
+	const queryParams = Object.fromEntries([["event", event]]);
 
-	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}/fire.json?${queryParams.toString()}`, "POST");
+	return await request(strategy, `/accounts/${accountSlug}/expenses/${id}/fire.json`, "POST", undefined, queryParams);
 };
 
 /**

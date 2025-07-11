@@ -25,7 +25,7 @@ describe("Event", () => {
 
 		// Stringify to parse just to have the same behavior for keys with undefined
 		expect(result).toStrictEqual(JSON.parse(JSON.stringify(events)));
-		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/events.json?page=0", {
+		expect(mockedFetch).toHaveBeenCalledExactlyOnceWith("https://test.example/accounts/test/events.json?page=1", {
 			body: null,
 			headers: Object.fromEntries(
 				new Headers({
