@@ -1,22 +1,22 @@
 import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import type { AuthenticationStrategy } from "../auth/strategy.ts";
-import type { FakturoidClient } from "./client.ts";
-import type { FakturoidResource } from "./resource/common.ts";
+import type { AuthenticationStrategy } from "../auth/strategy.js";
+import type { FakturoidClient } from "./client.js";
+import type { FakturoidResource } from "./resource/common.js";
 import {
 	ListResourcesRequestSchema,
 	ReadResourceRequestSchema,
 	type Resource,
 } from "@modelcontextprotocol/sdk/types.js";
-import { accountResource } from "./resource/account.ts";
-import { dashboardSummaryResource } from "./resource/dashboardSummary.ts";
-import { expensesOpenResource } from "./resource/expensesOpen.ts";
-import { expensesRecentResource } from "./resource/expensesRecent.ts";
-import { invoicesOpenResource } from "./resource/invoicesOpen.ts";
-import { invoicesOverdueResource } from "./resource/invoicesOverdue.ts";
-import { invoicesRecentResource } from "./resource/invoicesRecent.ts";
-import { subjectsCustomersResource } from "./resource/subjectsCustomers.ts";
-import { subjectsRecentResource } from "./resource/subjectsRecent.ts";
-import { subjectsSuppliersResource } from "./resource/subjectsSuppliers.ts";
+import { accountResource } from "./resource/account.js";
+import { dashboardSummaryResource } from "./resource/dashboardSummary.js";
+import { expensesOpenResource } from "./resource/expensesOpen.js";
+import { expensesRecentResource } from "./resource/expensesRecent.js";
+import { invoicesOpenResource } from "./resource/invoicesOpen.js";
+import { invoicesOverdueResource } from "./resource/invoicesOverdue.js";
+import { invoicesRecentResource } from "./resource/invoicesRecent.js";
+import { subjectsCustomersResource } from "./resource/subjectsCustomers.js";
+import { subjectsRecentResource } from "./resource/subjectsRecent.js";
+import { subjectsSuppliersResource } from "./resource/subjectsSuppliers.js";
 
 const RESOURCES: FakturoidResource[] = [
 	accountResource,

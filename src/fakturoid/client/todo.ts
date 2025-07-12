@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { Todo } from "../model/todo.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { Todo } from "../model/todo.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all todos.

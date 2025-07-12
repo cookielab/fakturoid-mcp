@@ -1,20 +1,20 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const VatRatesSummarySchema = z.object({
 	/** Base total */
-	base: z.string().readonly(),
+	base: z.string(),
 	/** Currency */
-	currency: z.string().readonly(),
+	currency: z.string(),
 	/** Base total in account currency */
-	native_base: z.string().readonly(),
+	native_base: z.string(),
 	/** Account currency */
-	native_currency: z.string().readonly(),
+	native_currency: z.string(),
 	/** VAT total in account currency */
-	native_vat: z.string().readonly(),
+	native_vat: z.string(),
 	/** VAT total */
-	vat: z.string().readonly(),
+	vat: z.string(),
 	/** VAT rate */
-	vat_rate: z.union([z.number(), z.string()]).readonly(),
+	vat_rate: z.union([z.number(), z.string()]),
 });
 
 const CreateAttachmentSchema = z.object({
@@ -26,13 +26,13 @@ const CreateAttachmentSchema = z.object({
 
 const LegacyBankDetailsSchema = z.object({
 	/** Bank account number */
-	bank_account: z.string().readonly(),
+	bank_account: z.string(),
 
 	/** IBAN */
-	iban: z.string().readonly(),
+	iban: z.string(),
 
 	/** BIC (for SWIFT payments) */
-	swift_bic: z.string().readonly(),
+	swift_bic: z.string(),
 });
 
 type VatRatesSummary = z.infer<typeof VatRatesSummarySchema>;

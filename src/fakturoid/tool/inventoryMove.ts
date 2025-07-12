@@ -1,8 +1,11 @@
-import { z } from "zod/v4";
-import { createTool, type ServerToolCreator } from "./common.ts";
+import { z } from "zod/v3";
+import { CreateInventoryMoveSchema, UpdateInventoryMoveSchema } from "../model/inventoryMove.js";
+import { createTool, type ServerToolCreator } from "./common.js";
 
 const getInventoryMoves = createTool(
 	"fakturoid_get_inventory_moves",
+	"Get Inventory Moves",
+	"Retrieve a list of inventory movements (stock changes) for a specific inventory item",
 	async (client, { inventoryItemId }) => {
 		const inventoryMoves = await client.getInventoryMoves(inventoryItemId);
 
@@ -10,14 +13,16 @@ const getInventoryMoves = createTool(
 			content: [{ text: JSON.stringify(inventoryMoves, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		accountSlug: z.string().min(1),
 		inventoryItemId: z.number(),
-	}),
+	},
 );
 
 const getInventoryMove = createTool(
 	"fakturoid_get_inventory_move",
+	"Get Inventory Move",
+	"Retrieve detailed information about a specific inventory movement by its ID",
 	async (client, { inventoryItemId, id }) => {
 		const inventoryMove = await client.getInventoryMove(inventoryItemId, id);
 
@@ -25,14 +30,16 @@ const getInventoryMove = createTool(
 			content: [{ text: JSON.stringify(inventoryMove, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
 		inventoryItemId: z.number(),
-	}),
+	},
 );
 
 const createInventoryMove = createTool(
 	"fakturoid_create_inventory_move",
+	"Create Inventory Move",
+	"Create a new inventory movement (stock change) for an inventory item",
 	async (client, { inventoryItemId, inventoryMoveData }) => {
 		const inventoryMove = await client.createInventoryMove(inventoryItemId, inventoryMoveData);
 
@@ -40,14 +47,16 @@ const createInventoryMove = createTool(
 			content: [{ text: JSON.stringify(inventoryMove, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		inventoryItemId: z.number(),
-		inventoryMoveData: z.any(), // Using z.any() since CreateInventoryMove type is not available here
-	}),
+		inventoryMoveData: CreateInventoryMoveSchema,
+	},
 );
 
 const updateInventoryMove = createTool(
 	"fakturoid_update_inventory_move",
+	"Update Inventory Move",
+	"Update an existing inventory movement with new data",
 	async (client, { inventoryItemId, id, inventoryMoveData }) => {
 		const inventoryMove = await client.updateInventoryMove(inventoryItemId, id, inventoryMoveData);
 
@@ -55,15 +64,17 @@ const updateInventoryMove = createTool(
 			content: [{ text: JSON.stringify(inventoryMove, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
 		inventoryItemId: z.number(),
-		inventoryMoveData: z.any(), // Using z.any() since UpdateInventoryMove type is not available here
-	}),
+		inventoryMoveData: UpdateInventoryMoveSchema,
+	},
 );
 
 const deleteInventoryMove = createTool(
 	"fakturoid_delete_inventory_move",
+	"Delete Inventory Move",
+	"Delete an inventory movement by its ID",
 	async (client, { inventoryItemId, id }) => {
 		await client.deleteInventoryMove(inventoryItemId, id);
 
@@ -71,10 +82,10 @@ const deleteInventoryMove = createTool(
 			content: [{ text: "Inventory move deleted successfully", type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
 		inventoryItemId: z.number(),
-	}),
+	},
 );
 
 const inventoryMove = [

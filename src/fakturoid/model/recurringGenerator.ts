@@ -1,5 +1,5 @@
-import { z } from "zod/v4";
-import { LegacyBankDetailsSchema } from "./common.ts";
+import { z } from "zod/v3";
+import { LegacyBankDetailsSchema } from "./common.js";
 
 const RECURRING_GENERATOR_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
 const RECURRING_GENERATOR_LANGUAGE = ["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"] as const;
@@ -23,29 +23,29 @@ const InventorySchema = z.object({
 
 const LineSchema = z.object({
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 	/** Inventory information */
-	inventory: InventorySchema.nullable().readonly().default(null),
+	inventory: InventorySchema.nullable().default(null),
 	/** Line name */
 	name: z.string(),
 	/** Total price without VAT in account currency */
-	native_total_price_without_vat: z.string().readonly(),
+	native_total_price_without_vat: z.string(),
 	/** Total VAT in account currency */
-	native_total_vat: z.string().readonly(),
+	native_total_vat: z.string(),
 	/** Quantity */
 	quantity: z.string().default("1"),
 	/** Total price without VAT */
-	total_price_without_vat: z.string().readonly(),
+	total_price_without_vat: z.string(),
 	/** Total VAT */
-	total_vat: z.string().readonly(),
+	total_vat: z.string(),
 	/** Unit name */
 	unit_name: z.string().optional(),
 	/** Unit price */
 	unit_price: z.string(),
 	/** Unit price including VAT */
-	unit_price_with_vat: z.string().readonly(),
+	unit_price_with_vat: z.string(),
 	/** Unit price without VAT */
-	unit_price_without_vat: z.string().readonly(),
+	unit_price_without_vat: z.string(),
 	/** VAT Rate */
 	vat_rate: z.union([z.number().int(), z.number()]).default(0),
 });
@@ -90,11 +90,11 @@ const UpdateLineSchema = z.object({
 
 const RecurringGeneratorSchema = z.object({
 	/** Generator is active or paused */
-	active: z.boolean().readonly().default(true),
+	active: z.boolean().default(true),
 	/** Bank account ID */
 	bank_account_id: z.number().int().nullable().optional(),
 	/** Date and time of generator creation */
-	created_at: z.string().readonly(),
+	created_at: z.string(),
 	/** Currency ISO code */
 	currency: z.string().optional(),
 	/** Identifier in your application */
@@ -112,17 +112,17 @@ const RecurringGeneratorSchema = z.object({
 	/** Show GoPay pay button on invoice */
 	gopay: z.boolean().default(false),
 	/** Generator HTML web address */
-	html_url: z.string().readonly(),
+	html_url: z.string(),
 	/** Controls IBAN visibility on the document webinvoice and PDF. IBAN must be valid to show */
 	iban_visibility: z.enum(RECURRING_GENERATOR_IBAN_VISIBILITY).default("automatically"),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 	/** Invoice language */
 	language: z.enum(RECURRING_GENERATOR_LANGUAGE).optional(),
 	/** Issue an invoice on the last day of the month */
 	last_day_in_month: z.boolean().default(false),
 	/** Display IBAN, BIC (SWIFT) and bank account number for legacy generators set without bank account ID */
-	legacy_bank_details: LegacyBankDetailsSchema.nullable().readonly().default(null),
+	legacy_bank_details: LegacyBankDetailsSchema.nullable().default(null),
 	/** List of lines to invoice. You can use variables for inserting dates to your text. */
 	lines: z.array(LineSchema),
 	/** Number of months until the next invoice */
@@ -130,9 +130,9 @@ const RecurringGeneratorSchema = z.object({
 	/** Generator name */
 	name: z.string(),
 	/** Total amount without VAT in the account currency */
-	native_subtotal: z.string().readonly(),
+	native_subtotal: z.string(),
 	/** Total amount with VAT in the account currency */
-	native_total: z.string().readonly(),
+	native_total: z.string(),
 	/** Next invoice date */
 	next_occurrence_on: z.string().optional(),
 	/** Text before invoice lines */
@@ -156,9 +156,9 @@ const RecurringGeneratorSchema = z.object({
 	/** Subject ID */
 	subject_id: z.number().int(),
 	/** API address of subject */
-	subject_url: z.string().readonly(),
+	subject_url: z.string(),
 	/** Total amount without VAT */
-	subtotal: z.string().readonly(),
+	subtotal: z.string(),
 	/** Supply code for reverse charge */
 	supply_code: z.number().int().nullable().optional(),
 	/** List of tags */
@@ -166,13 +166,13 @@ const RecurringGeneratorSchema = z.object({
 	/** Set CED at the end of last month */
 	tax_date_at_end_of_last_month: z.boolean().default(false),
 	/** Total amount with VAT */
-	total: z.string().readonly(),
+	total: z.string(),
 	/** Use reverse charge */
 	transferred_tax_liability: z.boolean().default(false),
 	/** Date and time of last generator update */
-	updated_at: z.string().readonly(),
+	updated_at: z.string(),
 	/** Generator API address */
-	url: z.string().readonly(),
+	url: z.string(),
 	/** Calculate VAT from base or final amount */
 	vat_price_mode: z.enum(RECURRING_GENERATOR_VAT_PRICE_MODE).nullable().optional(),
 });

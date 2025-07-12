@@ -1,8 +1,8 @@
 import process from "node:process";
 import dotenv from "dotenv";
-import { z } from "zod/v4";
-import { logger } from "../utils/logger.ts";
-import { AuthenticationStrategy } from "./strategy.ts";
+import { z } from "zod/v3";
+import { logger } from "../utils/logger.js";
+import { AuthenticationStrategy } from "./strategy.js";
 
 interface Configuration {
 	clientID: string;
@@ -12,20 +12,22 @@ interface Configuration {
 	email: string;
 }
 
-const TokenResponseSchema = z.looseObject({
-	access_token: z.string().min(1),
-	expires_in: z.int().positive(),
-	token_type: z.string().min(1),
-});
+const TokenResponseSchema = z
+	.object({
+		access_token: z.string().min(1),
+		expires_in: z.number().int().positive(),
+		token_type: z.string().min(1),
+	})
+	.passthrough();
 
 const EnvironmentConfigurationSchema = z
 	.object({
-		API_URL: z.url(),
+		API_URL: z.string().url(),
 		// biome-ignore lint/nursery/noSecrets: Not a secret
 		APP_NAME: z.string().min(1).default("FakturoidMCP"),
 		CLIENT_ID: z.string().min(1),
 		CLIENT_SECRET: z.string().min(1),
-		CONTACT_EMAIL: z.email().default("test@example.com"),
+		CONTACT_EMAIL: z.string().email().default("test@example.com"),
 	})
 	.transform(
 		(parsed) =>
@@ -39,12 +41,11 @@ const EnvironmentConfigurationSchema = z
 	);
 
 const loadEnvironmentConfiguration = (): Configuration => {
-	dotenv.config();
+	dotenv.config({ quiet: true });
 
 	const configuration = EnvironmentConfigurationSchema.safeParse(process.env);
 	if (!configuration.success) {
 		logger.error("Could not load the configuration from ENV!");
-		logger.error(z.prettifyError(configuration.error));
 		logger.error(configuration.error);
 
 		// Fatal error - should be ok to exit completely
@@ -109,9 +110,9 @@ class LocalStrategy extends AuthenticationStrategy<Configuration> {
 
 			const tokenResponse = TokenResponseSchema.safeParse(JSON.parse(body));
 			if (!tokenResponse.success) {
-				logger.error("Unexpected response from the API: ", z.prettifyError(tokenResponse.error));
+				logger.error("Unexpected response from the API: ", tokenResponse.error);
 
-				throw new Error(z.prettifyError(tokenResponse.error));
+				throw new Error(tokenResponse.error.message);
 			}
 
 			this.tokenExpiry = new Date(Date.now() + tokenResponse.data.expires_in * 1000 - EXPIRATION_MARGIN);

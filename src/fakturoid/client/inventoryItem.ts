@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateInventoryItem, InventoryItem, UpdateInventoryItem } from "../model/inventoryItem.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateInventoryItem, InventoryItem, UpdateInventoryItem } from "../model/inventoryItem.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all inventory items.

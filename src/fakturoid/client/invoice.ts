@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateInvoice, GetInvoicesFilters, Invoice, UpdateInvoice } from "../model/invoice.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateInvoice, GetInvoicesFilters, Invoice, UpdateInvoice } from "../model/invoice.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all invoices.

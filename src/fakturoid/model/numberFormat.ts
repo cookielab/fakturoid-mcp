@@ -1,22 +1,22 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const NumberFormatSchema = z.object({
 	/** Date and time of number format creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 
 	/** Default number format */
-	default: z.boolean().readonly(),
+	default: z.boolean(),
 
 	/** Format */
-	format: z.string().readonly(),
+	format: z.string(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Preview of number format */
-	preview: z.string().readonly(),
+	preview: z.string(),
 
 	/** Date and time of last number format update */
-	updated_at: z.iso.datetime().readonly(),
+	updated_at: z.coerce.date(),
 });
 
 type NumberFormat = z.infer<typeof NumberFormatSchema>;

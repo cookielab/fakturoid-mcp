@@ -1,9 +1,11 @@
-import { z } from "zod/v4";
-import { GetExpenseFiltersSchema } from "../model/expense.ts";
-import { createTool, type ServerToolCreator } from "./common.ts";
+import { z } from "zod/v3";
+import { CreateExpenseSchema, GetExpenseFiltersSchema, UpdateExpenseSchema } from "../model/expense.js";
+import { createTool, type ServerToolCreator } from "./common.js";
 
 const getExpenses = createTool(
 	"fakturoid_get_expenses",
+	"Get Expenses",
+	"Retrieve a list of expenses with optional filtering by status, date range, supplier, and other criteria",
 	async (client, { filters }) => {
 		const expenses = await client.getExpenses(filters);
 
@@ -11,13 +13,15 @@ const getExpenses = createTool(
 			content: [{ text: JSON.stringify(expenses, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		filters: GetExpenseFiltersSchema.optional(),
-	}),
+	},
 );
 
 const searchExpenses = createTool(
 	"fakturoid_search_expenses",
+	"Search Expenses",
+	"Search expenses by text query and optionally filter by tags",
 	async (client, { query, tags }) => {
 		const expenses = await client.searchExpenses(query, tags);
 
@@ -25,15 +29,17 @@ const searchExpenses = createTool(
 			content: [{ text: JSON.stringify(expenses, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		accountSlug: z.string().min(1),
 		query: z.string().optional(),
 		tags: z.array(z.string()).optional(),
-	}),
+	},
 );
 
 const getExpenseDetail = createTool(
 	"fakturoid_get_expense_detail",
+	"Get Expense Detail",
+	"Retrieve detailed information about a specific expense by its ID",
 	async (client, { id }) => {
 		const expense = await client.getExpenseDetail(id);
 
@@ -41,14 +47,16 @@ const getExpenseDetail = createTool(
 			content: [{ text: JSON.stringify(expense, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		accountSlug: z.string().min(1),
 		id: z.number(),
-	}),
+	},
 );
 
 const downloadExpenseAttachment = createTool(
 	"fakturoid_download_expense_attachment",
+	"Download Expense Attachment",
+	"Download a specific attachment from an expense",
 	async (client, { expenseId, attachmentId }) => {
 		const attachment = await client.downloadExpenseAttachment(expenseId, attachmentId);
 
@@ -56,14 +64,16 @@ const downloadExpenseAttachment = createTool(
 			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		attachmentId: z.number(),
 		expenseId: z.number(),
-	}),
+	},
 );
 
 const fireExpenseAction = createTool(
 	"fakturoid_fire_expense_action",
+	"Fire Expense Action",
+	"Execute actions on an expense such as locking or unlocking",
 	async (client, { id, event }) => {
 		const result = await client.fireExpenseAction(id, event);
 
@@ -71,29 +81,31 @@ const fireExpenseAction = createTool(
 			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		accountSlug: z.string().min(1),
 		event: z.enum(["lock", "unlock"]),
 		id: z.number(),
-	}),
+	},
 );
 
 const createExpense = createTool(
 	"fakturoid_create_expense",
-	async (client, { expenseData }) => {
+	"Create Expense",
+	"Create a new expense with the provided expense data",
+	async (client, expenseData) => {
 		const expense = await client.createExpense(expenseData);
 
 		return {
 			content: [{ text: JSON.stringify(expense, null, 2), type: "text" }],
 		};
 	},
-	z.object({
-		expenseData: z.any(), // Using z.any() since CreateExpense type is not available here
-	}),
+	CreateExpenseSchema.shape,
 );
 
 const updateExpense = createTool(
 	"fakturoid_update_expense",
+	"Update Expense",
+	"Update an existing expense with new data",
 	async (client, { id, updateData }) => {
 		const expense = await client.updateExpense(id, updateData);
 
@@ -101,14 +113,16 @@ const updateExpense = createTool(
 			content: [{ text: JSON.stringify(expense, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-		updateData: z.any(), // Using z.any() since UpdateExpense type is not available here
-	}),
+		updateData: UpdateExpenseSchema,
+	},
 );
 
 const deleteExpense = createTool(
 	"fakturoid_delete_expense",
+	"Delete Expense",
+	"Delete an expense by its ID",
 	async (client, { id }) => {
 		await client.deleteExpense(id);
 
@@ -116,9 +130,9 @@ const deleteExpense = createTool(
 			content: [{ text: "Expense deleted successfully", type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-	}),
+	},
 );
 
 const expense = [

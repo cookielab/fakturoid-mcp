@@ -1,46 +1,46 @@
-import { z } from "zod/v4";
-import { LegacyBankDetailsSchema } from "./common.ts";
+import { z } from "zod/v3";
+import { LegacyBankDetailsSchema } from "./common.js";
 
 const InventorySchema = z.object({
 	/** Article number (if present) */
-	article_number: z.string().optional().readonly(),
+	article_number: z.string().optional(),
 
 	/** Article number type (only if article_number is present) */
-	article_number_type: z.enum(["ian", "ean", "isbn"]).optional().readonly(),
+	article_number_type: z.enum(["ian", "ean", "isbn"]).optional(),
 	/** ID of the related inventory item */
-	item_id: z.number().int().readonly(),
+	item_id: z.number().int(),
 
 	/** ID of the related inventory move */
-	move_id: z.number().int().readonly(),
+	move_id: z.number().int(),
 
 	/** Stock Keeping Unit (SKU) */
-	sku: z.string().readonly(),
+	sku: z.string(),
 });
 
 const LineSchema = z.object({
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Inventory information */
-	inventory: InventorySchema.nullable().default(null).readonly(),
+	inventory: InventorySchema.nullable().default(null),
 
 	/** Line name */
 	name: z.string(),
 
 	/** Total price without VAT in account currency */
-	native_total_price_without_vat: z.coerce.string().readonly(),
+	native_total_price_without_vat: z.coerce.string(),
 
 	/** Total VAT in account currency */
-	native_total_vat: z.coerce.string().readonly(),
+	native_total_vat: z.coerce.string(),
 
 	/** Quantity */
 	quantity: z.coerce.string().default("1"),
 
 	/** Total price without VAT */
-	total_price_without_vat: z.coerce.string().readonly(),
+	total_price_without_vat: z.coerce.string(),
 
 	/** Total VAT */
-	total_vat: z.coerce.string().readonly(),
+	total_vat: z.coerce.string(),
 
 	/** Unit name */
 	unit_name: z.string().optional(),
@@ -49,10 +49,10 @@ const LineSchema = z.object({
 	unit_price: z.coerce.string(),
 
 	/** Unit price including VAT */
-	unit_price_with_vat: z.coerce.string().readonly(),
+	unit_price_with_vat: z.coerce.string(),
 
 	/** Unit price without VAT */
-	unit_price_without_vat: z.coerce.string().readonly(),
+	unit_price_without_vat: z.coerce.string(),
 
 	/** VAT Rate */
 	vat_rate: z.union([z.number().int(), z.number()]).default(0),
@@ -84,7 +84,7 @@ const GeneratorSchema = z.object({
 	bank_account_id: z.number().int().nullable().optional(),
 
 	/** Date and time of template creation */
-	created_at: z.string().readonly(),
+	created_at: z.string(),
 
 	/** Currency ISO code */
 	currency: z.string().optional(),
@@ -108,18 +108,18 @@ const GeneratorSchema = z.object({
 	gopay: z.boolean().default(false),
 
 	/** Template HTML web address */
-	html_url: z.string().readonly(),
+	html_url: z.string(),
 
 	/** Controls IBAN visibility on the document webinvoice and PDF */
 	iban_visibility: z.enum(["automatically", "always"]).default("automatically"),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Invoice language */
 	language: z.enum(["cz", "sk", "en", "de", "fr", "it", "es", "ru", "pl", "hu", "ro"]).optional(),
 
 	/** Display IBAN, BIC (SWIFT) and bank account number for legacy templates set without bank account ID */
-	legacy_bank_details: LegacyBankDetailsSchema.nullable().default(null).readonly(),
+	legacy_bank_details: LegacyBankDetailsSchema.nullable().default(null),
 
 	/** List of lines to invoice */
 	lines: z.array(LineSchema).default([]),
@@ -128,10 +128,10 @@ const GeneratorSchema = z.object({
 	name: z.string(),
 
 	/** Total amount without VAT in the account currency */
-	native_subtotal: z.coerce.string().readonly(),
+	native_subtotal: z.coerce.string(),
 
 	/** Total amount with VAT in the account currency */
-	native_total: z.coerce.string().readonly(),
+	native_total: z.coerce.string(),
 
 	/** Text before invoice lines */
 	note: z.string().optional(),
@@ -158,10 +158,10 @@ const GeneratorSchema = z.object({
 	subject_id: z.number().int(),
 
 	/** API address of subject */
-	subject_url: z.string().readonly(),
+	subject_url: z.string(),
 
 	/** Total amount without VAT */
-	subtotal: z.coerce.string().readonly(),
+	subtotal: z.coerce.string(),
 
 	/** Supply code for reverse charge */
 	supply_code: z.number().int().optional(),
@@ -173,16 +173,16 @@ const GeneratorSchema = z.object({
 	tax_date_at_end_of_last_month: z.boolean().default(false),
 
 	/** Total amount with VAT */
-	total: z.coerce.string().readonly(),
+	total: z.coerce.string(),
 
 	/** Use reverse charge */
 	transferred_tax_liability: z.boolean().default(false),
 
 	/** Date and time of last template update */
-	updated_at: z.string().readonly(),
+	updated_at: z.string(),
 
 	/** Template API address */
-	url: z.string().readonly(),
+	url: z.string(),
 
 	/** Calculate VAT from base or final amount */
 	vat_price_mode: z.enum(["without_vat", "from_total_with_vat"]).optional(),

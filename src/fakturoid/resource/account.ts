@@ -1,4 +1,4 @@
-import type { FakturoidResource } from "./common.ts";
+import type { FakturoidResource } from "./common.js";
 
 const URI = "fakturoid://account";
 

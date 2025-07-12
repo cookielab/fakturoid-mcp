@@ -6,7 +6,6 @@
 
 		"strict": true,
 		"checkJs": true,
-		"allowImportingTsExtensions": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"isolatedModules": true,
@@ -35,8 +34,9 @@
 		"noStrictGenericChecks": false,
 
 		"outDir": "./dist",
+		"rootDir": "./src",
 		"noEmit": true,
-		"emitDeclarationOnly": true,
+		"emitDeclarationOnly": false,
 		"declaration": true,
 		"baseUrl": "src"
 	},

@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateInvoicePayment, InvoicePayment } from "../model/invoicePayment.ts";
-import { request } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateInvoicePayment, InvoicePayment } from "../model/invoicePayment.js";
+import { request } from "./request.js";
 
 /**
  * Create a new payment for an invoice.

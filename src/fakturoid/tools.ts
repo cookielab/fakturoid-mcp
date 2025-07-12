@@ -1,25 +1,25 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { AuthenticationStrategy } from "../auth/strategy.ts";
-import type { FakturoidClient } from "./client.ts";
-import type { ServerToolCreator } from "./tool/common.ts";
-import { account } from "./tool/account.ts";
-import { bankAccount } from "./tool/bankAccount.ts";
-import { event } from "./tool/event.ts";
-import { expense } from "./tool/expense.ts";
-import { expensePayment } from "./tool/expensePayment.ts";
-import { generator } from "./tool/generator.ts";
-import { inboxFile } from "./tool/inboxFile.ts";
-import { inventoryItem } from "./tool/inventoryItem.ts";
-import { inventoryMove } from "./tool/inventoryMove.ts";
-import { invoice } from "./tool/invoice.ts";
-import { invoiceMessage } from "./tool/invoiceMessage.ts";
-import { invoicePayment } from "./tool/invoicePayment.ts";
-import { numberFormat } from "./tool/numberFormat.ts";
-import { recurringGenerator } from "./tool/recurringGenerator.ts";
-import { subject } from "./tool/subject.ts";
-import { todo } from "./tool/todo.ts";
-import { user } from "./tool/user.ts";
-import { webhook } from "./tool/webhook.ts";
+import type { AuthenticationStrategy } from "../auth/strategy.js";
+import type { FakturoidClient } from "./client.js";
+import type { ServerToolCreator } from "./tool/common.js";
+import { account } from "./tool/account.js";
+import { bankAccount } from "./tool/bankAccount.js";
+import { event } from "./tool/event.js";
+import { expense } from "./tool/expense.js";
+import { expensePayment } from "./tool/expensePayment.js";
+import { generator } from "./tool/generator.js";
+import { inboxFile } from "./tool/inboxFile.js";
+import { inventoryItem } from "./tool/inventoryItem.js";
+import { inventoryMove } from "./tool/inventoryMove.js";
+import { invoice } from "./tool/invoice.js";
+import { invoiceMessage } from "./tool/invoiceMessage.js";
+import { invoicePayment } from "./tool/invoicePayment.js";
+import { numberFormat } from "./tool/numberFormat.js";
+import { recurringGenerator } from "./tool/recurringGenerator.js";
+import { subject } from "./tool/subject.js";
+import { todo } from "./tool/todo.js";
+import { user } from "./tool/user.js";
+import { webhook } from "./tool/webhook.js";
 
 const registerFakturoidTools = <
 	Configuration extends object = object,

@@ -1,5 +1,5 @@
-import { z } from "zod/v4";
-import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.ts";
+import { z } from "zod/v3";
+import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.js";
 
 const INVOICE_DOCUMENT_TYPE = [
 	"partial_proforma",
@@ -58,64 +58,64 @@ const EetRecordSchema = z.object({
 });
 
 const PaidAdvanceSchema = z.object({
-	id: z.number().readonly(),
-	number: z.string().readonly(),
-	paid_on: z.string().readonly(),
-	price: z.string().readonly(),
-	variable_symbol: z.string().readonly(),
-	vat: z.string().readonly(),
-	vat_rate: z.union([z.number(), z.string()]).readonly(),
+	id: z.number(),
+	number: z.string(),
+	paid_on: z.string(),
+	price: z.string(),
+	variable_symbol: z.string(),
+	vat: z.string(),
+	vat_rate: z.union([z.number(), z.string()]),
 });
 
 const PaymentSchema = z.object({
-	amount: z.string().readonly(),
-	currency: z.string().readonly(),
-	id: z.number().readonly(),
-	native_amount: z.string().readonly(),
-	native_currency: z.string().readonly(),
-	paid_on: z.string().readonly(),
+	amount: z.string(),
+	currency: z.string(),
+	id: z.number(),
+	native_amount: z.string(),
+	native_currency: z.string(),
+	paid_on: z.string(),
 });
 
 const InventorySchema = z.object({
-	article_number: z.string().nullable().readonly(),
-	article_number_type: z.enum(INVOICE_ARTICLE_NUMBER_TYPE).nullable().readonly(),
-	item_id: z.number().readonly(),
-	move_id: z.number().readonly(),
-	sku: z.string().readonly(),
+	article_number: z.string().nullable(),
+	article_number_type: z.enum(INVOICE_ARTICLE_NUMBER_TYPE).nullable(),
+	item_id: z.number(),
+	move_id: z.number(),
+	sku: z.string(),
 });
 
 const AttachmentSchema = z.object({
-	content_type: z.string().readonly(),
-	download_url: z.string().readonly(),
-	filename: z.string().readonly(),
-	id: z.number().readonly(),
+	content_type: z.string(),
+	download_url: z.string(),
+	filename: z.string(),
+	id: z.number(),
 });
 
 const LineSchema = z.object({
 	/** Unique identifier in Fakturoid */
-	id: z.number().readonly(),
+	id: z.number(),
 	/** Inventory information */
-	inventory: InventorySchema.nullable().readonly(),
+	inventory: InventorySchema.nullable(),
 	/** Line name */
 	name: z.string(),
 	/** Total price without VAT in account currency */
-	native_total_price_without_vat: z.string().readonly(),
+	native_total_price_without_vat: z.string(),
 	/** Total VAT in account currency */
-	native_total_vat: z.string().readonly(),
+	native_total_vat: z.string(),
 	/** Quantity */
 	quantity: z.string().default("1"),
 	/** Total price without VAT */
-	total_price_without_vat: z.string().readonly(),
+	total_price_without_vat: z.string(),
 	/** Total VAT */
-	total_vat: z.string().readonly(),
+	total_vat: z.string(),
 	/** Unit name */
 	unit_name: z.string().optional(),
 	/** Unit price */
 	unit_price: z.string(),
 	/** Unit price including VAT */
-	unit_price_with_vat: z.string().readonly(),
+	unit_price_with_vat: z.string(),
 	/** Unit price without VAT */
-	unit_price_without_vat: z.string().readonly(),
+	unit_price_without_vat: z.string(),
 	/** VAT Rate */
 	vat_rate: z.union([z.number(), z.string()]).default(0),
 });
@@ -162,7 +162,7 @@ const InvoiceSchema = z.object({
 	/** Bank account ID (used only on create action) */
 	bank_account_id: z.number().optional(),
 	/** Date and time when the invoice was cancelled */
-	cancelled_at: z.string().nullable().readonly(),
+	cancelled_at: z.string().nullable(),
 	/** Subject address city */
 	client_city: z.string().optional(),
 	/** Subject address country (ISO code) */
@@ -194,7 +194,7 @@ const InvoiceSchema = z.object({
 	/** ID of the invoice being corrected */
 	correction_id: z.number().nullable().optional(),
 	/** Date and time of document creation */
-	created_at: z.string().readonly(),
+	created_at: z.string(),
 	/** Currency ISO code */
 	currency: z.string().optional(),
 	/** Identifier in your application */
@@ -206,27 +206,27 @@ const InvoiceSchema = z.object({
 	/** Number of days until the invoice becomes overdue */
 	due: z.number().optional(),
 	/** Date when the invoice becomes overdue */
-	due_on: z.string().readonly(),
+	due_on: z.string(),
 	/** EET records */
-	eet_records: z.array(EetRecordSchema).readonly(),
+	eet_records: z.array(EetRecordSchema),
 	/** Exchange rate (required if document currency differs from account currency) */
 	exchange_rate: z.string().optional(),
 	/** Invoice footer */
 	footer_note: z.string().optional(),
 	/** Generator ID from which the document was generated */
-	generator_id: z.number().nullable().readonly(),
+	generator_id: z.number().nullable(),
 	/** Enable GoPay payment button on invoice */
 	gopay: z.boolean().default(false).optional(),
 	/** Hide bank account on webinvoice and PDF */
 	hide_bank_account: z.boolean().nullable().optional(),
 	/** Document HTML web address */
-	html_url: z.string().readonly(),
+	html_url: z.string(),
 	/** IBAN */
 	iban: z.string().nullable().optional(),
 	/** Controls IBAN visibility on the document */
 	iban_visibility: z.enum(INVOICE_IBAN_VISIBILITY).default("automatically").optional(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().readonly(),
+	id: z.number(),
 	/** Date of issue */
 	issued_on: z.string().optional(),
 	/** Language of the document */
@@ -234,11 +234,11 @@ const InvoiceSchema = z.object({
 	/** List of lines to invoice */
 	lines: z.array(LineSchema).optional(),
 	/** Date and time when the document was locked */
-	locked_at: z.string().nullable().readonly(),
+	locked_at: z.string().nullable(),
 	/** Total without VAT in the account currency */
-	native_subtotal: z.string().readonly(),
+	native_subtotal: z.string(),
 	/** Total with VAT in the account currency */
-	native_total: z.string().readonly(),
+	native_total: z.string(),
 	/** Text before lines */
 	note: z.string().optional(),
 	/** Document number */
@@ -250,45 +250,45 @@ const InvoiceSchema = z.object({
 	/** Use OSS mode */
 	oss: z.enum(INVOICE_OSS).default("disabled").optional(),
 	/** List of paid advances (if final invoice) */
-	paid_advances: z.array(PaidAdvanceSchema).readonly(),
+	paid_advances: z.array(PaidAdvanceSchema),
 	/** Date when the document was marked as paid */
-	paid_on: z.string().nullable().readonly(),
+	paid_on: z.string().nullable(),
 	/** Payment method */
 	payment_method: z.enum(INVOICE_PAYMENT_METHOD).optional(),
 	/** List of payments */
-	payments: z.array(PaymentSchema).readonly(),
+	payments: z.array(PaymentSchema),
 	/** Enable PayPal payment button on invoice */
 	paypal: z.boolean().default(false).optional(),
 	/** PDF download address */
-	pdf_url: z.string().readonly(),
+	pdf_url: z.string(),
 	/** Private note */
 	private_note: z.string().nullable().optional(),
 	/** What to issue after a proforma is paid */
 	proforma_followup_document: z.enum(INVOICE_PROFORMA_FOLLOWUP_DOCUMENT).nullable().optional(),
 	/** Webinvoice web address */
-	public_html_url: z.string().readonly(),
+	public_html_url: z.string(),
 	/** Related document ID */
 	related_id: z.number().nullable().optional(),
 	/** Remaining invoice amount (after deducting proformas and/or tax documents, VAT included) */
-	remaining_amount: z.string().readonly(),
+	remaining_amount: z.string(),
 	/** Remaining invoice amount in the account currency */
-	remaining_native_amount: z.string().readonly(),
+	remaining_native_amount: z.string(),
 	/** Date and time of sending a reminder */
-	reminder_sent_at: z.string().nullable().readonly(),
+	reminder_sent_at: z.string().nullable(),
 	/** Date and time of sending the document via email */
-	sent_at: z.string().nullable().readonly(),
+	sent_at: z.string().nullable(),
 	/** Show „Do not pay, …" on document webinvoice and PDF */
 	show_already_paid_note_in_pdf: z.boolean().default(false).optional(),
 	/** Current state of the document */
-	status: z.enum(INVOICE_STATUS).readonly(),
+	status: z.enum(INVOICE_STATUS),
 	/** Subject identifier in your application */
 	subject_custom_id: z.string().nullable().optional(),
 	/** Subject ID */
 	subject_id: z.number(),
 	/** Subject API address */
-	subject_url: z.string().readonly(),
+	subject_url: z.string(),
 	/** Total without VAT */
-	subtotal: z.string().readonly(),
+	subtotal: z.string(),
 	/** Supply code for statement about invoices in reverse charge */
 	supply_code: z.string().nullable().optional(),
 	/** BIC (for SWIFT payments) */
@@ -300,41 +300,41 @@ const InvoiceSchema = z.object({
 	/** Chargeable event date */
 	taxable_fulfillment_due: z.string().optional(),
 	/** Token string for the webinvoice URL */
-	token: z.string().readonly(),
+	token: z.string(),
 	/** Total with VAT */
-	total: z.string().readonly(),
+	total: z.string(),
 	/** Use reverse charge */
 	transferred_tax_liability: z.boolean().default(false).optional(),
 	/** Date and time when an invoice was marked as uncollectible */
-	uncollectible_at: z.string().nullable().readonly(),
+	uncollectible_at: z.string().nullable(),
 	/** Date and time of last document update */
-	updated_at: z.string().readonly(),
+	updated_at: z.string(),
 	/** Document API address */
-	url: z.string().readonly(),
+	url: z.string(),
 	/** Variable symbol */
 	variable_symbol: z.string().optional(),
 	/** Calculate VAT from base or final amount */
 	vat_price_mode: z.enum(INVOICE_VAT_PRICE_MODE).nullable().optional(),
 	/** VAT rates summary */
-	vat_rates_summary: z.array(VatRatesSummarySchema).readonly(),
+	vat_rates_summary: z.array(VatRatesSummarySchema),
 	/** Date when the client visited the webinvoice */
-	webinvoice_seen_on: z.string().nullable().readonly(),
+	webinvoice_seen_on: z.string().nullable(),
 	/** Your address city */
-	your_city: z.string().readonly(),
+	your_city: z.string(),
 	/** Your address country (ISO code) */
-	your_country: z.string().readonly(),
+	your_country: z.string(),
 	/** Your SK DIČ (only for Slovakia, does not start with country code) */
-	your_local_vat_no: z.string().nullable().readonly(),
+	your_local_vat_no: z.string().nullable(),
 	/** Name of your company */
-	your_name: z.string().readonly(),
+	your_name: z.string(),
 	/** Your registration number (IČO) */
-	your_registration_no: z.string().readonly(),
+	your_registration_no: z.string(),
 	/** Your address street */
-	your_street: z.string().readonly(),
+	your_street: z.string(),
 	/** Your VAT number (DIČ) */
-	your_vat_no: z.string().readonly(),
+	your_vat_no: z.string(),
 	/** Your address postal code */
-	your_zip: z.string().readonly(),
+	your_zip: z.string(),
 });
 
 const CreateInvoiceSchema = InvoiceSchema.omit({
@@ -385,6 +385,8 @@ const CreateInvoiceSchema = InvoiceSchema.omit({
 		lines: z.array(CreateLineSchema).optional(),
 		/** Round total amount (VAT included) */
 		round_total: z.boolean().default(false).optional(),
+		/** Subject ID */
+		subject_id: z.number(),
 	})
 	.partial({
 		attachments: true,

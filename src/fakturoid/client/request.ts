@@ -1,9 +1,9 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
 import {
 	APIErrorSchema,
 	type GeneralError as GeneralErrorType,
 	type InvalidDataError as InvalidDataErrorType,
-} from "../model/error.ts";
+} from "../model/error.js";
 
 const PAGE_SIZE = 40 as const;
 

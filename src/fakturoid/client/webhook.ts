@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateWebhook, UpdateWebhook, Webhook } from "../model/webhook.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateWebhook, UpdateWebhook, Webhook } from "../model/webhook.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all webhooks.

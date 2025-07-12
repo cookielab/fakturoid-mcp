@@ -1,12 +1,12 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const InvalidDataErrorSchema = z.object({
-	errors: z.record(z.string().readonly(), z.array(z.string().readonly()).readonly()).readonly(),
+	errors: z.record(z.string(), z.array(z.string())),
 });
 
 const GeneralErrorSchema = z.object({
-	error: z.string().readonly(),
-	error_description: z.string().readonly(),
+	error: z.string(),
+	error_description: z.string(),
 });
 
 const APIErrorSchema = z.union([InvalidDataErrorSchema, GeneralErrorSchema]);

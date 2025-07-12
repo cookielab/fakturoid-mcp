@@ -11,7 +11,7 @@
 	},
 	"scripts": {
 		"build": "tsc --noEmit false",
-		"dev": "tsx --watch src/main.ts",
+		"dev": "NODE_ENV=development tsx --watch src/main.ts",
 		"types": "tsc",
 		"lint": "biome lint src/",
 		"format": "biome format --write --fix src/",

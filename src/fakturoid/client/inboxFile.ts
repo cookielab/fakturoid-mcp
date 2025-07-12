@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateInboxFile, InboxFile } from "../model/inboxFile.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateInboxFile, InboxFile } from "../model/inboxFile.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all inbox files.

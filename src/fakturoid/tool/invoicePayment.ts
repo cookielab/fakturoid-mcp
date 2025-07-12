@@ -1,8 +1,11 @@
-import { z } from "zod/v4";
-import { createTool, type ServerToolCreator } from "./common.ts";
+import { z } from "zod/v3";
+import { CreateInvoicePaymentSchema } from "../model/invoicePayment.js";
+import { createTool, type ServerToolCreator } from "./common.js";
 
 const createInvoicePayment = createTool(
 	"fakturoid_create_invoice_payment",
+	"Create Invoice Payment",
+	"Create a new payment record for an invoice",
 	async (client, { invoiceId, paymentData }) => {
 		const payment = await client.createInvoicePayment(invoiceId, paymentData);
 
@@ -10,14 +13,16 @@ const createInvoicePayment = createTool(
 			content: [{ text: JSON.stringify(payment, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		invoiceId: z.number(),
-		paymentData: z.any(), // Using z.any() since CreateInvoicePayment type is not available here
-	}),
+		paymentData: CreateInvoicePaymentSchema,
+	},
 );
 
 const createTaxDocument = createTool(
 	"fakturoid_create_tax_document",
+	"Create Tax Document",
+	"Create a tax document for a payment (required for cash payments in some countries)",
 	async (client, { invoiceId, paymentId }) => {
 		const taxDocument = await client.createTaxDocument(invoiceId, paymentId);
 
@@ -25,14 +30,16 @@ const createTaxDocument = createTool(
 			content: [{ text: JSON.stringify(taxDocument, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		invoiceId: z.number(),
 		paymentId: z.number(),
-	}),
+	},
 );
 
 const deleteInvoicePayment = createTool(
 	"fakturoid_delete_invoice_payment",
+	"Delete Invoice Payment",
+	"Delete a payment record from an invoice",
 	async (client, { invoiceId, paymentId }) => {
 		await client.deleteInvoicePayment(invoiceId, paymentId);
 
@@ -40,10 +47,10 @@ const deleteInvoicePayment = createTool(
 			content: [{ text: "Invoice payment deleted successfully", type: "text" }],
 		};
 	},
-	z.object({
+	{
 		invoiceId: z.number(),
 		paymentId: z.number(),
-	}),
+	},
 );
 
 const invoicePayment = [

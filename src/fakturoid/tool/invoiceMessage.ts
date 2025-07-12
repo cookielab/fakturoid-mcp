@@ -1,8 +1,11 @@
-import { z } from "zod/v4";
-import { createTool, type ServerToolCreator } from "./common.ts";
+import { z } from "zod/v3";
+import { InvoiceMessageSchema } from "../model/invoiceMessage.js";
+import { createTool, type ServerToolCreator } from "./common.js";
 
 const sendInvoiceMessage = createTool(
 	"fakturoid_send_invoice_message",
+	"Send Invoice Message",
+	"Send a message (email) to the customer about an invoice",
 	async (client, { invoiceId, messageData }) => {
 		const result = await client.sendInvoiceMessage(invoiceId, messageData);
 
@@ -10,10 +13,10 @@ const sendInvoiceMessage = createTool(
 			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		invoiceId: z.number(),
-		messageData: z.any(), // Using z.any() since InvoiceMessage type is not available here
-	}),
+		messageData: InvoiceMessageSchema,
+	},
 );
 
 const invoiceMessage = [sendInvoiceMessage] as const satisfies ServerToolCreator[];

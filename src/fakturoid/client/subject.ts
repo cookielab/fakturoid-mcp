@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { GetSubjectsFilters, Subject, SubjectCreate, SubjectUpdate } from "../model/subject.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { GetSubjectsFilters, Subject, SubjectCreate, SubjectUpdate } from "../model/subject.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all subjects.

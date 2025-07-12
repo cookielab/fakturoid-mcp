@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateExpensePayment, ExpensePayment } from "../model/expensePayment.ts";
-import { request } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateExpensePayment, ExpensePayment } from "../model/expensePayment.js";
+import { request } from "./request.js";
 
 /**
  * Create a payment for an expense.

@@ -14,13 +14,13 @@ const DEVELOPMENT_OPTIONS = {
 } as const satisfies LoggerOptions<never, boolean>;
 
 const PRODUCTION_OPTIONS = {
-	level: "info",
+	level: "silent",
 	name: "fakturoid-mcp",
 } as const satisfies LoggerOptions<never, boolean>;
 
 const initializeLogger = (): Logger<never, boolean> => {
-	// biome-ignore lint/complexity/useLiteralKeys: It's better to access it through index here. Not using environment.ts to prevent cycles.
-	const isDevelopment = (process.env["NODE_ENV"]?.toLowerCase() ?? "development") === "development";
+	// biome-ignore lint/complexity/useLiteralKeys: It's better to access it through index here. Not using environment.js to prevent cycles.
+	const isDevelopment = (process.env["NODE_ENV"]?.toLowerCase() ?? "production") === "development";
 	const options = isDevelopment ? DEVELOPMENT_OPTIONS : PRODUCTION_OPTIONS;
 
 	const logger = pino(options);

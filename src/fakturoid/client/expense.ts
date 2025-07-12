@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { CreateExpense, Expense, GetExpenseFilters, UpdateExpense } from "../model/expense.ts";
-import { request, requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { CreateExpense, Expense, GetExpenseFilters, UpdateExpense } from "../model/expense.js";
+import { request, requestAllPages } from "./request.js";
 
 /**
  * Get all expenses.

@@ -1,22 +1,22 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const InventoryItemSchema = z.object({
 	/** Allow quantity below zero */
 	allow_below_zero: z.boolean().default(false).optional(),
 	/** If item is archived */
-	archived: z.boolean().readonly(),
+	archived: z.boolean(),
 	/** Article number */
 	article_number: z.string().nullable().optional(),
 	/** Article number type */
 	article_number_type: z.enum(["ian", "ean", "isbn"]).default("ian").optional(),
 	/** Average purchase price in account currency */
-	average_native_purchase_price: z.string().readonly(),
+	average_native_purchase_price: z.string(),
 	/** Date and time of item creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 	/** Date when item quantity dropped below min_quantity */
-	low_quantity_date: z.iso.datetime().nullable().optional().readonly(),
+	low_quantity_date: z.coerce.date().nullable().optional(),
 	/** Maximum stock quantity */
 	max_quantity: z.string().nullable().optional(),
 	/** Minimum stock quantity */
@@ -33,7 +33,7 @@ const InventoryItemSchema = z.object({
 	 * Quantity in stock - Required if track_quantity is enabled
 	 * Becomes read-only after item creation and can be changed only via inventory moves
 	 */
-	quantity: z.string().readonly(),
+	quantity: z.string(),
 	/** Stock Keeping Unit (SKU) - Required if track_quantity is enabled */
 	sku: z.string(),
 	/** Suggest item for documents */
@@ -45,7 +45,7 @@ const InventoryItemSchema = z.object({
 	/** Unit of measure */
 	unit_name: z.string().nullable().optional(),
 	/** Date and time of last item update */
-	updated_at: z.iso.datetime().readonly(),
+	updated_at: z.coerce.date(),
 	/** VAT rate */
 	vat_rate: z.enum(["standard", "reduced", "reduced2", "zero"]).nullable().optional(),
 });

@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { InvoiceMessage } from "../model/invoiceMessage.ts";
-import { request } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { InvoiceMessage } from "../model/invoiceMessage.js";
+import { request } from "./request.js";
 
 /**
  * Send an email message for an invoice.

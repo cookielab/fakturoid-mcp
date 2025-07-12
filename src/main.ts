@@ -1,4 +1,4 @@
-import type { AuthenticationStrategy } from "./auth/strategy.ts";
+import type { AuthenticationStrategy } from "./auth/strategy.js";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
@@ -7,21 +7,21 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
 import express, { type Request, type Response } from "express";
-import { z } from "zod/v4";
-import { LocalStrategy } from "./auth/localStrategy.ts";
-import { createServer } from "./server.ts";
-import { logger } from "./utils/logger.ts";
+import { z } from "zod/v3";
+import { LocalStrategy } from "./auth/localStrategy.js";
+import { createServer } from "./server.js";
+import { logger } from "./utils/logger.js";
 
 const EnvironmentSchema = z.object({
 	MCP_TRANSPORT: z.preprocess(
 		(value) => (typeof value === "string" ? value.toLocaleLowerCase() : value),
 		z.union([z.literal("stdio"), z.literal("sse"), z.literal("http")]).default("stdio"),
 	),
-	PORT: z.preprocess((value) => (value != null ? Number(value) : undefined), z.int().positive().default(5173)),
+	PORT: z.preprocess((value) => (value != null ? Number(value) : undefined), z.number().int().positive().default(5173)),
 });
 
 const loadEnvironment = (): z.infer<typeof EnvironmentSchema> => {
-	dotenv.config();
+	dotenv.config({ quiet: true });
 
 	try {
 		return EnvironmentSchema.parse(process.env);

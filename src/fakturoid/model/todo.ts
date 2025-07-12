@@ -1,37 +1,34 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const TodoSchema = z.object({
 	/** Date and time of todo completion */
-	completed_at: z.iso.datetime().nullable().readonly(),
+	completed_at: z.coerce.date().nullable(),
 
 	/** Date and time of todo creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Todo name */
-	name: z.string().readonly(),
+	name: z.string(),
 
 	/** Parameters with details about todo, specific for each type of todo */
-	params: z.record(z.string(), z.unknown()).readonly(),
+	params: z.record(z.string(), z.unknown()),
 
 	/** Attributes of objects related to the todo */
-	related_objects: z
-		.array(
-			z.object({
-				/** ID of the object related to todo */
-				id: z.number().int().readonly(),
-				/** Type of the object related to the todo */
-				type: z
-					// biome-ignore lint/nursery/noSecrets: "RecurringGenerator" is not a secret
-					.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator"])
-					.readonly(),
-			}),
-		)
-		.readonly(),
+	related_objects: z.array(
+		z.object({
+			/** ID of the object related to todo */
+			id: z.number().int(),
+			/** Type of the object related to the todo */
+			type: z
+				// biome-ignore lint/nursery/noSecrets: "RecurringGenerator" is not a secret
+				.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator"]),
+		}),
+	),
 
 	/** Todo text */
-	text: z.string().readonly(),
+	text: z.string(),
 });
 
 type Todo = z.infer<typeof TodoSchema>;

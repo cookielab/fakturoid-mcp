@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const SUBJECT_SETTING = ["inherit", "on", "off"] as const;
 const SUBJECT_TYPE = ["customer", "supplier", "both"] as const;
@@ -21,7 +21,7 @@ const SubjectSchema = z.object({
 	country: z.string().nullable(),
 
 	/** Date and time of subject creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 
 	/** Currency (ISO code) */
 	currency: z.string().nullable(),
@@ -54,10 +54,10 @@ const SubjectSchema = z.object({
 	due: z.number().int().nullable(),
 
 	/** Main email address receive invoice emails */
-	email: z.email().nullable(),
+	email: z.string().email().nullable(),
 
 	/** Email copy address to receive invoice emails */
-	email_copy: z.email().nullable(),
+	email_copy: z.string().email().nullable(),
 
 	/** Contact person name */
 	full_name: z.string().nullable(),
@@ -66,12 +66,12 @@ const SubjectSchema = z.object({
 	has_delivery_address: z.boolean().default(false),
 
 	/** Subject HTML web address */
-	html_url: z.url().readonly(),
+	html_url: z.string().url(),
 
 	/** IBAN */
 	iban: z.string().nullable(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Proforma paid custom email text */
 	invoice_from_proforma_email_text: z.string().nullable(),
@@ -128,19 +128,19 @@ const SubjectSchema = z.object({
 	type: z.enum(SUBJECT_TYPE).default("customer"),
 
 	/** Unreliable VAT-payer */
-	unreliable: z.boolean().nullable().readonly(),
+	unreliable: z.boolean().nullable(),
 
 	/** Date of last check for unreliable VAT-payer */
-	unreliable_checked_at: z.iso.datetime().nullable().readonly(),
+	unreliable_checked_at: z.coerce.date().nullable(),
 
 	/** Date and time of last subject update */
-	updated_at: z.iso.datetime().readonly(),
+	updated_at: z.coerce.date(),
 
 	/** Subject API address */
-	url: z.url().readonly(),
+	url: z.string().url(),
 
 	/** User ID who created the subject */
-	user_id: z.number().int().nullable().readonly(),
+	user_id: z.number().int().nullable(),
 
 	/** Fixed variable symbol (used for all invoices for this client instead of invoice number) */
 	variable_symbol: z.string().nullable(),

@@ -1,19 +1,19 @@
-import type { AuthenticationStrategy } from "../auth/strategy.ts";
-import type { CreateExpense, GetExpenseFilters, UpdateExpense } from "./model/expense.ts";
-import type { CreateExpensePayment } from "./model/expensePayment.ts";
-import type { CreateGenerator, UpdateGenerator } from "./model/generator.ts";
-import type { CreateInboxFile } from "./model/inboxFile.ts";
-import type { CreateInventoryItem, UpdateInventoryItem } from "./model/inventoryItem.ts";
-import type { CreateInventoryMove, UpdateInventoryMove } from "./model/inventoryMove.ts";
-import type { CreateInvoice, GetInvoicesFilters, UpdateInvoice } from "./model/invoice.ts";
-import type { InvoiceMessage } from "./model/invoiceMessage.ts";
-import type { CreateInvoicePayment } from "./model/invoicePayment.ts";
-import type { CreateRecurringGenerator, UpdateRecurringGenerator } from "./model/recurringGenerator.ts";
-import type { GetSubjectsFilters, SubjectCreate, SubjectUpdate } from "./model/subject.ts";
-import type { CreateWebhook, UpdateWebhook } from "./model/webhook.ts";
-import { getAccountDetail } from "./client/account.ts";
-import { getBankAccounts } from "./client/bankAccount.ts";
-import { getEvents } from "./client/event.ts";
+import type { AuthenticationStrategy } from "../auth/strategy.js";
+import type { CreateExpense, GetExpenseFilters, UpdateExpense } from "./model/expense.js";
+import type { CreateExpensePayment } from "./model/expensePayment.js";
+import type { CreateGenerator, UpdateGenerator } from "./model/generator.js";
+import type { CreateInboxFile } from "./model/inboxFile.js";
+import type { CreateInventoryItem, UpdateInventoryItem } from "./model/inventoryItem.js";
+import type { CreateInventoryMove, UpdateInventoryMove } from "./model/inventoryMove.js";
+import type { CreateInvoice, GetInvoicesFilters, UpdateInvoice } from "./model/invoice.js";
+import type { InvoiceMessage } from "./model/invoiceMessage.js";
+import type { CreateInvoicePayment } from "./model/invoicePayment.js";
+import type { CreateRecurringGenerator, UpdateRecurringGenerator } from "./model/recurringGenerator.js";
+import type { GetSubjectsFilters, SubjectCreate, SubjectUpdate } from "./model/subject.js";
+import type { CreateWebhook, UpdateWebhook } from "./model/webhook.js";
+import { getAccountDetail } from "./client/account.js";
+import { getBankAccounts } from "./client/bankAccount.js";
+import { getEvents } from "./client/event.js";
 import {
 	createExpense,
 	deleteExpense,
@@ -23,16 +23,16 @@ import {
 	getExpenses,
 	searchExpenses,
 	updateExpense,
-} from "./client/expense.ts";
-import { createExpensePayment, deleteExpensePayment } from "./client/expensePayment.ts";
-import { createGenerator, deleteGenerator, getGenerator, getGenerators, updateGenerator } from "./client/generator.ts";
+} from "./client/expense.js";
+import { createExpensePayment, deleteExpensePayment } from "./client/expensePayment.js";
+import { createGenerator, deleteGenerator, getGenerator, getGenerators, updateGenerator } from "./client/generator.js";
 import {
 	createInboxFile,
 	deleteInboxFile,
 	downloadInboxFile,
 	getInboxFiles,
 	sendInboxFileToOcr,
-} from "./client/inboxFile.ts";
+} from "./client/inboxFile.js";
 import {
 	archiveInventoryItem,
 	createInventoryItem,
@@ -41,14 +41,14 @@ import {
 	getInventoryItems,
 	unarchiveInventoryItem,
 	updateInventoryItem,
-} from "./client/inventoryItem.ts";
+} from "./client/inventoryItem.js";
 import {
 	createInventoryMove,
 	deleteInventoryMove,
 	getInventoryMove,
 	getInventoryMoves,
 	updateInventoryMove,
-} from "./client/inventoryMove.ts";
+} from "./client/inventoryMove.js";
 import {
 	createInvoice,
 	deleteInvoice,
@@ -59,17 +59,17 @@ import {
 	getInvoices,
 	searchInvoices,
 	updateInvoice,
-} from "./client/invoice.ts";
-import { sendInvoiceMessage } from "./client/invoiceMessage.ts";
-import { createInvoicePayment, createTaxDocument, deleteInvoicePayment } from "./client/invoicePayment.ts";
-import { getNumberFormats } from "./client/numberFormat.ts";
+} from "./client/invoice.js";
+import { sendInvoiceMessage } from "./client/invoiceMessage.js";
+import { createInvoicePayment, createTaxDocument, deleteInvoicePayment } from "./client/invoicePayment.js";
+import { getNumberFormats } from "./client/numberFormat.js";
 import {
 	createRecurringGenerator,
 	deleteRecurringGenerator,
 	getRecurringGenerator,
 	getRecurringGenerators,
 	updateRecurringGenerator,
-} from "./client/recurringGenerator.ts";
+} from "./client/recurringGenerator.js";
 import {
 	createSubject,
 	deleteSubject,
@@ -77,10 +77,10 @@ import {
 	getSubjects,
 	searchSubjects,
 	updateSubject,
-} from "./client/subject.ts";
-import { getTodos, toggleTodoCompletion } from "./client/todo.ts";
-import { getCurrentUser, getUsersForAccount } from "./client/user.ts";
-import { createWebhook, deleteWebhook, getWebhook, getWebhooks, updateWebhook } from "./client/webhook.ts";
+} from "./client/subject.js";
+import { getTodos, toggleTodoCompletion } from "./client/todo.js";
+import { getCurrentUser, getUsersForAccount } from "./client/user.js";
+import { createWebhook, deleteWebhook, getWebhook, getWebhooks, updateWebhook } from "./client/webhook.js";
 
 export class FakturoidClient<Configuration extends object, Strategy extends AuthenticationStrategy<Configuration>> {
 	private readonly strategy: Strategy;

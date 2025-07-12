@@ -1,9 +1,11 @@
-import { z } from "zod/v4";
-import { GetInvoicesFiltersSchema } from "../model/invoice.ts";
-import { createTool, type ServerToolCreator } from "./common.ts";
+import { z } from "zod/v3";
+import { CreateInvoiceSchema, GetInvoicesFiltersSchema, UpdateInvoiceSchema } from "../model/invoice.js";
+import { createTool, type ServerToolCreator } from "./common.js";
 
 const getInvoices = createTool(
 	"fakturoid_get_invoices",
+	"Get Invoices",
+	"Retrieve a list of invoices with optional filtering by status, date range, customer, and other criteria",
 	async (client, { filters }) => {
 		const invoices = await client.getInvoices(filters);
 
@@ -11,13 +13,15 @@ const getInvoices = createTool(
 			content: [{ text: JSON.stringify(invoices, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		filters: GetInvoicesFiltersSchema.optional(),
-	}),
+	},
 );
 
 const searchInvoices = createTool(
 	"fakturoid_search_invoices",
+	"Search Invoices",
+	"Search invoices by text query and optionally filter by tags",
 	async (client, { query, tags }) => {
 		const invoices = await client.searchInvoices(query, tags);
 
@@ -25,14 +29,16 @@ const searchInvoices = createTool(
 			content: [{ text: JSON.stringify(invoices, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		query: z.string().optional(),
 		tags: z.array(z.string()).optional(),
-	}),
+	},
 );
 
 const getInvoiceDetail = createTool(
 	"fakturoid_get_invoice_detail",
+	"Get Invoice Detail",
+	"Retrieve detailed information about a specific invoice by its ID",
 	async (client, { id }) => {
 		const invoice = await client.getInvoiceDetail(id);
 
@@ -40,13 +46,15 @@ const getInvoiceDetail = createTool(
 			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-	}),
+	},
 );
 
 const downloadInvoicePDF = createTool(
 	"fakturoid_download_invoice_pdf",
+	"Download Invoice PDF",
+	"Download the PDF version of an invoice by its ID",
 	async (client, { id }) => {
 		const pdf = await client.downloadInvoicePDF(id);
 
@@ -54,13 +62,15 @@ const downloadInvoicePDF = createTool(
 			content: [{ text: JSON.stringify(pdf, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-	}),
+	},
 );
 
 const downloadInvoiceAttachment = createTool(
 	"fakturoid_download_invoice_attachment",
+	"Download Invoice Attachment",
+	"Download a specific attachment from an invoice",
 	async (client, { invoiceId, attachmentId }) => {
 		const attachment = await client.downloadInvoiceAttachment(invoiceId, attachmentId);
 
@@ -68,14 +78,16 @@ const downloadInvoiceAttachment = createTool(
 			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		attachmentId: z.number(),
 		invoiceId: z.number(),
-	}),
+	},
 );
 
 const fireInvoiceAction = createTool(
 	"fakturoid_fire_invoice_action",
+	"Fire Invoice Action",
+	"Execute actions on an invoice such as marking as sent, canceling, locking, or marking as uncollectible",
 	async (client, { id, event }) => {
 		const result = await client.fireInvoiceAction(id, event);
 
@@ -83,7 +95,7 @@ const fireInvoiceAction = createTool(
 			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		event: z.enum([
 			"mark_as_sent",
 			"cancel",
@@ -94,25 +106,27 @@ const fireInvoiceAction = createTool(
 			"undo_uncollectible",
 		]),
 		id: z.number(),
-	}),
+	},
 );
 
 const createInvoice = createTool(
 	"fakturoid_create_invoice",
-	async (client, { invoiceData }) => {
+	"Create Invoice",
+	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created.",
+	async (client, invoiceData) => {
 		const invoice = await client.createInvoice(invoiceData);
 
 		return {
 			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
 		};
 	},
-	z.object({
-		invoiceData: z.any(), // Using z.any() since CreateInvoice type is not available here
-	}),
+	CreateInvoiceSchema.shape,
 );
 
 const updateInvoice = createTool(
 	"fakturoid_update_invoice",
+	"Update Invoice",
+	"Update an existing invoice with new data",
 	async (client, { id, updateData }) => {
 		const invoice = await client.updateInvoice(id, updateData);
 
@@ -120,14 +134,16 @@ const updateInvoice = createTool(
 			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-		updateData: z.any(), // Using z.any() since UpdateInvoice type is not available here
-	}),
+		updateData: UpdateInvoiceSchema,
+	},
 );
 
 const deleteInvoice = createTool(
 	"fakturoid_delete_invoice",
+	"Delete Invoice",
+	"Delete an invoice by its ID (only possible for draft invoices)",
 	async (client, { id }) => {
 		await client.deleteInvoice(id);
 
@@ -135,9 +151,9 @@ const deleteInvoice = createTool(
 			content: [{ text: "Invoice deleted successfully", type: "text" }],
 		};
 	},
-	z.object({
+	{
 		id: z.number(),
-	}),
+	},
 );
 
 const invoice = [

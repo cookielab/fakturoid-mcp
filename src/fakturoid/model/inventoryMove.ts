@@ -1,33 +1,31 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 /**
  * Document details about the document and line the move is tied to
  */
-const DocumentSchema = z
-	.object({
-		/** Document ID */
-		id: z.number().int().readonly(),
-		/** Document line ID */
-		line_id: z.number().int().readonly(),
-		/** Type of document */
-		// biome-ignore lint/nursery/noSecrets: Not a secret
-		type: z.enum(["Estimate", "Expense", "ExpenseGenerator", "Generator", "Invoice"]).readonly(),
-	})
-	.readonly();
+const DocumentSchema = z.object({
+	/** Document ID */
+	id: z.number().int(),
+	/** Document line ID */
+	line_id: z.number().int(),
+	/** Type of document */
+	// biome-ignore lint/nursery/noSecrets: Not a secret
+	type: z.enum(["Estimate", "Expense", "ExpenseGenerator", "Generator", "Invoice"]),
+});
 
 const InventoryMoveSchema = z.object({
 	/** Date and time of move creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 	/** Move direction */
 	direction: z.enum(["in", "out"]),
 	/** Details about document and line the move is tied to. Default: null */
-	document: DocumentSchema.nullish().readonly(),
+	document: DocumentSchema.nullish(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 	/** Inventory item ID */
-	inventory_item_id: z.number().int().readonly(),
+	inventory_item_id: z.number().int(),
 	/** Move date */
-	moved_on: z.iso.datetime(),
+	moved_on: z.coerce.date(),
 	/** Unit purchase price in account currency */
 	native_purchase_price: z.coerce.number().nullish(),
 	/** Retail price in account currency */
@@ -45,7 +43,7 @@ const InventoryMoveSchema = z.object({
 	/** Retail price per unit */
 	retail_price: z.coerce.number().nullish(),
 	/** Date and time of last move update */
-	updated_at: z.iso.datetime().readonly(),
+	updated_at: z.coerce.date(),
 });
 
 const CreateInventoryMoveSchema = InventoryMoveSchema.pick({

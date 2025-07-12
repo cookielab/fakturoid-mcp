@@ -11,7 +11,7 @@ export default defineConfig({
 			enabled: true,
 			provider: "v8",
 			reporter: ["cobertura"],
-			exclude: ["node_modules/**", "test/**", "*.config.ts", "dist/**"],
+			exclude: ["node_modules/**", "test/**", "*.config.js", "dist/**"],
 		},
 
 		reporters: ["default", "junit"],

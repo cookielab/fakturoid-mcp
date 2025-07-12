@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const ExpensePaymentSchema = z.object({
 	/** Paid amount in document currency */
@@ -8,12 +8,12 @@ const ExpensePaymentSchema = z.object({
 	bank_account_id: z.number().int(),
 
 	/** The date and time of payment creation */
-	created_at: z.iso.datetime().readonly(),
+	created_at: z.coerce.date(),
 
 	/** Currency ISO Code (same as expense currency) */
-	currency: z.string().readonly(),
+	currency: z.string(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 
 	/** Mark document as paid? */
 	mark_document_as_paid: z.boolean(),
@@ -22,10 +22,10 @@ const ExpensePaymentSchema = z.object({
 	native_amount: z.string(),
 
 	/** Payment date */
-	paid_on: z.iso.date(),
+	paid_on: z.coerce.date(),
 
 	/** The date and time of last payment update */
-	updated_at: z.iso.datetime().readonly(),
+	updated_at: z.coerce.date(),
 
 	/** Payment variable symbol */
 	variable_symbol: z.string(),

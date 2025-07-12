@@ -1,47 +1,47 @@
-import { z } from "zod/v4";
-import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.ts";
-import { ExpensePaymentSchema } from "./expensePayment.ts";
+import { z } from "zod/v3";
+import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.js";
+import { ExpensePaymentSchema } from "./expensePayment.js";
 
 const EXPENSE_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
 
 const LineInventorySchema = z.object({
 	/** Article number (if present) */
-	article_number: z.string().optional().readonly(),
+	article_number: z.string().optional(),
 	/** Article number type (only if article_number is present) */
-	article_number_type: z.enum(EXPENSE_ARTICLE_NUMBER_TYPE).optional().readonly(),
+	article_number_type: z.enum(EXPENSE_ARTICLE_NUMBER_TYPE).optional(),
 	/** ID of the related inventory item */
-	item_id: z.number().readonly(),
+	item_id: z.number(),
 	/** ID of the related inventory move */
-	move_id: z.number().readonly(),
+	move_id: z.number(),
 	/** Stock Keeping Unit (SKU) */
-	sku: z.string().readonly(),
+	sku: z.string(),
 });
 
 const LineSchema = z.object({
 	/** Unique identifier in Fakturoid */
-	id: z.number().readonly(),
+	id: z.number(),
 	/** Inventory information */
-	inventory: LineInventorySchema.nullable().default(null).readonly(),
+	inventory: LineInventorySchema.nullable().default(null),
 	/** Line name */
 	name: z.string(),
 	/** Total price without VAT in account currency */
-	native_total_price_without_vat: z.string().readonly(),
+	native_total_price_without_vat: z.string(),
 	/** Total VAT in account currency */
-	native_total_vat: z.string().readonly(),
+	native_total_vat: z.string(),
 	/** Quantity */
 	quantity: z.string().default("1"),
 	/** Total price without VAT */
-	total_price_without_vat: z.string().readonly(),
+	total_price_without_vat: z.string(),
 	/** Total VAT */
-	total_vat: z.string().readonly(),
+	total_vat: z.string(),
 	/** Unit name */
 	unit_name: z.string().optional(),
 	/** Unit price */
 	unit_price: z.string(),
 	/** Unit price including VAT */
-	unit_price_with_vat: z.string().readonly(),
+	unit_price_with_vat: z.string(),
 	/** Unit price without VAT */
-	unit_price_without_vat: z.string().readonly(),
+	unit_price_without_vat: z.string(),
 	/** VAT Rate */
 	vat_rate: z.union([z.number(), z.string()]).default(0),
 });
@@ -80,13 +80,13 @@ const UpdateLineSchema = LineSchema.pick({
 
 const AttachmentResponseSchema = z.object({
 	/** Attachment file MIME type */
-	content_type: z.string().readonly(),
+	content_type: z.string(),
 	/** API URL for file download */
-	download_url: z.string().readonly(),
+	download_url: z.string(),
 	/** Attachment file name */
-	filename: z.string().readonly(),
+	filename: z.string(),
 	/** Unique identifier */
-	id: z.number().readonly(),
+	id: z.number(),
 });
 
 const ExpenseSchema = z.object({
@@ -95,7 +95,7 @@ const ExpenseSchema = z.object({
 	/** Supplier bank account number */
 	bank_account: z.string().optional(),
 	/** Date and time of expense creation */
-	created_at: z.string().readonly(),
+	created_at: z.string(),
 	/** Currency ISO Code */
 	currency: z.string().optional(),
 	/** Identifier in your application */
@@ -111,31 +111,31 @@ const ExpenseSchema = z.object({
 	/** Exchange rate (required if expense currency differs from account currency) */
 	exchange_rate: z.string().optional(),
 	/** Expense HTML web address */
-	html_url: z.string().readonly(),
+	html_url: z.string(),
 	/** Supplier bank account IBAN */
 	iban: z.string().optional(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().readonly(),
+	id: z.number(),
 	/** Date of issue */
 	issued_on: z.string().optional(),
 	/** List of lines to expense */
 	lines: z.array(LineSchema).optional(),
 	/** Date and time when the expense was locked */
-	locked_at: z.string().nullable().readonly(),
+	locked_at: z.string().nullable(),
 	/** Total without VAT in the account currency */
-	native_subtotal: z.string().readonly(),
+	native_subtotal: z.string(),
 	/** Total with VAT in the account currency */
-	native_total: z.string().readonly(),
+	native_total: z.string(),
 	/** Expense number */
 	number: z.string().optional(),
 	/** Original expense number */
 	original_number: z.string().optional(),
 	/** Date when the expense was marked as paid */
-	paid_on: z.string().nullable().readonly(),
+	paid_on: z.string().nullable(),
 	/** Payment method */
 	payment_method: z.enum(["bank", "cash", "cod", "card", "paypal", "custom"]).default("bank"),
 	/** List of payments */
-	payments: z.array(ExpensePaymentSchema).readonly(),
+	payments: z.array(ExpensePaymentSchema),
 	/** Private note */
 	private_note: z.string().optional(),
 	/** Proportional VAT deduction (percent) */
@@ -145,29 +145,29 @@ const ExpenseSchema = z.object({
 	/** Remind the upcoming due date with a Todo */
 	remind_due_date: z.boolean().default(true),
 	/** Current state of the expense */
-	status: z.enum(["open", "overdue", "paid"]).readonly(),
+	status: z.enum(["open", "overdue", "paid"]),
 	/** Subject ID */
 	subject_id: z.number(),
 	/** Subject API address */
-	subject_url: z.string().readonly(),
+	subject_url: z.string(),
 	/** Total without VAT */
-	subtotal: z.string().readonly(),
+	subtotal: z.string(),
 	/** Subject address city */
-	supplier_city: z.string().readonly(),
+	supplier_city: z.string(),
 	/** Subject address country (ISO Code) */
-	supplier_country: z.string().readonly(),
+	supplier_country: z.string(),
 	/** Subject SK DIČ (only for Slovakia, does not start with country code) */
-	supplier_local_vat_no: z.string().nullable().readonly(),
+	supplier_local_vat_no: z.string().nullable(),
 	/** Subject company name */
-	supplier_name: z.string().readonly(),
+	supplier_name: z.string(),
 	/** Subject registration number (IČO) */
-	supplier_registration_no: z.string().readonly(),
+	supplier_registration_no: z.string(),
 	/** Subject address street */
-	supplier_street: z.string().readonly(),
+	supplier_street: z.string(),
 	/** Subject VAT number (DIČ) */
-	supplier_vat_no: z.string().readonly(),
+	supplier_vat_no: z.string(),
 	/** Subject address postal code */
-	supplier_zip: z.string().readonly(),
+	supplier_zip: z.string(),
 	/** Supply code for statement about expenses in reverse charge */
 	supply_code: z.string().optional(),
 	/** Supplier bank account BIC (for SWIFT payments) */
@@ -179,19 +179,19 @@ const ExpenseSchema = z.object({
 	/** Chargeable event date */
 	taxable_fulfillment_due: z.string().optional(),
 	/** Total with VAT */
-	total: z.string().readonly(),
+	total: z.string(),
 	/** Self-assesment of VAT? */
 	transferred_tax_liability: z.boolean().default(false),
 	/** Date and time of last expense update */
-	updated_at: z.string().readonly(),
+	updated_at: z.string(),
 	/** Expense API address */
-	url: z.string().readonly(),
+	url: z.string(),
 	/** Variable symbol */
 	variable_symbol: z.string().optional(),
 	/** Calculate VAT from base or final amount */
 	vat_price_mode: z.enum(["without_vat", "from_total_with_vat"]).default("without_vat"),
 	/** VAT rates summary */
-	vat_rates_summary: z.array(VatRatesSummarySchema).readonly(),
+	vat_rates_summary: z.array(VatRatesSummarySchema),
 });
 
 const CreateExpenseSchema = ExpenseSchema.pick({

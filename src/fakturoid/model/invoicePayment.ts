@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod/v3";
 
 const InvoicePaymentSchema = z.object({
 	/**
@@ -12,11 +12,11 @@ const InvoicePaymentSchema = z.object({
 	 */
 	bank_account_id: z.number().int(),
 	/** The date and time of payment creation */
-	created_at: z.string().readonly(),
+	created_at: z.string(),
 	/** Currency ISO Code (same as invoice currency) */
-	currency: z.string().readonly(),
+	currency: z.string(),
 	/** Unique identifier in Fakturoid */
-	id: z.number().int().readonly(),
+	id: z.number().int(),
 	/**
 	 * Mark document as paid?
 	 * @default true if the total paid amount becomes greater or equal to remaining amount to pay
@@ -45,9 +45,9 @@ const InvoicePaymentSchema = z.object({
 	 */
 	send_thank_you_email: z.boolean(),
 	/** Tax document ID (if present) */
-	tax_document_id: z.number().int().nullable().readonly(),
+	tax_document_id: z.number().int().nullable(),
 	/** The date and time of last payment update */
-	updated_at: z.string().readonly(),
+	updated_at: z.string(),
 	/**
 	 * Payment variable symbol
 	 * @default Invoice variable symbol

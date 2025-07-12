@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { BankAccount } from "../model/bankAccount.ts";
-import { request } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { BankAccount } from "../model/bankAccount.js";
+import { request } from "./request.js";
 
 const getBankAccounts = async (
 	strategy: AuthenticationStrategy,

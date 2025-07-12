@@ -1,6 +1,6 @@
-import type { AuthenticationStrategy } from "../../auth/strategy.ts";
-import type { Event } from "../model/event.ts";
-import { requestAllPages } from "./request.ts";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import type { Event } from "../model/event.js";
+import { requestAllPages } from "./request.js";
 
 /**
  * Get all events.
