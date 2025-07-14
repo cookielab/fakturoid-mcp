@@ -39,7 +39,7 @@ const request = async <Response, Body = undefined>(
 	method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
 	body?: Body,
 	queryParameters?: Record<string, string>,
-): Promise<Response | InvalidDataError | GeneralError | UnexpectedError> => {
+): Promise<Response> => {
 	const params = Object.entries(queryParameters ?? {})
 		.map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
 		.join("&");
@@ -63,14 +63,14 @@ const request = async <Response, Body = undefined>(
 	if (!response.ok) {
 		const parsedError = APIErrorSchema.safeParse(responseBody);
 		if (!parsedError.success) {
-			return new UnexpectedError(await responseBody.text());
+			throw new UnexpectedError(await responseBody.text());
 		}
 
 		if ("errors" in parsedError.data) {
-			return new InvalidDataError(parsedError.data);
+			throw new InvalidDataError(parsedError.data);
 		}
 
-		return new GeneralError(parsedError.data);
+		throw new GeneralError(parsedError.data);
 	}
 
 	const isJSON = response.headers.get("content-type")?.includes("application/json") ?? false;
@@ -83,7 +83,7 @@ async function* paginatedRequest<Item>(
 	endpoint: string,
 	queryParameters?: Record<string, string>,
 	page?: number,
-): AsyncGenerator<Item[], undefined | InvalidDataError | GeneralError | UnexpectedError, undefined> {
+): AsyncGenerator<Item[], undefined, undefined> {
 	let currentPage = page ?? 1;
 
 	while (true) {
@@ -92,10 +92,6 @@ async function* paginatedRequest<Item>(
 			...queryParameters,
 			page: String(currentPage),
 		});
-
-		if (response instanceof Error) {
-			return response;
-		}
 
 		if (response.length < PAGE_SIZE) {
 			// Must yield, as returned values are not consumed in `for await` loops.
@@ -115,15 +111,11 @@ const requestAllPages = async <Item>(
 	endpoint: string,
 	queryParameters?: Record<string, string>,
 	pageCount?: number,
-): Promise<Item[] | InvalidDataError | GeneralError | UnexpectedError> => {
+): Promise<Item[]> => {
 	const items: Item[] = [];
 	let currentPage = 0;
 
 	for await (const itemsPage of paginatedRequest<Item>(strategy, endpoint, queryParameters)) {
-		if (itemsPage instanceof Error) {
-			return itemsPage;
-		}
-
 		if (itemsPage == null) {
 			break;
 		}

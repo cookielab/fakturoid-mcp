@@ -50,7 +50,7 @@ const createTool = <
 			logger.error(message);
 
 			return {
-				content: [{ text: `Error: ${message}`, type: "text" }],
+				content: [{ isError: true, text: `Error: ${message}`, type: "text" }],
 			};
 		}
 	};
