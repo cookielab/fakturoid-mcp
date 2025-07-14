@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import type { AuthenticationStrategy } from "./auth/strategy.js";
 import { randomUUID } from "node:crypto";
 import process from "node:process";

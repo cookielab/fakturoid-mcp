@@ -5,6 +5,7 @@
 	"type": "module",
 	"main": "dist/main.js",
 	"bin": "dist/main.js",
+	"files": ["dist"],
 	"exports": {
 		".": "./src/server.ts",
 		"./strategy": "./src/auth/strategy.ts"
