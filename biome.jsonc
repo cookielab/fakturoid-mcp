@@ -13,7 +13,8 @@
 	"linter": {
 		"rules": {
 			"nursery": {
-				"noUnresolvedImports": "off"
+				"noUnresolvedImports": "off",
+				"noSecrets": "off"
 			}
 		}
 	}

@@ -19,9 +19,7 @@ const RelatedObjectSchema = z.object({
 	/** ID of the object related to event */
 	id: z.number().int(),
 	/** Type of the object related to the event */
-	type: z
-		// biome-ignore lint/nursery/noSecrets: "RecurringGenerator" is not a secret
-		.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator", "Estimate"]),
+	type: z.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator", "Estimate"]),
 });
 
 /**

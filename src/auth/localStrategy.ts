@@ -23,7 +23,6 @@ const TokenResponseSchema = z
 const EnvironmentConfigurationSchema = z
 	.object({
 		API_URL: z.string().url(),
-		// biome-ignore lint/nursery/noSecrets: Not a secret
 		APP_NAME: z.string().min(1).default("FakturoidMCP"),
 		CLIENT_ID: z.string().min(1),
 		CLIENT_SECRET: z.string().min(1),

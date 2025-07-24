@@ -21,9 +21,7 @@ const TodoSchema = z.object({
 			/** ID of the object related to todo */
 			id: z.number().int(),
 			/** Type of the object related to the todo */
-			type: z
-				// biome-ignore lint/nursery/noSecrets: "RecurringGenerator" is not a secret
-				.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator"]),
+			type: z.enum(["Invoice", "Subject", "Expense", "Generator", "RecurringGenerator", "ExpenseGenerator"]),
 		}),
 	),
 
