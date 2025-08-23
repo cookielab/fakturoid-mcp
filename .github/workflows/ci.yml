@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Run lint
+        run: pnpm lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4.4.3
+        if: always()
+        with:
+          name: test-results
+          path: |
+            **/junit.xml
+            **/cobertura-coverage.xml
+          retention-days: 30
+
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    needs:
+      - test
+      - lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-environment
+
+      - name: Build
+        run: pnpm build
