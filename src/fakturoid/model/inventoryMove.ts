@@ -9,7 +9,6 @@ const DocumentSchema = z.object({
 	/** Document line ID */
 	line_id: z.number().int(),
 	/** Type of document */
-	// biome-ignore lint/nursery/noSecrets: Not a secret
 	type: z.enum(["Estimate", "Expense", "ExpenseGenerator", "Generator", "Invoice"]),
 });
 

@@ -1,0 +1,6 @@
+FAKTUROID_CLIENT_ID="CLIENT-ID"
+FAKTUROID_CLIENT_SECRET="CLIENT-SECRET"
+
+API_URL=https://app.fakturoid.cz/api/v3
+APP_NAME=FakturoidMCP
+CONTACT_EMAIL=tester@cookielab.io

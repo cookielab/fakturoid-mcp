@@ -1,5 +1,8 @@
-onlyBuiltDependencies:
-  - esbuild
-
 packages:
   - ‘src/*’
+
+onlyBuiltDependencies:
+  - core-js-pure
+  - esbuild
+  - sharp
+  - workerd

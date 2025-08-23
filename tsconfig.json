@@ -38,7 +38,10 @@
 		"noEmit": true,
 		"emitDeclarationOnly": false,
 		"declaration": true,
-		"baseUrl": "src"
+		"baseUrl": "src",
+
+		"jsx": "react-jsx",
+		"jsxImportSource": "hono/jsx"
 	},
-	"include": ["src"]
+	"include": ["src", "worker-configuration.d.ts"]
 }
