@@ -77,6 +77,11 @@ class DefaultAPIHandler implements APIHandlerInterface {
 		environment: Env & { OAUTH_PROVIDER: OAuthHelpers },
 		context: ExecutionContext,
 	): Promise<Response> {
+		const url = new URL(request.url);
+		if (url.pathname === "/") {
+			return Response.redirect("https://github.com/cookielab/fakturoid-mcp");
+		}
+
 		return await createHandler(FakturoidMCP.strategy).fetch(request, environment, context);
 	}
 }
