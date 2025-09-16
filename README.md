@@ -10,6 +10,10 @@ This MCP server provides a complete integration with Fakturoid API v3, demonstra
 - **📚 Resources** - 10 contextual data sources providing real-time business insights
 - **💡 Prompts** - 6 professional workflow templates for common accounting tasks
 
+👉 **Hosted deployment**:  
+The server is publicly available at **https://fakturoid-mcp.cookielab.ai** via CloudFront.  
+You can connect directly to this endpoint when using the MCP HTTP transport mode
+
 ## Features
 
 ### Tools (Interactive Functions)
@@ -119,7 +123,7 @@ The server can be configured in Claude Desktop using any of the three transport 
    ```
 
 2. Choose your preferred transport mode and update the configuration:
-
+You can either run the server locally (e.g. `http://localhost:5173/mcp`) or connect directly to the **hosted deployment at https://fakturoid-mcp.cookielab.ai/mcp**.
    **For STDIO mode (recommended for Claude Desktop):**
 
    ```json
