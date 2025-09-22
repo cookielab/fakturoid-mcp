@@ -14,6 +14,7 @@ import { inventoryMove } from "./tool/inventoryMove.js";
 import { invoice } from "./tool/invoice.js";
 import { invoiceMessage } from "./tool/invoiceMessage.js";
 import { invoicePayment } from "./tool/invoicePayment.js";
+import { meta } from "./tool/meta.js";
 import { numberFormat } from "./tool/numberFormat.js";
 import { recurringGenerator } from "./tool/recurringGenerator.js";
 import { subject } from "./tool/subject.js";
@@ -41,6 +42,7 @@ const registerFakturoidTools = <
 		invoice,
 		invoiceMessage,
 		invoicePayment,
+		meta,
 		numberFormat,
 		recurringGenerator,
 		subject,

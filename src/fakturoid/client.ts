@@ -10,6 +10,7 @@ import type { InvoiceMessage } from "./model/invoiceMessage.js";
 import type { CreateInvoicePayment } from "./model/invoicePayment.js";
 import type { CreateRecurringGenerator, UpdateRecurringGenerator } from "./model/recurringGenerator.js";
 import type { GetSubjectsFilters, SubjectCreate, SubjectUpdate } from "./model/subject.js";
+import type { User } from "./model/user.js";
 import type { CreateWebhook, UpdateWebhook } from "./model/webhook.js";
 import { getAccountDetail } from "./client/account.js";
 import { getBankAccounts } from "./client/bankAccount.js";
@@ -84,7 +85,7 @@ import { createWebhook, deleteWebhook, getWebhook, getWebhooks, updateWebhook } 
 
 export class FakturoidClient<Configuration extends object, Strategy extends AuthenticationStrategy<Configuration>> {
 	private readonly strategy: Strategy;
-	private readonly accountSlug: string;
+	private accountSlug: string;
 
 	private constructor(strategy: Strategy, accountSlug: string) {
 		this.strategy = strategy;
@@ -100,8 +101,27 @@ export class FakturoidClient<Configuration extends object, Strategy extends Auth
 			throw new Error("The user account could not be found.");
 		}
 
+		// Default to the first available account slug. Can be changed via `changeAccountSlug`
 		return new FakturoidClient(strategy, user.accounts[0].slug);
 	}
+
+	getAvailableAccounts = async (): Promise<User["accounts"]> => {
+		const user = await getCurrentUser(this.strategy);
+		if (user instanceof Error) {
+			throw new Error("The user account could not be found.");
+		}
+
+		return user.accounts;
+	};
+
+	changeAccountSlug = async (accountSlug: string): Promise<void> => {
+		const availableSlugs = await this.getAvailableAccounts().then((accounts) => accounts.map(({ slug }) => slug));
+		if (!availableSlugs.includes(accountSlug)) {
+			throw new Error(`The account slug '${accountSlug}' is not available.`);
+		}
+
+		this.accountSlug = accountSlug;
+	};
 
 	// Account
 	getAccountDetail = () => getAccountDetail(this.strategy, this.accountSlug);
