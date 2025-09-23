@@ -1,6 +1,65 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":dependencyDashboard", ":semanticCommitTypeAll(chore)"],
+	"timezone": "UTC",
+	"schedule": ["before 3am on Monday"],
+	"labels": ["dependencies"],
+	"rangeStrategy": "bump",
+	"postUpdateOptions": ["pnpmDedupe"],
+	"lockFileMaintenance": {
+		"enabled": true,
+		"schedule": ["before 3am on Monday"]
+	},
+	"packageRules": [
+		{
+			"description": "Automatically merge patch updates",
+			"matchUpdateTypes": ["patch"],
+			"automerge": true
+		},
+		{
+			"description": "Automatically merge minor updates for dev dependencies",
+			"matchDepTypes": ["devDependencies"],
+			"matchUpdateTypes": ["minor"],
+			"automerge": true
+		},
+		{
+			"description": "Group Biome-related packages",
+			"groupName": "biome packages",
+			"matchPackageNames": ["/^@biomejs//"]
+		},
+		{
+			"description": "Group TypeScript-related packages",
+			"groupName": "typescript packages",
+			"matchPackageNames": ["/typescript/", "/^@types//"]
+		},
+		{
+			"description": "Group documentation packages",
+			"groupName": "documentation packages",
+			"matchPackageNames": ["/typedoc/"]
+		},
+		{
+			"description": "Require approval for major updates",
+			"matchUpdateTypes": ["major"],
+			"automerge": false
+		},
+		{
+			"description": "Pin Node.js version",
+			"matchManagers": ["npm"],
+			"matchDepTypes": ["engines"],
+			"enabled": false
+		}
+	],
+	"vulnerabilityAlerts": {
+		"labels": ["security"],
+		"automerge": true
+	},
+	"prConcurrentLimit": 10,
+	"prCreation": "immediate",
+	"semanticCommits": "enabled",
+	"commitMessagePrefix": "chore(deps):",
+	"commitMessageAction": "update",
+	"commitMessageTopic": "{{depName}}",
+	"commitMessageExtra": "to {{newVersion}}",
+	"commitBodyTable": true,
+	"reviewersFromCodeOwners": true
 }
