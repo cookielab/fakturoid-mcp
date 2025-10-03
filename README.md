@@ -20,7 +20,7 @@ You can connect directly to this endpoint when using the MCP HTTP transport mode
 
 The server implements comprehensive coverage of the Fakturoid API:
 
-- **Account Management** - Get and update account information
+- **Account Management** - Get and update account information, including multi-account support via switching using the `Change the Active Fakturoid Account` tool
 - **Invoice Operations** - Full CRUD operations, search, filtering, and PDF generation
 - **Expense Tracking** - Create, read, update, delete, and categorize expenses
 - **Contact Management** - Manage subjects (companies and individuals)
