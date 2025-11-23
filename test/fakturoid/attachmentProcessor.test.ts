@@ -78,9 +78,53 @@ describe("Attachment Processor", () => {
 	});
 
 	describe("Strategy 2: file_path", () => {
-		// Note: file_path strategy requires actual filesystem access
-		// Integration tests would be better suited for full file reading tests
-		// Here we only test the transport restriction logic
+		test("reads PDF fixture file and converts to data_url", async () => {
+			const input = {
+				file_path: `${process.cwd()}/test/fixtures/test-document.pdf`,
+			};
+
+			const result = await processAttachment(input, stdioContext, client);
+
+			expect(result.data_url).toMatch(/^data:application\/pdf;base64,/);
+			expect(result.filename).toBe("test-document.pdf");
+
+			// Verify the base64 content can be decoded
+			const base64Content = result.data_url.split(",")[1];
+			const decoded = Buffer.from(base64Content, "base64").toString();
+			expect(decoded).toContain("%PDF-1.4");
+			expect(decoded).toContain("Test Document");
+		});
+
+		test("reads JPG fixture file and converts to data_url", async () => {
+			const input = {
+				file_path: `${process.cwd()}/test/fixtures/test-image.jpg`,
+			};
+
+			const result = await processAttachment(input, stdioContext, client);
+
+			expect(result.data_url).toMatch(/^data:image\/jpeg;base64,/);
+			expect(result.filename).toBe("test-image.jpg");
+
+			// Verify the base64 content starts with JPEG signature
+			const base64Content = result.data_url.split(",")[1];
+			const decoded = Buffer.from(base64Content, "base64");
+			// JPEG files start with FF D8 FF
+			expect(decoded[0]).toBe(0xff);
+			expect(decoded[1]).toBe(0xd8);
+			expect(decoded[2]).toBe(0xff);
+		});
+
+		test("uses custom filename when provided", async () => {
+			const input = {
+				file_path: `${process.cwd()}/test/fixtures/test-document.pdf`,
+				filename: "my-custom-invoice.pdf",
+			};
+
+			const result = await processAttachment(input, stdioContext, client);
+
+			expect(result.filename).toBe("my-custom-invoice.pdf");
+			expect(result.data_url).toMatch(/^data:application\/pdf;base64,/);
+		});
 
 		test("throws error when file_path used in non-stdio transport", async () => {
 			const input = {
