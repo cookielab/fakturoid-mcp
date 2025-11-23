@@ -46,3 +46,4 @@ const createServer = async <Configuration extends object, Strategy extends Authe
 };
 
 export { createServer };
+export type { ServerContext };

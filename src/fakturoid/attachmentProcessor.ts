@@ -83,6 +83,7 @@ function detectMimeType(filename: string): string {
  */
 async function downloadFromUrl(url: string, context: ServerContext): Promise<{ buffer: Buffer; mimeType: string }> {
 	const validatedUrl = validateUrl(url);
+	// biome-ignore lint/nursery/noMagicNumbers: MB to bytes conversion requires 1024 * 1024
 	const maxBytes = context.uploadConfig.maxDownloadSizeMB * 1024 * 1024;
 
 	const controller = new AbortController();
@@ -99,7 +100,7 @@ async function downloadFromUrl(url: string, context: ServerContext): Promise<{ b
 		}
 
 		const contentLength = response.headers.get("content-length");
-		if (contentLength && Number.parseInt(contentLength) > maxBytes) {
+		if (contentLength && Number.parseInt(contentLength, 10) > maxBytes) {
 			throw new Error(
 				`File too large: ${contentLength} bytes exceeds maximum of ${context.uploadConfig.maxDownloadSizeMB}MB`,
 			);
@@ -114,8 +115,11 @@ async function downloadFromUrl(url: string, context: ServerContext): Promise<{ b
 		let receivedBytes = 0;
 
 		while (true) {
+			// biome-ignore lint/nursery/noAwaitInLoop: Streaming download requires sequential reading
 			const { done, value } = await reader.read();
-			if (done) break;
+			if (done) {
+				break;
+			}
 
 			receivedBytes += value.length;
 			if (receivedBytes > maxBytes) {
@@ -138,9 +142,11 @@ async function downloadFromUrl(url: string, context: ServerContext): Promise<{ b
 /**
  * Process attachment input and convert to Fakturoid API format
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Multiple strategies require branching logic
 export async function processAttachment(
 	input: AttachmentInput,
 	context: ServerContext,
+	// biome-ignore lint/suspicious/noExplicitAny: Generic client type accepts any strategy
 	client: FakturoidClient<object, any>,
 ): Promise<ProcessedAttachment> {
 	// Strategy 1: Raw data_url - pass through as-is
