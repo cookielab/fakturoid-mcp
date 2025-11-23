@@ -318,7 +318,9 @@ type Line = z.infer<typeof LineSchema>;
 type AttachmentResponse = z.infer<typeof AttachmentResponseSchema>;
 
 // Generic types for client usage - use any to bypass strict type checking with context-dependent schemas
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
 export type CreateExpense = any;
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
 export type UpdateExpense = any;
 
 export {

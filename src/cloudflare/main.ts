@@ -51,7 +51,7 @@ class FakturoidMCP extends McpAgent<Env, never, Record<string, string>> {
 			uploadConfig: {
 				allowUrlDownloads: true,
 				maxDownloadSizeMB: 10,
-				downloadTimeoutMs: 30000,
+				downloadTimeoutMs: 30_000,
 			},
 		});
 	}

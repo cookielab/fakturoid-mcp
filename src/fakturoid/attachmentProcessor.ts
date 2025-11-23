@@ -38,7 +38,7 @@ function validateUrl(urlString: string): URL {
 	if (!ALLOWED_PROTOCOLS.includes(url.protocol)) {
 		throw new Error(
 			`Protocol ${url.protocol} not allowed. Only http: and https: are supported. ` +
-				`Please ensure the URL points to a publicly accessible resource.`,
+				"Please ensure the URL points to a publicly accessible resource.",
 		);
 	}
 
@@ -47,8 +47,8 @@ function validateUrl(urlString: string): URL {
 		if (pattern.test(hostname)) {
 			throw new Error(
 				`Access to ${hostname} is blocked for security reasons. ` +
-					`Only publicly accessible URLs are allowed. ` +
-					`Private networks, localhost, and link-local addresses cannot be accessed.`,
+					"Only publicly accessible URLs are allowed. " +
+					"Private networks, localhost, and link-local addresses cannot be accessed.",
 			);
 		}
 	}
@@ -129,7 +129,7 @@ async function downloadFromUrl(url: string, context: ServerContext): Promise<{ b
 		const buffer = Buffer.concat(chunks);
 		const mimeType = response.headers.get("content-type")?.split(";")[0] || "application/octet-stream";
 
-		return { buffer, mimeType };
+		return { buffer: buffer, mimeType : mimeType };
 	} finally {
 		clearTimeout(timeout);
 	}
@@ -155,9 +155,9 @@ export async function processAttachment(
 	if ("file_path" in input) {
 		if (!context.capabilities.fileSystemAccess) {
 			throw new Error(
-				`file_path strategy is only available in stdio transport mode. ` +
+				"file_path strategy is only available in stdio transport mode. " +
 					`Current transport: ${context.transport}. ` +
-					`Please use url or inbox_file_id instead, or switch to stdio mode.`,
+					"Please use url or inbox_file_id instead, or switch to stdio mode.",
 			);
 		}
 
@@ -168,7 +168,7 @@ export async function processAttachment(
 
 		return {
 			data_url: `data:${mimeType};base64,${base64}`,
-			filename,
+			filename: filename,
 		};
 	}
 
@@ -215,7 +215,7 @@ export async function processAttachment(
 
 		return {
 			data_url: `data:${mimeType};base64,${base64}`,
-			filename,
+			filename: filename,
 		};
 	}
 

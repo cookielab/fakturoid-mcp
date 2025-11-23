@@ -389,62 +389,62 @@ const createCreateInvoiceSchema = (context: ServerContext) =>
 			round_total: z.boolean().default(false).optional(),
 			/** Subject ID */
 			subject_id: z.number(),
-	})
-	.partial({
-		attachments: true,
-		bank_account: true,
-		bank_account_id: true,
-		client_city: true,
-		client_country: true,
-		client_delivery_city: true,
-		client_delivery_country: true,
-		client_delivery_name: true,
-		client_delivery_street: true,
-		client_delivery_zip: true,
-		client_has_delivery_address: true,
-		client_local_vat_no: true,
-		client_name: true,
-		client_registration_no: true,
-		client_street: true,
-		client_vat_no: true,
-		client_zip: true,
-		correction_id: true,
-		currency: true,
-		custom_id: true,
-		custom_payment_method: true,
-		document_type: true,
-		due: true,
-		exchange_rate: true,
-		footer_note: true,
-		gopay: true,
-		hide_bank_account: true,
-		iban: true,
-		iban_visibility: true,
-		issued_on: true,
-		language: true,
-		lines: true,
-		note: true,
-		number: true,
-		number_format_id: true,
-		order_number: true,
-		oss: true,
-		payment_method: true,
-		paypal: true,
-		private_note: true,
-		proforma_followup_document: true,
-		related_id: true,
-		round_total: true,
-		show_already_paid_note_in_pdf: true,
-		subject_custom_id: true,
-		supply_code: true,
-		swift_bic: true,
-		tags: true,
-		tax_document_ids: true,
-		taxable_fulfillment_due: true,
-		transferred_tax_liability: true,
-		variable_symbol: true,
-		vat_price_mode: true,
-	});
+		})
+		.partial({
+			attachments: true,
+			bank_account: true,
+			bank_account_id: true,
+			client_city: true,
+			client_country: true,
+			client_delivery_city: true,
+			client_delivery_country: true,
+			client_delivery_name: true,
+			client_delivery_street: true,
+			client_delivery_zip: true,
+			client_has_delivery_address: true,
+			client_local_vat_no: true,
+			client_name: true,
+			client_registration_no: true,
+			client_street: true,
+			client_vat_no: true,
+			client_zip: true,
+			correction_id: true,
+			currency: true,
+			custom_id: true,
+			custom_payment_method: true,
+			document_type: true,
+			due: true,
+			exchange_rate: true,
+			footer_note: true,
+			gopay: true,
+			hide_bank_account: true,
+			iban: true,
+			iban_visibility: true,
+			issued_on: true,
+			language: true,
+			lines: true,
+			note: true,
+			number: true,
+			number_format_id: true,
+			order_number: true,
+			oss: true,
+			payment_method: true,
+			paypal: true,
+			private_note: true,
+			proforma_followup_document: true,
+			related_id: true,
+			round_total: true,
+			show_already_paid_note_in_pdf: true,
+			subject_custom_id: true,
+			supply_code: true,
+			swift_bic: true,
+			tags: true,
+			tax_document_ids: true,
+			taxable_fulfillment_due: true,
+			transferred_tax_liability: true,
+			variable_symbol: true,
+			vat_price_mode: true,
+		});
 
 const createUpdateInvoiceSchema = (context: ServerContext) =>
 	InvoiceSchema.omit({
@@ -497,10 +497,10 @@ const createUpdateInvoiceSchema = (context: ServerContext) =>
 			attachments: z.array(createAttachmentSchema(context)).optional(),
 			/** List of lines to invoice */
 			lines: z.array(UpdateLineSchema).optional(),
-		/** Round total amount (VAT included) */
-		round_total: z.boolean().optional(),
-	})
-	.partial();
+			/** Round total amount (VAT included) */
+			round_total: z.boolean().optional(),
+		})
+		.partial();
 
 const GetInvoicesFiltersSchema = InvoiceSchema.pick({
 	custom_id: true,
@@ -529,7 +529,9 @@ type Payment = z.infer<typeof PaymentSchema>;
 type VatRatesSummary = z.infer<typeof VatRatesSummarySchema>;
 
 // Generic types for client usage - use any to bypass strict type checking with context-dependent schemas
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
 export type CreateInvoice = any;
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
 export type UpdateInvoice = any;
 
 export {

@@ -6,7 +6,7 @@ import { registerFakturoidPrompts } from "./fakturoid/prompts.js";
 import { registerFakturoidResources } from "./fakturoid/resources.js";
 import { registerFakturoidTools } from "./fakturoid/tools.js";
 
-export type ServerContext = {
+type ServerContext = {
 	transport: "stdio" | "sse" | "http" | "cloudflare";
 	capabilities: {
 		fileSystemAccess: boolean;

@@ -29,7 +29,7 @@ const EnvironmentSchema = z.object({
 	),
 	DOWNLOAD_TIMEOUT_MS: z.preprocess(
 		(value) => (value != null ? Number(value) : undefined),
-		z.number().int().positive().default(30000),
+		z.number().int().positive().default(30_000),
 	),
 });
 
@@ -64,7 +64,11 @@ const startSTDIO = async (strategy: AuthenticationStrategy, env: z.infer<typeof 
 	await server.connect(transport);
 };
 
-const startSSE = async (strategy: AuthenticationStrategy, port: number, env: z.infer<typeof EnvironmentSchema>): Promise<void> => {
+const startSSE = async (
+	strategy: AuthenticationStrategy,
+	port: number,
+	env: z.infer<typeof EnvironmentSchema>,
+): Promise<void> => {
 	logger.info("Starting the server in SSE transport mode.");
 
 	logger.warn("Please note that SSE transport mode is DEPRECATED.");
