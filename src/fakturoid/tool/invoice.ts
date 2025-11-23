@@ -156,6 +156,11 @@ const deleteInvoice = createTool(
 	},
 );
 
+import type { ServerContext } from "../../server.js";
+
+// Temporary: Invoice tools not yet updated for new attachment system
+export const createInvoiceTools = (_context: ServerContext): ServerToolCreator[] => invoice;
+
 const invoice = [
 	getInvoices,
 	searchInvoices,

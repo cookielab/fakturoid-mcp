@@ -19,6 +19,18 @@ const EnvironmentSchema = z.object({
 		z.union([z.literal("stdio"), z.literal("sse"), z.literal("http")]).default("stdio"),
 	),
 	PORT: z.preprocess((value) => (value != null ? Number(value) : undefined), z.number().int().positive().default(5173)),
+	ALLOW_URL_DOWNLOADS: z.preprocess(
+		(value) => (typeof value === "string" ? value.toLowerCase() === "true" : value),
+		z.boolean().default(true),
+	),
+	MAX_DOWNLOAD_SIZE_MB: z.preprocess(
+		(value) => (value != null ? Number(value) : undefined),
+		z.number().int().positive().default(10),
+	),
+	DOWNLOAD_TIMEOUT_MS: z.preprocess(
+		(value) => (value != null ? Number(value) : undefined),
+		z.number().int().positive().default(30000),
+	),
 });
 
 const loadEnvironment = (): z.infer<typeof EnvironmentSchema> => {
@@ -35,16 +47,24 @@ const loadEnvironment = (): z.infer<typeof EnvironmentSchema> => {
 	}
 };
 
-const startSTDIO = async (strategy: AuthenticationStrategy): Promise<void> => {
+const startSTDIO = async (strategy: AuthenticationStrategy, env: z.infer<typeof EnvironmentSchema>): Promise<void> => {
 	logger.info("Starting the server in STDIO transport mode.");
 
 	const transport = new StdioServerTransport();
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, {
+		transport: "stdio",
+		capabilities: { fileSystemAccess: true },
+		uploadConfig: {
+			allowUrlDownloads: env.ALLOW_URL_DOWNLOADS,
+			maxDownloadSizeMB: env.MAX_DOWNLOAD_SIZE_MB,
+			downloadTimeoutMs: env.DOWNLOAD_TIMEOUT_MS,
+		},
+	});
 
 	await server.connect(transport);
 };
 
-const startSSE = async (strategy: AuthenticationStrategy, port: number): Promise<void> => {
+const startSSE = async (strategy: AuthenticationStrategy, port: number, env: z.infer<typeof EnvironmentSchema>): Promise<void> => {
 	logger.info("Starting the server in SSE transport mode.");
 
 	logger.warn("Please note that SSE transport mode is DEPRECATED.");
@@ -53,7 +73,15 @@ const startSSE = async (strategy: AuthenticationStrategy, port: number): Promise
 		"See the documentation for more information https://modelcontextprotocol.io/docs/concepts/transports#server-sent-events-sse-deprecated",
 	);
 
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, {
+		transport: "sse",
+		capabilities: { fileSystemAccess: false },
+		uploadConfig: {
+			allowUrlDownloads: env.ALLOW_URL_DOWNLOADS,
+			maxDownloadSizeMB: env.MAX_DOWNLOAD_SIZE_MB,
+			downloadTimeoutMs: env.DOWNLOAD_TIMEOUT_MS,
+		},
+	});
 
 	const app = express();
 	app.use(express.json());
@@ -96,7 +124,7 @@ interface HttpTransports {
 	[sessionID: string]: StreamableHTTPServerTransport;
 }
 
-const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
+const startHTTP = (strategy: AuthenticationStrategy, port: number, env: z.infer<typeof EnvironmentSchema>): void => {
 	logger.info(`Starting the server in Streamable HTTP transport mode on port ${port}.`);
 
 	const app = express();
@@ -138,7 +166,15 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 				}
 			};
 
-			const server = await createServer(strategy);
+			const server = await createServer(strategy, {
+				transport: "http",
+				capabilities: { fileSystemAccess: false },
+				uploadConfig: {
+					allowUrlDownloads: env.ALLOW_URL_DOWNLOADS,
+					maxDownloadSizeMB: env.MAX_DOWNLOAD_SIZE_MB,
+					downloadTimeoutMs: env.DOWNLOAD_TIMEOUT_MS,
+				},
+			});
 			await server.connect(transport);
 		}
 
@@ -169,20 +205,20 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 };
 
 const startServer = async (): Promise<void> => {
-	const { PORT, MCP_TRANSPORT } = loadEnvironment();
+	const env = loadEnvironment();
 
 	try {
-		if (MCP_TRANSPORT === "stdio") {
-			return await startSTDIO(new LocalStrategy());
+		if (env.MCP_TRANSPORT === "stdio") {
+			return await startSTDIO(new LocalStrategy(), env);
 		}
 
-		if (MCP_TRANSPORT === "sse") {
-			return await startSSE(new LocalStrategy(), PORT);
+		if (env.MCP_TRANSPORT === "sse") {
+			return await startSSE(new LocalStrategy(), env.PORT, env);
 		}
 
-		return startHTTP(new LocalStrategy(), PORT);
+		return startHTTP(new LocalStrategy(), env.PORT, env);
 	} catch (error: unknown) {
-		logger.error(`Could not start the ${MCP_TRANSPORT} transport mode`);
+		logger.error(`Could not start the ${env.MCP_TRANSPORT} transport mode`);
 		logger.error(error);
 
 		process.exit(1);

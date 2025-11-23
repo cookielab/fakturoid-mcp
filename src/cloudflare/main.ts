@@ -45,7 +45,15 @@ class FakturoidMCP extends McpAgent<Env, never, Record<string, string>> {
 			}
 		}
 
-		this.server = await createServer(FakturoidMCP.strategy);
+		this.server = await createServer(FakturoidMCP.strategy, {
+			transport: "cloudflare",
+			capabilities: { fileSystemAccess: false },
+			uploadConfig: {
+				allowUrlDownloads: true,
+				maxDownloadSizeMB: 10,
+				downloadTimeoutMs: 30000,
+			},
+		});
 	}
 }
 

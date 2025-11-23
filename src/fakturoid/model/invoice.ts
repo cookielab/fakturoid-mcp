@@ -1,5 +1,11 @@
 import { z } from "zod/v3";
-import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.js";
+import { VatRatesSummarySchema } from "./common.js";
+
+// Temporary: Use static attachment schema until invoice is updated
+const CreateAttachmentSchema = z.object({
+	data_url: z.string(),
+	filename: z.string().optional(),
+});
 
 const INVOICE_DOCUMENT_TYPE = [
 	"partial_proforma",

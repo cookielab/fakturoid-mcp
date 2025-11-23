@@ -1,17 +1,18 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { ServerContext } from "../server.js";
 import type { AuthenticationStrategy } from "../auth/strategy.js";
 import type { FakturoidClient } from "./client.js";
 import type { ServerToolCreator } from "./tool/common.js";
 import { account } from "./tool/account.js";
 import { bankAccount } from "./tool/bankAccount.js";
 import { event } from "./tool/event.js";
-import { expense } from "./tool/expense.js";
+import { createExpenseTools } from "./tool/expense.js";
 import { expensePayment } from "./tool/expensePayment.js";
 import { generator } from "./tool/generator.js";
 import { inboxFile } from "./tool/inboxFile.js";
 import { inventoryItem } from "./tool/inventoryItem.js";
 import { inventoryMove } from "./tool/inventoryMove.js";
-import { invoice } from "./tool/invoice.js";
+import { createInvoiceTools } from "./tool/invoice.js";
 import { invoiceMessage } from "./tool/invoiceMessage.js";
 import { invoicePayment } from "./tool/invoicePayment.js";
 import { meta } from "./tool/meta.js";
@@ -28,18 +29,19 @@ const registerFakturoidTools = <
 >(
 	server: McpServer,
 	client: FakturoidClient<Configuration, Strategy>,
+	context: ServerContext,
 ): void => {
 	const tools: ServerToolCreator<Configuration, Strategy>[] = [
 		account,
 		bankAccount,
 		event,
-		expense,
+		...createExpenseTools(context),
 		expensePayment,
 		generator,
 		inboxFile,
 		inventoryItem,
 		inventoryMove,
-		invoice,
+		...createInvoiceTools(context),
 		invoiceMessage,
 		invoicePayment,
 		meta,
