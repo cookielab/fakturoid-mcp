@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { z } from "zod/v3";
 import { CreateInvoiceSchema, GetInvoicesFiltersSchema, UpdateInvoiceSchema } from "../model/invoice.js";
 import { createTool, type ServerToolCreator } from "./common.js";
@@ -58,8 +59,27 @@ const downloadInvoicePDF = createTool(
 	async (client, { id }) => {
 		const pdf = await client.downloadInvoicePDF(id);
 
+		if (pdf instanceof Error) {
+			throw pdf;
+		}
+
+		const arrayBuffer = await pdf.arrayBuffer();
+		const mimeType = pdf.type || "application/pdf";
+		const extension = mimeType.split("/")[1] || "pdf";
+		const filename = `invoice-${id}.${extension}`;
+		const filepath = `${process.cwd()}/${filename}`;
+
+		await writeFile(filepath, new Uint8Array(arrayBuffer));
+
+		const result = {
+			filepath,
+			filename,
+			size: pdf.size,
+			mimeType,
+		};
+
 		return {
-			content: [{ text: JSON.stringify(pdf, null, 2), type: "text" }],
+			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
 	{
@@ -74,8 +94,27 @@ const downloadInvoiceAttachment = createTool(
 	async (client, { invoiceId, attachmentId }) => {
 		const attachment = await client.downloadInvoiceAttachment(invoiceId, attachmentId);
 
+		if (attachment instanceof Error) {
+			throw attachment;
+		}
+
+		const arrayBuffer = await attachment.arrayBuffer();
+		const mimeType = attachment.type || "application/octet-stream";
+		const extension = mimeType.split("/")[1] || "bin";
+		const filename = `invoice-${invoiceId}-attachment-${attachmentId}.${extension}`;
+		const filepath = `${process.cwd()}/${filename}`;
+
+		await writeFile(filepath, new Uint8Array(arrayBuffer));
+
+		const result = {
+			filepath,
+			filename,
+			size: attachment.size,
+			mimeType,
+		};
+
 		return {
-			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
+			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
 	{
