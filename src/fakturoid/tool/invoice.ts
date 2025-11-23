@@ -1,8 +1,11 @@
 import { z } from "zod/v3";
-import { CreateInvoiceSchema, GetInvoicesFiltersSchema, UpdateInvoiceSchema } from "../model/invoice.js";
+import type { ServerContext } from "../../server.js";
+import { processAttachment } from "../attachmentProcessor.js";
+import { createCreateInvoiceSchema, createUpdateInvoiceSchema, GetInvoicesFiltersSchema } from "../model/invoice.js";
 import { createTool, type ServerToolCreator } from "./common.js";
 
-const getInvoices = createTool(
+export const createInvoiceTools = (context: ServerContext): ServerToolCreator[] => {
+	const getInvoices = createTool(
 	"fakturoid_get_invoices",
 	"Get Invoices",
 	"Retrieve a list of invoices with optional filtering by status, date range, customer, and other criteria",
@@ -109,68 +112,82 @@ const fireInvoiceAction = createTool(
 	},
 );
 
-const createInvoice = createTool(
-	"fakturoid_create_invoice",
-	"Create Invoice",
-	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created.",
-	async (client, invoiceData) => {
-		const invoice = await client.createInvoice(invoiceData);
+	const createInvoice = createTool(
+		"fakturoid_create_invoice",
+		"Create Invoice",
+		"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created.",
+		async (client, invoiceData) => {
+			// Process attachments if present
+			if (invoiceData.attachments) {
+				const processedAttachments = [];
+				for (const attachment of invoiceData.attachments) {
+					const processed = await processAttachment(attachment, context, client);
+					processedAttachments.push(processed);
+				}
+				invoiceData.attachments = processedAttachments;
+			}
 
-		return {
-			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
-		};
-	},
-	CreateInvoiceSchema.shape,
-);
+			const invoice = await client.createInvoice(invoiceData);
 
-const updateInvoice = createTool(
-	"fakturoid_update_invoice",
-	"Update Invoice",
-	"Update an existing invoice with new data",
-	async (client, { id, updateData }) => {
-		const invoice = await client.updateInvoice(id, updateData);
+			return {
+				content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
+			};
+		},
+		createCreateInvoiceSchema(context).shape,
+	);
 
-		return {
-			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
-		};
-	},
-	{
-		id: z.number(),
-		updateData: UpdateInvoiceSchema,
-	},
-);
+	const updateInvoice = createTool(
+		"fakturoid_update_invoice",
+		"Update Invoice",
+		"Update an existing invoice with new data",
+		async (client, { id, updateData }) => {
+			// Process attachments if present
+			if (updateData.attachments) {
+				const processedAttachments = [];
+				for (const attachment of updateData.attachments) {
+					const processed = await processAttachment(attachment, context, client);
+					processedAttachments.push(processed);
+				}
+				updateData.attachments = processedAttachments;
+			}
 
-const deleteInvoice = createTool(
-	"fakturoid_delete_invoice",
-	"Delete Invoice",
-	"Delete an invoice by its ID (only possible for draft invoices)",
-	async (client, { id }) => {
-		await client.deleteInvoice(id);
+			const invoice = await client.updateInvoice(id, updateData);
 
-		return {
-			content: [{ text: "Invoice deleted successfully", type: "text" }],
-		};
-	},
-	{
-		id: z.number(),
-	},
-);
+			return {
+				content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
+			};
+		},
+		{
+			id: z.number(),
+			updateData: createUpdateInvoiceSchema(context),
+		},
+	);
 
-import type { ServerContext } from "../../server.js";
+	const deleteInvoice = createTool(
+		"fakturoid_delete_invoice",
+		"Delete Invoice",
+		"Delete an invoice by its ID (only possible for draft invoices)",
+		async (client, { id }) => {
+			await client.deleteInvoice(id);
 
-// Temporary: Invoice tools not yet updated for new attachment system
-export const createInvoiceTools = (_context: ServerContext): ServerToolCreator[] => invoice;
+			return {
+				content: [{ text: "Invoice deleted successfully", type: "text" }],
+			};
+		},
+		{
+			id: z.number(),
+		},
+	);
 
-const invoice = [
-	getInvoices,
-	searchInvoices,
-	getInvoiceDetail,
-	downloadInvoicePDF,
-	downloadInvoiceAttachment,
-	fireInvoiceAction,
-	createInvoice,
-	updateInvoice,
-	deleteInvoice,
-] as const satisfies ServerToolCreator[];
-
-export { invoice };
+	return [
+		getInvoices,
+		searchInvoices,
+		getInvoiceDetail,
+		downloadInvoicePDF,
+		downloadInvoiceAttachment,
+		fireInvoiceAction,
+		createInvoice,
+		updateInvoice,
+		deleteInvoice,
+	];
+};
