@@ -45,6 +45,23 @@ const CreateInboxFileSchema = z.object({
 	send_to_ocr: z.boolean().optional(),
 });
 
+const CreateInboxFileToolSchema = z.object({
+	/** Reference ID from the /upload page */
+	file_ref: z.string().optional(),
+	/** URL to fetch the file from */
+	source_url: z.string().optional(),
+	/** Local file path (only works when server runs locally) */
+	file_path: z.string().optional(),
+	/** File content as Base64 encoded string (fallback - prefer file_ref or source_url to avoid context exhaustion) */
+	attachment: z.string().optional(),
+	/** File name (with extension) */
+	filename: z.string().optional(),
+	/** The file will be sent to OCR */
+	send_to_ocr: z.boolean().optional(),
+});
+
+type CreateInboxFileTool = z.infer<typeof CreateInboxFileToolSchema>;
+
 const UpdateInboxFileSchema = z.object({
 	/** File name (with extension) */
 	filename: z.string().optional(),
@@ -57,5 +74,5 @@ type InboxFile = z.infer<typeof InboxFileSchema>;
 type CreateInboxFile = z.infer<typeof CreateInboxFileSchema>;
 type UpdateInboxFile = z.infer<typeof UpdateInboxFileSchema>;
 
-export { InboxFileSchema, CreateInboxFileSchema, UpdateInboxFileSchema };
-export type { InboxFile, CreateInboxFile, UpdateInboxFile };
+export { InboxFileSchema, CreateInboxFileSchema, CreateInboxFileToolSchema, UpdateInboxFileSchema };
+export type { InboxFile, CreateInboxFile, CreateInboxFileTool, UpdateInboxFile };

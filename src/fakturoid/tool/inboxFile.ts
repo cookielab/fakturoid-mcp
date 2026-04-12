@@ -1,5 +1,6 @@
 import { z } from "zod/v3";
-import { CreateInboxFileSchema } from "../model/inboxFile.js";
+import { CreateInboxFileToolSchema } from "../model/inboxFile.js";
+import { resolveFileSource, bufferToBase64 } from "../../staging/resolver.js";
 import { createTool, type ServerToolCreator } from "./common.js";
 
 const getInboxFiles = createTool(
@@ -18,15 +19,30 @@ const getInboxFiles = createTool(
 const createInboxFile = createTool(
 	"fakturoid_create_inbox_file",
 	"Create Inbox File",
-	"Upload a new file to the inbox for processing",
-	async (client, inboxFileData) => {
-		const inboxFile = await client.createInboxFile(inboxFileData);
+	"Upload a new file to the inbox for processing. Provide exactly one file source: file_ref (from /upload page - preferred), source_url, file_path (local server only), or attachment (base64 - avoid, exhausts context).",
+	async (client, input, staging) => {
+		const resolved = await resolveFileSource(
+			{
+				...(input.file_ref != null && { file_ref: input.file_ref }),
+				...(input.source_url != null && { source_url: input.source_url }),
+				...(input.file_path != null && { file_path: input.file_path }),
+				...(input.attachment != null && { data: input.attachment }),
+				...(input.filename != null && { filename: input.filename }),
+			},
+			staging,
+		);
+
+		const inboxFile = await client.createInboxFile({
+			attachment: bufferToBase64(resolved.content),
+			filename: input.filename ?? resolved.filename,
+			send_to_ocr: input.send_to_ocr,
+		});
 
 		return {
 			content: [{ text: JSON.stringify(inboxFile, null, 2), type: "text" }],
 		};
 	},
-	CreateInboxFileSchema.shape,
+	CreateInboxFileToolSchema.shape,
 );
 
 const sendInboxFileToOcr = createTool(
