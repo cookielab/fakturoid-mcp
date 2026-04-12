@@ -1,3 +1,4 @@
+import type { CreateAttachment } from "../fakturoid/model/common.js";
 import type { FileStaging } from "./storage.js";
 
 const DATA_URI_REGEX = /^data:([^;]+);base64,(.+)$/;
@@ -146,5 +147,42 @@ const bufferToDataUri = (buffer: ArrayBuffer, mimeType: string): string => {
   return `data:${mimeType};base64,${bufferToBase64(buffer)}`;
 };
 
-export { resolveFileSource, bufferToBase64, bufferToDataUri };
-export type { FileSource, ResolvedFile };
+interface AttachmentToolInput {
+  file_ref?: string | undefined;
+  source_url?: string | undefined;
+  file_path?: string | undefined;
+  data_url?: string | undefined;
+  filename?: string | undefined;
+}
+
+const resolveAttachments = async (
+  attachments: AttachmentToolInput[] | undefined,
+  staging: FileStaging,
+): Promise<CreateAttachment[] | undefined> => {
+  if (attachments == null || attachments.length === 0) {
+    return;
+  }
+
+  return await Promise.all(
+    attachments.map(async (att) => {
+      const file = await resolveFileSource(
+        {
+          ...(att.file_ref != null && { file_ref: att.file_ref }),
+          ...(att.source_url != null && { source_url: att.source_url }),
+          ...(att.file_path != null && { file_path: att.file_path }),
+          ...(att.data_url != null && { data: att.data_url }),
+          ...(att.filename != null && { filename: att.filename }),
+        },
+        staging,
+      );
+
+      return {
+        data_url: bufferToDataUri(file.content, file.mimeType),
+        filename: att.filename ?? file.filename,
+      };
+    }),
+  );
+};
+
+export { resolveFileSource, bufferToBase64, bufferToDataUri, resolveAttachments };
+export type { FileSource, ResolvedFile, AttachmentToolInput };

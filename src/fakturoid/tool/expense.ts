@@ -1,5 +1,7 @@
 import { z } from "zod/v3";
+import { CreateAttachmentToolSchema } from "../model/common.js";
 import { CreateExpenseSchema, GetExpenseFiltersSchema, UpdateExpenseSchema } from "../model/expense.js";
+import { resolveAttachments } from "../../staging/resolver.js";
 import { createTool, type ServerToolCreator } from "./common.js";
 
 const getExpenses = createTool(
@@ -91,15 +93,23 @@ const fireExpenseAction = createTool(
 const createExpense = createTool(
 	"fakturoid_create_expense",
 	"Create Expense",
-	"Create a new expense with the provided expense data",
-	async (client, expenseData) => {
-		const expense = await client.createExpense(expenseData);
+	"Create a new expense with the provided expense data. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
+	async (client, expenseData, staging) => {
+		const resolvedAttachments = await resolveAttachments(expenseData.attachments, staging);
+
+		const expense = await client.createExpense({
+			...expenseData,
+			attachments: resolvedAttachments,
+		});
 
 		return {
 			content: [{ text: JSON.stringify(expense, null, 2), type: "text" }],
 		};
 	},
-	CreateExpenseSchema.shape,
+	{
+		...CreateExpenseSchema.shape,
+		attachments: z.array(CreateAttachmentToolSchema).optional(),
+	},
 );
 
 const updateExpense = createTool(

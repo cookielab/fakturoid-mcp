@@ -1,5 +1,7 @@
 import { z } from "zod/v3";
+import { CreateAttachmentToolSchema } from "../model/common.js";
 import { CreateInvoiceSchema, GetInvoicesFiltersSchema, UpdateInvoiceSchema } from "../model/invoice.js";
+import { resolveAttachments } from "../../staging/resolver.js";
 import { createTool, type ServerToolCreator } from "./common.js";
 
 const getInvoices = createTool(
@@ -112,15 +114,23 @@ const fireInvoiceAction = createTool(
 const createInvoice = createTool(
 	"fakturoid_create_invoice",
 	"Create Invoice",
-	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created.",
-	async (client, invoiceData) => {
-		const invoice = await client.createInvoice(invoiceData);
+	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
+	async (client, invoiceData, staging) => {
+		const resolvedAttachments = await resolveAttachments(invoiceData.attachments, staging);
+
+		const invoice = await client.createInvoice({
+			...invoiceData,
+			attachments: resolvedAttachments,
+		});
 
 		return {
 			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
 		};
 	},
-	CreateInvoiceSchema.shape,
+	{
+		...CreateInvoiceSchema.shape,
+		attachments: z.array(CreateAttachmentToolSchema).optional(),
+	},
 );
 
 const updateInvoice = createTool(
