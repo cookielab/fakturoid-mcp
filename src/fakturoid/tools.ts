@@ -17,6 +17,8 @@ import { invoicePayment } from "./tool/invoicePayment.js";
 import { meta } from "./tool/meta.js";
 import { numberFormat } from "./tool/numberFormat.js";
 import { recurringGenerator } from "./tool/recurringGenerator.js";
+import { smartExpense } from "./tool/smartExpense.js";
+import { smartInvoice } from "./tool/smartInvoice.js";
 import { subject } from "./tool/subject.js";
 import { todo } from "./tool/todo.js";
 import { user } from "./tool/user.js";
@@ -45,6 +47,8 @@ const registerFakturoidTools = <
 		meta,
 		numberFormat,
 		recurringGenerator,
+		smartExpense,
+		smartInvoice,
 		subject,
 		todo,
 		user,
