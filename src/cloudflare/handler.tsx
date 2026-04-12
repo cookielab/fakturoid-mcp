@@ -5,6 +5,9 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { html } from "hono/html";
 import { logger as honoLogger } from "hono/logger";
+import { KVFileStaging } from "../staging/kvStorage.js";
+import { handleFileDownload, handleFileUpload } from "../staging/routes.js";
+import { uploadPageHtml } from "../staging/upload-page.js";
 import { logger } from "../utils/logger.js";
 import { Dialog } from "./Dialog.js";
 
@@ -16,6 +19,54 @@ const createHandler = (strategy: OAuthStrategy) => {
 	const app = new Hono<HonoEnvironment, HonoSchema, HonoBasePath>();
 	app.use(honoLogger());
 	app.use(cors());
+
+	// Upload page
+	app.get("/upload", (context) => {
+		const baseUrl = new URL(context.req.url).origin;
+		return context.html(uploadPageHtml(baseUrl));
+	});
+
+	// Upload endpoint
+	app.post("/upload", async (context) => {
+		try {
+			const staging = new KVFileStaging(context.env.FILE_STAGING);
+			const formData = await context.req.raw.formData();
+			const file = formData.get("file");
+
+			if (!(file instanceof File)) {
+				return context.json({ error: "No file provided" }, 400);
+			}
+
+			const result = await handleFileUpload(staging, {
+				content: await file.arrayBuffer(),
+				filename: file.name,
+				mimeType: file.type || "application/octet-stream",
+			});
+
+			return context.json(result);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			return context.json({ error: message }, 400);
+		}
+	});
+
+	// Download endpoint
+	app.get("/download/:ref", async (context) => {
+		const ref = context.req.param("ref");
+		const staging = new KVFileStaging(context.env.FILE_STAGING);
+		const file = await handleFileDownload(staging, ref);
+
+		if (file == null) {
+			return context.json({ error: "File not found or expired" }, 404);
+		}
+
+		return new Response(file.content, {
+			headers: {
+				"Content-Type": file.mimeType,
+				"Content-Disposition": `inline; filename="${file.filename}"`,
+			},
+		});
+	});
 
 	app.get("/authorize", async (context) => {
 		const authorizationRequest = await context.env.OAUTH_PROVIDER.parseAuthRequest(context.req.raw);
