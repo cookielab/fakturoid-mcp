@@ -84,8 +84,8 @@ const resolveFromFilePath = async (filePath: string): Promise<ResolvedFile> => {
 const resolveFromData = (data: string, filename?: string, mimeType?: string): ResolvedFile => {
   const dataUriMatch = data.match(DATA_URI_REGEX);
   if (dataUriMatch != null) {
-    const parsedMime = dataUriMatch[1];
-    const base64Content = dataUriMatch[2];
+    const parsedMime = dataUriMatch[1] ?? "";
+    const base64Content = dataUriMatch[2] ?? "";
     return {
       content: base64ToBuffer(base64Content),
       filename: filename ?? "attachment",

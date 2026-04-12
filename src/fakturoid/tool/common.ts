@@ -3,12 +3,13 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { z } from "zod/v3";
 import type { AuthenticationStrategy } from "../../auth/strategy.js";
 import type { FakturoidClient } from "../client.js";
+import type { FileStaging } from "../../staging/storage.js";
 import { logger } from "../../utils/logger.js";
 
 type ServerToolCreator<
 	Configuration extends object = object,
 	Strategy extends AuthenticationStrategy<Configuration> = AuthenticationStrategy<Configuration>,
-> = (server: McpServer, client: FakturoidClient<Configuration, Strategy>) => void;
+> = (server: McpServer, client: FakturoidClient<Configuration, Strategy>, staging: FileStaging) => void;
 
 const createTool = <
 	InputSchema extends z.ZodRawShape | undefined = undefined,
@@ -21,16 +22,18 @@ const createTool = <
 	implementation: (
 		client: FakturoidClient<Configuration, Strategy>,
 		input: InputSchema extends z.ZodRawShape ? z.objectOutputType<InputSchema, z.ZodTypeAny> : undefined,
+		staging: FileStaging,
 	) => CallToolResult | Promise<CallToolResult>,
 	inputSchema?: InputSchema,
 ): ServerToolCreator<Configuration, Strategy> => {
-	return (server, client) => {
+	return (server, client, staging) => {
 		try {
 			if (inputSchema == null) {
 				return server.registerTool(name, { title: title, description: description }, () =>
 					implementation(
 						client,
 						undefined as InputSchema extends z.ZodRawShape ? z.objectOutputType<InputSchema, z.ZodTypeAny> : undefined,
+						staging,
 					),
 				);
 			}
@@ -41,6 +44,7 @@ const createTool = <
 				implementation(
 					client,
 					input as InputSchema extends z.ZodRawShape ? z.objectOutputType<InputSchema, z.ZodTypeAny> : undefined,
+					staging,
 				),
 			);
 		} catch (error: unknown) {

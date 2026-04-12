@@ -11,6 +11,7 @@ import express, { type Request, type Response } from "express";
 import { z } from "zod/v3";
 import { LocalStrategy } from "./auth/localStrategy.js";
 import { createServer } from "./server.js";
+import { InMemoryFileStaging } from "./staging/storage.js";
 import { logger } from "./utils/logger.js";
 
 const EnvironmentSchema = z.object({
@@ -39,7 +40,7 @@ const startSTDIO = async (strategy: AuthenticationStrategy): Promise<void> => {
 	logger.info("Starting the server in STDIO transport mode.");
 
 	const transport = new StdioServerTransport();
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, new InMemoryFileStaging());
 
 	await server.connect(transport);
 };
@@ -53,7 +54,7 @@ const startSSE = async (strategy: AuthenticationStrategy, port: number): Promise
 		"See the documentation for more information https://modelcontextprotocol.io/docs/concepts/transports#server-sent-events-sse-deprecated",
 	);
 
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, new InMemoryFileStaging());
 
 	const app = express();
 	app.use(express.json());
@@ -138,7 +139,7 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 				}
 			};
 
-			const server = await createServer(strategy);
+			const server = await createServer(strategy, new InMemoryFileStaging());
 			await server.connect(transport);
 		}
 

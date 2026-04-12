@@ -1,4 +1,5 @@
 import type { AuthenticationStrategy } from "./auth/strategy.js";
+import type { FileStaging } from "./staging/storage.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import packageJSON from "../package.json" with { type: "json" };
 import { FakturoidClient } from "./fakturoid/client.js";
@@ -8,6 +9,7 @@ import { registerFakturoidTools } from "./fakturoid/tools.js";
 
 const createServer = async <Configuration extends object, Strategy extends AuthenticationStrategy<Configuration>>(
 	strategy: Strategy,
+	staging: FileStaging,
 ): Promise<McpServer> => {
 	const fakturoidClient = await FakturoidClient.create(strategy);
 
@@ -25,7 +27,7 @@ const createServer = async <Configuration extends object, Strategy extends Authe
 		},
 	);
 
-	registerFakturoidTools(server, fakturoidClient);
+	registerFakturoidTools(server, fakturoidClient, staging);
 	registerFakturoidResources(server.server, fakturoidClient);
 	registerFakturoidPrompts(server.server);
 
