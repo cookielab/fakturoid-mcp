@@ -58,12 +58,32 @@ const getExpenseDetail = createTool(
 const downloadExpenseAttachment = createTool(
 	"fakturoid_download_expense_attachment",
 	"Download Expense Attachment",
-	"Download a specific attachment from an expense",
-	async (client, { expenseId, attachmentId }) => {
+	"Download a specific attachment from an expense. Returns a file reference that can be opened via /download/:ref",
+	async (client, { expenseId, attachmentId }, staging) => {
 		const attachment = await client.downloadExpenseAttachment(expenseId, attachmentId);
 
+		if (attachment instanceof Blob) {
+			const buffer = await attachment.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `expense-${expenseId}-attachment-${attachmentId}`,
+				mimeType: attachment.type || "application/octet-stream",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(attachment)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{

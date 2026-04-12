@@ -56,12 +56,32 @@ const getInvoiceDetail = createTool(
 const downloadInvoicePDF = createTool(
 	"fakturoid_download_invoice_pdf",
 	"Download Invoice PDF",
-	"Download the PDF version of an invoice by its ID",
-	async (client, { id }) => {
+	"Download the PDF version of an invoice by its ID. Returns a file reference that can be opened via /download/:ref",
+	async (client, { id }, staging) => {
 		const pdf = await client.downloadInvoicePDF(id);
 
+		if (pdf instanceof Blob) {
+			const buffer = await pdf.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `invoice-${id}.pdf`,
+				mimeType: "application/pdf",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(pdf, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(pdf)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{
@@ -72,12 +92,32 @@ const downloadInvoicePDF = createTool(
 const downloadInvoiceAttachment = createTool(
 	"fakturoid_download_invoice_attachment",
 	"Download Invoice Attachment",
-	"Download a specific attachment from an invoice",
-	async (client, { invoiceId, attachmentId }) => {
+	"Download a specific attachment from an invoice. Returns a file reference that can be opened via /download/:ref",
+	async (client, { invoiceId, attachmentId }, staging) => {
 		const attachment = await client.downloadInvoiceAttachment(invoiceId, attachmentId);
 
+		if (attachment instanceof Blob) {
+			const buffer = await attachment.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `invoice-${invoiceId}-attachment-${attachmentId}`,
+				mimeType: attachment.type || "application/octet-stream",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(attachment)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{

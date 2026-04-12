@@ -64,12 +64,32 @@ const sendInboxFileToOcr = createTool(
 const downloadInboxFile = createTool(
 	"fakturoid_download_inbox_file",
 	"Download Inbox File",
-	"Download a file from the inbox by its ID",
-	async (client, { id }) => {
+	"Download a file from the inbox by its ID. Returns a file reference that can be opened via /download/:ref",
+	async (client, { id }, staging) => {
 		const file = await client.downloadInboxFile(id);
 
+		if (file instanceof Blob) {
+			const buffer = await file.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `inbox-file-${id}`,
+				mimeType: file.type || "application/octet-stream",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(file, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(file)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{
