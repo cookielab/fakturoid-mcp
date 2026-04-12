@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "cloudflare@claude-plugins-official": true,
+    "document-skills@anthropic-agent-skills": true
+  }
+}
