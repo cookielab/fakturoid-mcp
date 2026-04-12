@@ -46,7 +46,8 @@ For duplicate detection:
        - type: "customer" (invoice) or "supplier" (expense)
 
 3. Duplicate check (only if number/original_number is provided)
-   └─ Query existing documents filtered by subject_id + number/original_number
+   └─ Invoice: query by subject_id + number filter
+   └─ Expense: query by subject_id, then client-side filter on original_number (API does not support original_number filter)
 
 4. Document resolution
    ├─ Duplicate found → return existing document with "duplicate_found" status
