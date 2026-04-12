@@ -77,7 +77,8 @@ describe("executeSmartCreateExpense", () => {
 			subject: { status: "found", data: subject },
 			document: {
 				data: existingExpense,
-				message: "Document with this number already exists for this subject. Ask the user whether to update it or leave it as-is.",
+				message:
+					"Document with this number already exists for this subject. Ask the user whether to update it or leave it as-is.",
 			},
 		});
 		expect(mockClient.createExpense).not.toHaveBeenCalled();

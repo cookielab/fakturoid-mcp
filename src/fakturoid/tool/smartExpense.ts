@@ -47,9 +47,7 @@ const executeSmartCreateExpense = async (
 			return new Error(`Expense search failed: ${existingExpenses.message}`);
 		}
 
-		const duplicate = existingExpenses.find(
-			(e) => e.original_number === expenseData.original_number,
-		);
+		const duplicate = existingExpenses.find((e) => e.original_number === expenseData.original_number);
 
 		if (duplicate != null) {
 			return {

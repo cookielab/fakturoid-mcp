@@ -1,9 +1,7 @@
 import type { FakturoidClient } from "../client.js";
 import type { Subject } from "../model/subject.js";
 
-type SubjectResolution =
-	| { status: "found"; data: Subject }
-	| { status: "created"; data: Subject };
+type SubjectResolution = { status: "found"; data: Subject } | { status: "created"; data: Subject };
 
 const resolveSubject = async (
 	client: FakturoidClient<any, any>,
@@ -15,9 +13,7 @@ const resolveSubject = async (
 		return new Error(`Subject search failed: ${searchResult.message}`);
 	}
 
-	const match = searchResult.find(
-		(subject) => subject.registration_no === registrationNo,
-	);
+	const match = searchResult.find((subject) => subject.registration_no === registrationNo);
 
 	if (match != null) {
 		return { status: "found", data: match };
