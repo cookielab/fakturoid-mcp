@@ -11,6 +11,7 @@ describe("resolveSubject", () => {
 		const existingSubject = { id: 42, name: "Test Company", registration_no: "12345678" };
 		mockClient.searchSubjects.mockResolvedValue([existingSubject]);
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		const result = await resolveSubject(mockClient as any, "12345678", "customer");
 
 		expect(result).toEqual({ status: "found", data: existingSubject });
@@ -23,6 +24,7 @@ describe("resolveSubject", () => {
 		const createdSubject = { id: 99, name: "New Co", registration_no: "87654321" };
 		mockClient.createSubject.mockResolvedValue(createdSubject);
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		const result = await resolveSubject(mockClient as any, "87654321", "customer");
 
 		expect(result).toEqual({ status: "created", data: createdSubject });
@@ -39,6 +41,7 @@ describe("resolveSubject", () => {
 		const createdSubject = { id: 99, name: "New Co", registration_no: "12345678" };
 		mockClient.createSubject.mockResolvedValue(createdSubject);
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		const result = await resolveSubject(mockClient as any, "12345678", "customer");
 
 		expect(result).toEqual({ status: "created", data: createdSubject });
@@ -48,6 +51,7 @@ describe("resolveSubject", () => {
 		mockClient.searchSubjects.mockResolvedValue([]);
 		mockClient.createSubject.mockResolvedValue({ id: 1, name: "Supplier", registration_no: "11111111" });
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		await resolveSubject(mockClient as any, "11111111", "supplier");
 
 		expect(mockClient.createSubject).toHaveBeenCalledWith({
@@ -60,6 +64,7 @@ describe("resolveSubject", () => {
 	it("returns error when searchSubjects fails", async () => {
 		mockClient.searchSubjects.mockResolvedValue(new Error("API error"));
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		const result = await resolveSubject(mockClient as any, "12345678", "customer");
 
 		expect(result).toBeInstanceOf(Error);
@@ -69,6 +74,7 @@ describe("resolveSubject", () => {
 		mockClient.searchSubjects.mockResolvedValue([]);
 		mockClient.createSubject.mockResolvedValue(new Error("Validation error"));
 
+		// biome-ignore lint/suspicious/noExplicitAny: mock client doesn't implement full FakturoidClient interface
 		const result = await resolveSubject(mockClient as any, "12345678", "customer");
 
 		expect(result).toBeInstanceOf(Error);

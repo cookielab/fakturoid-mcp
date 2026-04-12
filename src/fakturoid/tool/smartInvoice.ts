@@ -1,4 +1,5 @@
 import { z } from "zod/v3";
+import type { AuthenticationStrategy } from "../../auth/strategy.js";
 import type { FakturoidClient } from "../client.js";
 import type { Invoice } from "../model/invoice.js";
 import { CreateInvoiceSchema } from "../model/invoice.js";
@@ -25,8 +26,11 @@ const SmartCreateInvoiceInputSchema = CreateInvoiceSchema.omit({ subject_id: tru
 
 type SmartCreateInvoiceInput = z.infer<typeof SmartCreateInvoiceInputSchema>;
 
-const executeSmartCreateInvoice = async (
-	client: FakturoidClient<any, any>,
+const executeSmartCreateInvoice = async <
+	Configuration extends object = object,
+	Strategy extends AuthenticationStrategy<Configuration> = AuthenticationStrategy<Configuration>,
+>(
+	client: FakturoidClient<Configuration, Strategy>,
 	input: SmartCreateInvoiceInput,
 ): Promise<SmartCreateInvoiceResult> => {
 	const { registration_no, ...invoiceData } = input;
