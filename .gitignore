@@ -33,3 +33,4 @@ test_report
 
 .dev.vars
 .wrangler
+.worktrees
