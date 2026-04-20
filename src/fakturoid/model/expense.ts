@@ -1,5 +1,6 @@
 import { z } from "zod/v3";
-import { CreateAttachmentSchema, VatRatesSummarySchema } from "./common.js";
+import type { ServerContext } from "../../server.js";
+import { createAttachmentSchema, VatRatesSummarySchema } from "./common.js";
 import { ExpensePaymentSchema } from "./expensePayment.js";
 
 const EXPENSE_ARTICLE_NUMBER_TYPE = ["ian", "ean", "isbn"] as const;
@@ -194,35 +195,8 @@ const ExpenseSchema = z.object({
 	vat_rates_summary: z.array(VatRatesSummarySchema),
 });
 
-const CreateExpenseSchema = ExpenseSchema.pick({
-	bank_account: true,
-	currency: true,
-	custom_id: true,
-	custom_payment_method: true,
-	description: true,
-	document_type: true,
-	due_on: true,
-	exchange_rate: true,
-	iban: true,
-	issued_on: true,
-	number: true,
-	original_number: true,
-	payment_method: true,
-	private_note: true,
-	proportional_vat_deduction: true,
-	received_on: true,
-	remind_due_date: true,
-	subject_id: true,
-	supply_code: true,
-	swift_bic: true,
-	tags: true,
-	tax_deductible: true,
-	taxable_fulfillment_due: true,
-	transferred_tax_liability: true,
-	variable_symbol: true,
-	vat_price_mode: true,
-})
-	.partial({
+const createCreateExpenseSchema = (context: ServerContext) =>
+	ExpenseSchema.pick({
 		bank_account: true,
 		currency: true,
 		custom_id: true,
@@ -240,6 +214,7 @@ const CreateExpenseSchema = ExpenseSchema.pick({
 		proportional_vat_deduction: true,
 		received_on: true,
 		remind_due_date: true,
+		subject_id: true,
 		supply_code: true,
 		swift_bic: true,
 		tags: true,
@@ -249,51 +224,79 @@ const CreateExpenseSchema = ExpenseSchema.pick({
 		variable_symbol: true,
 		vat_price_mode: true,
 	})
-	.required({
-		subject_id: true,
-	})
-	.extend({
-		/** List of attachments */
-		attachments: z.array(CreateAttachmentSchema).optional(),
-		/** List of lines to expense */
-		lines: z.array(CreateLineSchema).optional(),
-	});
+		.partial({
+			bank_account: true,
+			currency: true,
+			custom_id: true,
+			custom_payment_method: true,
+			description: true,
+			document_type: true,
+			due_on: true,
+			exchange_rate: true,
+			iban: true,
+			issued_on: true,
+			number: true,
+			original_number: true,
+			payment_method: true,
+			private_note: true,
+			proportional_vat_deduction: true,
+			received_on: true,
+			remind_due_date: true,
+			supply_code: true,
+			swift_bic: true,
+			tags: true,
+			tax_deductible: true,
+			taxable_fulfillment_due: true,
+			transferred_tax_liability: true,
+			variable_symbol: true,
+			vat_price_mode: true,
+		})
+		.required({
+			subject_id: true,
+		})
+		.extend({
+			/** List of attachments */
+			attachments: z.array(createAttachmentSchema(context)).optional(),
+			/** List of lines to expense */
+			lines: z.array(CreateLineSchema).optional(),
+		});
 
-const UpdateExpenseSchema = ExpenseSchema.pick({
-	bank_account: true,
-	currency: true,
-	custom_id: true,
-	custom_payment_method: true,
-	description: true,
-	document_type: true,
-	due_on: true,
-	exchange_rate: true,
-	iban: true,
-	issued_on: true,
-	number: true,
-	original_number: true,
-	payment_method: true,
-	private_note: true,
-	proportional_vat_deduction: true,
-	received_on: true,
-	remind_due_date: true,
-	subject_id: true,
-	supply_code: true,
-	swift_bic: true,
-	tags: true,
-	tax_deductible: true,
-	taxable_fulfillment_due: true,
-	transferred_tax_liability: true,
-	variable_symbol: true,
-	vat_price_mode: true,
-})
-	.partial()
-	.extend({
-		/** List of attachments */
-		attachments: z.array(CreateAttachmentSchema).optional(),
-		/** List of lines to expense */
-		lines: z.array(UpdateLineSchema).optional(),
-	});
+const createUpdateExpenseSchema = (context: ServerContext) =>
+	ExpenseSchema.pick({
+		bank_account: true,
+		currency: true,
+		custom_id: true,
+		custom_payment_method: true,
+		description: true,
+		document_type: true,
+		due_on: true,
+		exchange_rate: true,
+		iban: true,
+		issued_on: true,
+		number: true,
+		original_number: true,
+		payment_method: true,
+		private_note: true,
+		proportional_vat_deduction: true,
+		received_on: true,
+		remind_due_date: true,
+		subject_id: true,
+		supply_code: true,
+		swift_bic: true,
+		tags: true,
+		tax_deductible: true,
+		taxable_fulfillment_due: true,
+		transferred_tax_liability: true,
+		variable_symbol: true,
+		vat_price_mode: true,
+	})
+		.partial()
+		.extend({
+			/** List of attachments */
+			attachments: z.array(createAttachmentSchema(context)).optional(),
+			/** List of lines to expense */
+			lines: z.array(UpdateLineSchema).optional(),
+		});
 
 const GetExpenseFiltersSchema = ExpenseSchema.pick({
 	custom_id: true,
@@ -310,18 +313,21 @@ const GetExpenseFiltersSchema = ExpenseSchema.pick({
 	.partial();
 
 type Expense = z.infer<typeof ExpenseSchema>;
-type CreateExpense = z.infer<typeof CreateExpenseSchema>;
-type UpdateExpense = z.infer<typeof UpdateExpenseSchema>;
 type GetExpenseFilters = z.infer<typeof GetExpenseFiltersSchema>;
-
 type Line = z.infer<typeof LineSchema>;
 type AttachmentResponse = z.infer<typeof AttachmentResponseSchema>;
 
+// Generic types for client usage - use any to bypass strict type checking with context-dependent schemas
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
+export type CreateExpense = any;
+// biome-ignore lint/suspicious/noExplicitAny: Context-dependent schemas require dynamic typing
+export type UpdateExpense = any;
+
 export {
 	ExpenseSchema,
-	CreateExpenseSchema,
-	UpdateExpenseSchema,
+	createCreateExpenseSchema,
+	createUpdateExpenseSchema,
 	GetExpenseFiltersSchema,
 	EXPENSE_ARTICLE_NUMBER_TYPE,
 };
-export type { Expense, CreateExpense, UpdateExpense, GetExpenseFilters, Line, AttachmentResponse };
+export type { Expense, GetExpenseFilters, Line, AttachmentResponse };

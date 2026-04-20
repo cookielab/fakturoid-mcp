@@ -95,6 +95,11 @@ Professional templates for common accounting workflows:
 
    # MCP Transport type (stdio, sse, or http)
    MCP_TRANSPORT=http
+
+   # Attachment Upload Configuration (optional)
+   ALLOW_URL_DOWNLOADS=true       # Enable URL-based attachment downloads (default: true)
+   MAX_DOWNLOAD_SIZE_MB=10        # Maximum file size for downloads in MB (default: 10)
+   DOWNLOAD_TIMEOUT_MS=30000      # Download timeout in milliseconds (default: 30000)
    ```
 
 4. Build the project:
@@ -354,12 +359,75 @@ const server = await createServer(strategy);
 - **Biome** - Code formatting and linting
 - **Modular Design** - Clean separation of concerns
 
+## Attachment Upload Strategies
+
+The server supports four flexible strategies for attaching documents to invoices and expenses:
+
+### 1. Data URL (Always Available)
+Direct embedding of file content as base64-encoded Data URI:
+```json
+{
+  "attachments": [{
+    "data_url": "data:application/pdf;base64,JVBERi0xLjQK...",
+    "filename": "invoice.pdf"
+  }]
+}
+```
+**Use case:** Small files, LLM-generated content
+**Availability:** All transport modes
+**Token cost:** High (~30k tokens for 90KB file)
+
+### 2. File Path (STDIO Mode Only)
+Reference a local file system path:
+```json
+{
+  "attachments": [{
+    "file_path": "/Users/username/Documents/invoice.pdf",
+    "filename": "invoice.pdf"
+  }]
+}
+```
+**Use case:** Local files when running in stdio mode
+**Availability:** stdio transport only (security restriction)
+**Token cost:** Very low (~10 tokens)
+
+### 3. Inbox File ID (Always Available)
+Reference an already-uploaded Fakturoid inbox file:
+```json
+{
+  "attachments": [{
+    "inbox_file_id": 123456
+  }]
+}
+```
+**Use case:** Fakturoid-native workflows (eg. creating expenses via Inbox files)
+**Availability:** All transport modes
+**Token cost:** Very low (~5 tokens)
+
+### 4. URL Download (Configurable)
+Download from a public URL:
+```json
+{
+  "attachments": [{
+    "url": "https://example.com/invoice.pdf",
+    "filename": "invoice.pdf"
+  }]
+}
+```
+**Use case:** Cloud storage, public file shares
+**Availability:** All transport modes (when `ALLOW_URL_DOWNLOADS=true`)
+**Token cost:** Very low (~20 tokens)
+**Security:** Only publicly accessible URLs (no authentication). SSRF protection blocks private networks and localhost.
+
 ## Security
 
 - OAuth 2.0 authentication flow
 - Automatic token refresh
 - Secure credential management via environment variables
 - No hardcoded secrets or API keys
+- SSRF protection for URL downloads (blocks private networks, localhost, and link-local addresses)
+- Configurable file size limits and timeouts for downloads
+- Transport-based capability restrictions (file system access only in stdio mode)
 
 ## Contributing
 
