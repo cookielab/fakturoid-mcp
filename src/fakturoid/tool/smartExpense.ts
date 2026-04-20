@@ -84,7 +84,7 @@ const executeSmartCreateExpense = async <
 const smartCreateExpense = createTool(
 	"fakturoid_smart_create_expense",
 	"Smart Create Expense",
-	"Resolve subject by IČO (create via ARES if not found), check for duplicate expense by original number, and create the expense — all in one step. Returns existing document with a message if duplicate is found.",
+	"PREFERRED tool for creating expenses. Use this instead of fakturoid_create_expense. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate expense by original number, and creates the expense — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. Returns existing document with a message if duplicate is found.",
 	async (client, input) => {
 		const result = await executeSmartCreateExpense(client, input as SmartCreateExpenseInput);
 

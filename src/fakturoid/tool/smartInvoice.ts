@@ -83,7 +83,7 @@ const executeSmartCreateInvoice = async <
 const smartCreateInvoice = createTool(
 	"fakturoid_smart_create_invoice",
 	"Smart Create Invoice",
-	"Resolve subject by IČO (create via ARES if not found), check for duplicate invoice by number, and create the invoice — all in one step. Returns existing document with a message if duplicate is found.",
+	"PREFERRED tool for creating invoices. Use this instead of fakturoid_create_invoice. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate invoice by number, and creates the invoice — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. Returns existing document with a message if duplicate is found.",
 	async (client, input) => {
 		const result = await executeSmartCreateInvoice(client, input as SmartCreateInvoiceInput);
 

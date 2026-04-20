@@ -112,7 +112,7 @@ const fireInvoiceAction = createTool(
 const createInvoice = createTool(
 	"fakturoid_create_invoice",
 	"Create Invoice",
-	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created.",
+	"Low-level invoice creation. Prefer fakturoid_smart_create_invoice which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control.",
 	async (client, invoiceData) => {
 		const invoice = await client.createInvoice(invoiceData);
 

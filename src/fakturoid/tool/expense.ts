@@ -91,7 +91,7 @@ const fireExpenseAction = createTool(
 const createExpense = createTool(
 	"fakturoid_create_expense",
 	"Create Expense",
-	"Create a new expense with the provided expense data",
+	"Low-level expense creation. Prefer fakturoid_smart_create_expense which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control.",
 	async (client, expenseData) => {
 		const expense = await client.createExpense(expenseData);
 
