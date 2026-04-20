@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpAgent } from "agents/mcp";
 import { type OAuthConfiguration, OAuthStrategy } from "../auth/oauthStrategy.js";
 import { createServer } from "../server.js";
+import { KVFileStaging } from "../staging/kvStorage.js";
 import { logger } from "../utils/logger.js";
 import { createHandler } from "./handler.js";
 
@@ -45,7 +46,7 @@ class FakturoidMCP extends McpAgent<Env, never, Record<string, string>> {
 			}
 		}
 
-		this.server = await createServer(FakturoidMCP.strategy);
+		this.server = await createServer(FakturoidMCP.strategy, new KVFileStaging(this.env.FILE_STAGING));
 	}
 }
 

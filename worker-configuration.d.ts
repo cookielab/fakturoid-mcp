@@ -5,6 +5,7 @@ declare namespace Cloudflare {
 	interface Env {
 		OAUTH_TOKENS: KVNamespace;
 		OAUTH_KV: KVNamespace;
+		FILE_STAGING: KVNamespace;
 		FAKTUROID_CLIENT_ID: string;
 		FAKTUROID_CLIENT_SECRET: string;
 		API_URL: string;

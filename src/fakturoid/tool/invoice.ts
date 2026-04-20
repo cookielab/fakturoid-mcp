@@ -1,5 +1,7 @@
 import { z } from "zod/v3";
+import { CreateAttachmentToolSchema } from "../model/common.js";
 import { CreateInvoiceSchema, GetInvoicesFiltersSchema, UpdateInvoiceSchema } from "../model/invoice.js";
+import { resolveAttachments } from "../../staging/resolver.js";
 import { createTool, type ServerToolCreator } from "./common.js";
 
 const getInvoices = createTool(
@@ -54,12 +56,32 @@ const getInvoiceDetail = createTool(
 const downloadInvoicePDF = createTool(
 	"fakturoid_download_invoice_pdf",
 	"Download Invoice PDF",
-	"Download the PDF version of an invoice by its ID",
-	async (client, { id }) => {
+	"Download the PDF version of an invoice by its ID. Returns a file reference that can be opened via /download/:ref",
+	async (client, { id }, staging) => {
 		const pdf = await client.downloadInvoicePDF(id);
 
+		if (pdf instanceof Blob) {
+			const buffer = await pdf.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `invoice-${id}.pdf`,
+				mimeType: "application/pdf",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(pdf, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(pdf)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{
@@ -70,12 +92,32 @@ const downloadInvoicePDF = createTool(
 const downloadInvoiceAttachment = createTool(
 	"fakturoid_download_invoice_attachment",
 	"Download Invoice Attachment",
-	"Download a specific attachment from an invoice",
-	async (client, { invoiceId, attachmentId }) => {
+	"Download a specific attachment from an invoice. Returns a file reference that can be opened via /download/:ref",
+	async (client, { invoiceId, attachmentId }, staging) => {
 		const attachment = await client.downloadInvoiceAttachment(invoiceId, attachmentId);
 
+		if (attachment instanceof Blob) {
+			const buffer = await attachment.arrayBuffer();
+			const ref = await staging.store({
+				content: buffer,
+				filename: `invoice-${invoiceId}-attachment-${attachmentId}`,
+				mimeType: attachment.type || "application/octet-stream",
+			});
+			const sizeKB = (buffer.byteLength / 1024).toFixed(1);
+
+			return {
+				content: [
+					{
+						text: `File downloaded successfully. File ref: ${ref} (expires in 5 minutes). Size: ${sizeKB} KB. Open in browser: /download/${ref}`,
+						type: "text" as const,
+					},
+				],
+			};
+		}
+
 		return {
-			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
+			content: [{ text: `Error downloading file: ${String(attachment)}`, type: "text" as const }],
+			isError: true,
 		};
 	},
 	{
@@ -112,15 +154,23 @@ const fireInvoiceAction = createTool(
 const createInvoice = createTool(
 	"fakturoid_create_invoice",
 	"Create Invoice",
-	"Low-level invoice creation. Prefer fakturoid_smart_create_invoice which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control.",
-	async (client, invoiceData) => {
-		const invoice = await client.createInvoice(invoiceData);
+	"Low-level invoice creation. Prefer fakturoid_smart_create_invoice which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
+	async (client, invoiceData, staging) => {
+		const resolvedAttachments = await resolveAttachments(invoiceData.attachments, staging);
+
+		const invoice = await client.createInvoice({
+			...invoiceData,
+			attachments: resolvedAttachments,
+		});
 
 		return {
 			content: [{ text: JSON.stringify(invoice, null, 2), type: "text" }],
 		};
 	},
-	CreateInvoiceSchema.shape,
+	{
+		...CreateInvoiceSchema.shape,
+		attachments: z.array(CreateAttachmentToolSchema).optional(),
+	},
 );
 
 const updateInvoice = createTool(

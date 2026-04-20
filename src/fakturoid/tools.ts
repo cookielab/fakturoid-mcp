@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AuthenticationStrategy } from "../auth/strategy.js";
 import type { FakturoidClient } from "./client.js";
 import type { ServerToolCreator } from "./tool/common.js";
+import type { FileStaging } from "../staging/storage.js";
 import { account } from "./tool/account.js";
 import { bankAccount } from "./tool/bankAccount.js";
 import { event } from "./tool/event.js";
@@ -30,6 +31,7 @@ const registerFakturoidTools = <
 >(
 	server: McpServer,
 	client: FakturoidClient<Configuration, Strategy>,
+	staging: FileStaging,
 ): void => {
 	const tools: ServerToolCreator<Configuration, Strategy>[] = [
 		account,
@@ -56,7 +58,7 @@ const registerFakturoidTools = <
 	].flat();
 
 	for (const registerTool of tools) {
-		registerTool(server, client);
+		registerTool(server, client, staging);
 	}
 };
 

@@ -21,6 +21,10 @@
 		{
 			"binding": "OAUTH_KV",
 			"id": "5210340d56854b0fa3a0f43c63c53b24"
+		},
+		{
+			"binding": "FILE_STAGING",
+			"id": "2b60d9cf47e44f0b9553a38cd8982d80"
 		}
 	],
 	"observability": {

@@ -24,6 +24,21 @@ const CreateAttachmentSchema = z.object({
 	filename: z.string().optional().default("attachment.{extension}"),
 });
 
+const CreateAttachmentToolSchema = z.object({
+	/** Reference ID from the /upload page */
+	file_ref: z.string().optional(),
+	/** URL to fetch the file from */
+	source_url: z.string().optional(),
+	/** Local file path (only works when server runs locally) */
+	file_path: z.string().optional(),
+	/** Attachment contents in the form of a Data URI (fallback - prefer file_ref or source_url) */
+	data_url: z.string().optional(),
+	/** Attachment file name */
+	filename: z.string().optional(),
+});
+
+type CreateAttachmentTool = z.infer<typeof CreateAttachmentToolSchema>;
+
 const LegacyBankDetailsSchema = z.object({
 	/** Bank account number */
 	bank_account: z.string(),
@@ -39,5 +54,5 @@ type VatRatesSummary = z.infer<typeof VatRatesSummarySchema>;
 type CreateAttachment = z.infer<typeof CreateAttachmentSchema>;
 type LegacyBankDetails = z.infer<typeof LegacyBankDetailsSchema>;
 
-export { VatRatesSummarySchema, CreateAttachmentSchema, LegacyBankDetailsSchema };
-export type { VatRatesSummary, CreateAttachment, LegacyBankDetails };
+export { VatRatesSummarySchema, CreateAttachmentSchema, CreateAttachmentToolSchema, LegacyBankDetailsSchema };
+export type { VatRatesSummary, CreateAttachment, CreateAttachmentTool, LegacyBankDetails };

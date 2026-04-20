@@ -11,6 +11,9 @@ import express, { type Request, type Response } from "express";
 import { z } from "zod/v3";
 import { LocalStrategy } from "./auth/localStrategy.js";
 import { createServer } from "./server.js";
+import { handleFileDownload, handleFileUpload } from "./staging/routes.js";
+import { InMemoryFileStaging } from "./staging/storage.js";
+import { uploadPageHtml } from "./staging/upload-page.js";
 import { logger } from "./utils/logger.js";
 
 const EnvironmentSchema = z.object({
@@ -39,7 +42,7 @@ const startSTDIO = async (strategy: AuthenticationStrategy): Promise<void> => {
 	logger.info("Starting the server in STDIO transport mode.");
 
 	const transport = new StdioServerTransport();
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, new InMemoryFileStaging());
 
 	await server.connect(transport);
 };
@@ -53,7 +56,7 @@ const startSSE = async (strategy: AuthenticationStrategy, port: number): Promise
 		"See the documentation for more information https://modelcontextprotocol.io/docs/concepts/transports#server-sent-events-sse-deprecated",
 	);
 
-	const server = await createServer(strategy);
+	const server = await createServer(strategy, new InMemoryFileStaging());
 
 	const app = express();
 	app.use(express.json());
@@ -104,6 +107,74 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 	app.disable("x-powered-by");
 
 	const transports: HttpTransports = {};
+	const staging = new InMemoryFileStaging();
+
+	// Upload page
+	app.get("/upload", (_request: Request, response: Response) => {
+		response.setHeader("Content-Type", "text/html");
+		response.send(uploadPageHtml(`http://localhost:${port}`));
+	});
+
+	// Upload endpoint
+	app.post("/upload", async (request: Request, response: Response) => {
+		try {
+			const contentType = request.get("content-type") ?? "";
+			if (!contentType.includes("multipart/form-data")) {
+				response.status(400).json({ error: "Expected multipart/form-data" });
+				return;
+			}
+
+			const rawBody = await new Promise<Buffer>((resolve) => {
+				const chunks: Buffer[] = [];
+				request.on("data", (chunk: Buffer) => chunks.push(chunk));
+				request.on("end", () => resolve(Buffer.concat(chunks)));
+			});
+
+			const webRequest = new globalThis.Request("http://localhost/upload", {
+				method: "POST",
+				headers: { "Content-Type": contentType },
+				body: rawBody,
+			});
+
+			const formData = await webRequest.formData();
+			const file = formData.get("file");
+			if (!(file instanceof File)) {
+				response.status(400).json({ error: "No file provided" });
+				return;
+			}
+
+			const result = await handleFileUpload(staging, {
+				content: await file.arrayBuffer(),
+				filename: file.name,
+				mimeType: file.type || "application/octet-stream",
+			});
+
+			response.json(result);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			response.status(400).json({ error: message });
+		}
+	});
+
+	// Download endpoint
+	app.get("/download/:ref", async (request: Request, response: Response) => {
+		// biome-ignore lint/complexity/useLiteralKeys: TypeScript requires bracket notation for index signatures
+		const ref = request.params["ref"];
+		if (ref == null) {
+			response.status(400).json({ error: "Missing ref parameter" });
+			return;
+		}
+		const file = await handleFileDownload(staging, ref);
+
+		if (file == null) {
+			response.status(404).json({ error: "File not found or expired" });
+			return;
+		}
+
+		response.setHeader("Content-Type", file.mimeType);
+		response.setHeader("Content-Disposition", `inline; filename="${file.filename}"`);
+		response.send(Buffer.from(file.content));
+	});
 
 	app.post("/mcp", async (request: Request, response: Response) => {
 		const sessionID = request.get("mcp-session-id");
@@ -138,7 +209,7 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 				}
 			};
 
-			const server = await createServer(strategy);
+			const server = await createServer(strategy, staging);
 			await server.connect(transport);
 		}
 
