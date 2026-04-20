@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { z } from "zod/v3";
 import { CreateExpenseSchema, GetExpenseFiltersSchema, UpdateExpenseSchema } from "../model/expense.js";
 import { createTool, type ServerToolCreator } from "./common.js";
@@ -60,8 +61,27 @@ const downloadExpenseAttachment = createTool(
 	async (client, { expenseId, attachmentId }) => {
 		const attachment = await client.downloadExpenseAttachment(expenseId, attachmentId);
 
+		if (attachment instanceof Error) {
+			throw attachment;
+		}
+
+		const arrayBuffer = await attachment.arrayBuffer();
+		const mimeType = attachment.type || "application/octet-stream";
+		const extension = mimeType.split("/")[1] || "bin";
+		const filename = `expense-${expenseId}-attachment-${attachmentId}.${extension}`;
+		const filepath = `${process.cwd()}/${filename}`;
+
+		await writeFile(filepath, new Uint8Array(arrayBuffer));
+
+		const result = {
+			filepath,
+			filename,
+			size: attachment.size,
+			mimeType,
+		};
+
 		return {
-			content: [{ text: JSON.stringify(attachment, null, 2), type: "text" }],
+			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
 	{

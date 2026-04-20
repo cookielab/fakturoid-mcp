@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { z } from "zod/v3";
 import { CreateInboxFileSchema } from "../model/inboxFile.js";
 import { createTool, type ServerToolCreator } from "./common.js";
@@ -52,8 +53,27 @@ const downloadInboxFile = createTool(
 	async (client, { id }) => {
 		const file = await client.downloadInboxFile(id);
 
+		if (file instanceof Error) {
+			throw file;
+		}
+
+		const arrayBuffer = await file.arrayBuffer();
+		const mimeType = file.type || "application/octet-stream";
+		const extension = mimeType.split("/")[1] || "bin";
+		const filename = `inbox-file-${id}.${extension}`;
+		const filepath = `${process.cwd()}/${filename}`;
+
+		await writeFile(filepath, new Uint8Array(arrayBuffer));
+
+		const result = {
+			filepath,
+			filename,
+			size: file.size,
+			mimeType,
+		};
+
 		return {
-			content: [{ text: JSON.stringify(file, null, 2), type: "text" }],
+			content: [{ text: JSON.stringify(result, null, 2), type: "text" }],
 		};
 	},
 	{
