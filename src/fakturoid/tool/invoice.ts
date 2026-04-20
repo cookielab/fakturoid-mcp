@@ -154,7 +154,7 @@ const fireInvoiceAction = createTool(
 const createInvoice = createTool(
 	"fakturoid_create_invoice",
 	"Create Invoice",
-	"Create a new invoice with the provided invoice data. subject_id is necessary for the invoice to be created. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
+	"Low-level invoice creation. Prefer fakturoid_smart_create_invoice which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
 	async (client, invoiceData, staging) => {
 		const resolvedAttachments = await resolveAttachments(invoiceData.attachments, staging);
 

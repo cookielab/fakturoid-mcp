@@ -113,7 +113,7 @@ const fireExpenseAction = createTool(
 const createExpense = createTool(
 	"fakturoid_create_expense",
 	"Create Expense",
-	"Create a new expense with the provided expense data. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
+	"Low-level expense creation. Prefer fakturoid_smart_create_expense which handles subject resolution and duplicate detection automatically. Use this only when you already have the subject_id and need direct control. For attachments, provide file_ref (from /upload page - preferred), source_url, file_path, or data_url.",
 	async (client, expenseData, staging) => {
 		const resolvedAttachments = await resolveAttachments(expenseData.attachments, staging);
 
