@@ -1,6 +1,8 @@
 import { z } from "zod/v3";
 import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import { resolveAttachments } from "../../staging/resolver.js";
 import type { FakturoidClient } from "../client.js";
+import { CreateAttachmentToolSchema } from "../model/common.js";
 import type { Invoice } from "../model/invoice.js";
 import { CreateInvoiceSchema } from "../model/invoice.js";
 import { createTool, type ServerToolCreator } from "./common.js";
@@ -80,12 +82,21 @@ const executeSmartCreateInvoice = async <
 	};
 };
 
+const SmartCreateInvoiceToolSchema = SmartCreateInvoiceInputSchema.omit({ attachments: true }).extend({
+	attachments: z.array(CreateAttachmentToolSchema).optional(),
+});
+
 const smartCreateInvoice = createTool(
 	"fakturoid_smart_create_invoice",
 	"Smart Create Invoice",
-	"PREFERRED tool for creating invoices. Use this instead of fakturoid_create_invoice. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate invoice by number, and creates the invoice — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. Returns existing document with a message if duplicate is found.",
-	async (client, input) => {
-		const result = await executeSmartCreateInvoice(client, input as SmartCreateInvoiceInput);
+	"PREFERRED tool for creating invoices. Use this instead of fakturoid_create_invoice. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate invoice by number, and creates the invoice — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. For attachments, provide file_ref (from curl upload to /upload - preferred), source_url, or data_url. Returns existing document with a message if duplicate is found.",
+	async (client, input, staging) => {
+		const resolvedAttachments = await resolveAttachments(input.attachments, staging);
+
+		const result = await executeSmartCreateInvoice(client, {
+			...input,
+			attachments: resolvedAttachments,
+		} as SmartCreateInvoiceInput);
 
 		if (result instanceof Error) {
 			return {
@@ -97,7 +108,7 @@ const smartCreateInvoice = createTool(
 			content: [{ text: JSON.stringify(result, null, 2), type: "text" as const }],
 		};
 	},
-	SmartCreateInvoiceInputSchema.shape,
+	SmartCreateInvoiceToolSchema.shape,
 );
 
 const smartInvoice = [smartCreateInvoice] as const satisfies ServerToolCreator[];

@@ -1,6 +1,8 @@
 import { z } from "zod/v3";
 import type { AuthenticationStrategy } from "../../auth/strategy.js";
+import { resolveAttachments } from "../../staging/resolver.js";
 import type { FakturoidClient } from "../client.js";
+import { CreateAttachmentToolSchema } from "../model/common.js";
 import type { Expense } from "../model/expense.js";
 import { CreateExpenseSchema } from "../model/expense.js";
 import { createTool, type ServerToolCreator } from "./common.js";
@@ -81,12 +83,21 @@ const executeSmartCreateExpense = async <
 	};
 };
 
+const SmartCreateExpenseToolSchema = SmartCreateExpenseInputSchema.omit({ attachments: true }).extend({
+	attachments: z.array(CreateAttachmentToolSchema).optional(),
+});
+
 const smartCreateExpense = createTool(
 	"fakturoid_smart_create_expense",
 	"Smart Create Expense",
-	"PREFERRED tool for creating expenses. Use this instead of fakturoid_create_expense. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate expense by original number, and creates the expense — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. Returns existing document with a message if duplicate is found.",
-	async (client, input) => {
-		const result = await executeSmartCreateExpense(client, input as SmartCreateExpenseInput);
+	"PREFERRED tool for creating expenses. Use this instead of fakturoid_create_expense. Automatically resolves the subject by IČO (creates via ARES if not found), checks for duplicate expense by original number, and creates the expense — all in one step. Only requires the subject's registration number (IČO) instead of subject_id. For attachments, provide file_ref (from curl upload to /upload - preferred), source_url, or data_url. Returns existing document with a message if duplicate is found.",
+	async (client, input, staging) => {
+		const resolvedAttachments = await resolveAttachments(input.attachments, staging);
+
+		const result = await executeSmartCreateExpense(client, {
+			...input,
+			attachments: resolvedAttachments,
+		} as SmartCreateExpenseInput);
 
 		if (result instanceof Error) {
 			return {
@@ -98,7 +109,7 @@ const smartCreateExpense = createTool(
 			content: [{ text: JSON.stringify(result, null, 2), type: "text" as const }],
 		};
 	},
-	SmartCreateExpenseInputSchema.shape,
+	SmartCreateExpenseToolSchema.shape,
 );
 
 const smartExpense = [smartCreateExpense] as const satisfies ServerToolCreator[];
