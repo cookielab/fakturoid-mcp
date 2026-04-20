@@ -158,7 +158,8 @@ const startHTTP = (strategy: AuthenticationStrategy, port: number): void => {
 
 	// Download endpoint
 	app.get("/download/:ref", async (request: Request, response: Response) => {
-		const ref = request.params.ref;
+		// biome-ignore lint/complexity/useLiteralKeys: TypeScript requires bracket notation for index signatures
+		const ref = request.params["ref"];
 		if (ref == null) {
 			response.status(400).json({ error: "Missing ref parameter" });
 			return;
