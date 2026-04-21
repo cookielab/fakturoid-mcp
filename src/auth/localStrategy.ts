@@ -22,22 +22,45 @@ const TokenResponseSchema = z
 
 const EnvironmentConfigurationSchema = z
 	.object({
-		API_URL: z.string().url(),
-		APP_NAME: z.string().min(1).default("FakturoidMCP"),
-		CLIENT_ID: z.string().min(1),
-		CLIENT_SECRET: z.string().min(1),
-		CONTACT_EMAIL: z.string().email().default("test@example.com"),
+		// Support both FAKTUROID_ prefixed and non-prefixed environment variables
+		API_URL: z.string().url().optional(),
+		FAKTUROID_API_URL: z.string().url().optional(),
+		APP_NAME: z.string().min(1).optional(),
+		FAKTUROID_APP_NAME: z.string().min(1).optional(),
+		CLIENT_ID: z.string().min(1).optional(),
+		FAKTUROID_CLIENT_ID: z.string().min(1).optional(),
+		CLIENT_SECRET: z.string().min(1).optional(),
+		FAKTUROID_CLIENT_SECRET: z.string().min(1).optional(),
+		CONTACT_EMAIL: z.string().email().optional(),
+		FAKTUROID_CONTACT_EMAIL: z.string().email().optional(),
+		ACCOUNT_SLUG: z.string().min(1).optional(),
+		FAKTUROID_ACCOUNT_SLUG: z.string().min(1).optional(),
 	})
-	.transform(
-		(parsed) =>
-			({
-				appName: parsed.APP_NAME,
-				baseURL: parsed.API_URL,
-				clientID: parsed.CLIENT_ID,
-				clientSecret: parsed.CLIENT_SECRET,
-				email: parsed.CONTACT_EMAIL,
-			}) satisfies Configuration,
-	);
+	.transform((parsed) => {
+		const apiUrl = parsed.FAKTUROID_API_URL ?? parsed.API_URL;
+		const clientId = parsed.FAKTUROID_CLIENT_ID ?? parsed.CLIENT_ID;
+		const clientSecret = parsed.FAKTUROID_CLIENT_SECRET ?? parsed.CLIENT_SECRET;
+		const appName = parsed.FAKTUROID_APP_NAME ?? parsed.APP_NAME ?? "FakturoidMCP";
+		const email = parsed.FAKTUROID_CONTACT_EMAIL ?? parsed.CONTACT_EMAIL ?? "test@example.com";
+
+		if (!apiUrl) {
+			throw new Error("API_URL or FAKTUROID_API_URL is required");
+		}
+		if (!clientId) {
+			throw new Error("CLIENT_ID or FAKTUROID_CLIENT_ID is required");
+		}
+		if (!clientSecret) {
+			throw new Error("CLIENT_SECRET or FAKTUROID_CLIENT_SECRET is required");
+		}
+
+		return {
+			appName,
+			baseURL: apiUrl,
+			clientID: clientId,
+			clientSecret,
+			email,
+		} satisfies Configuration;
+	});
 
 const loadEnvironmentConfiguration = (): Configuration => {
 	dotenv.config({ quiet: true });

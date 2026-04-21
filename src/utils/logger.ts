@@ -7,6 +7,7 @@ const DEVELOPMENT_OPTIONS = {
 		level: "debug",
 		options: {
 			colorize: true,
+			destination: 2, // Write to stderr (fd 2) instead of stdout
 		},
 		target: "pino-pretty",
 	},
