@@ -7,6 +7,7 @@ const DEVELOPMENT_OPTIONS = {
 		level: "debug",
 		options: {
 			colorize: true,
+			destination: 2,
 		},
 		target: "pino-pretty",
 	},
